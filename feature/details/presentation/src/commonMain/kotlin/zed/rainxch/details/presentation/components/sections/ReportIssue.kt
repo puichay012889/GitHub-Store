@@ -32,7 +32,7 @@ fun LazyListScope.reportIssue(
 
         OutlinedCard(
             onClick = {
-                uriHandler.openUri("$repoUrl/issues")
+                uriHandler.openUri("${repoUrl.trimEnd('/')}/issues")
             },
             colors = CardDefaults.outlinedCardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
