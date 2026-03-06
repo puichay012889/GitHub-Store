@@ -3,10 +3,12 @@ package zed.rainxch.details.presentation
 import org.jetbrains.compose.resources.StringResource
 import zed.rainxch.core.domain.model.GithubRelease
 import zed.rainxch.details.domain.model.ReleaseCategory
+import zed.rainxch.details.presentation.model.TranslationTarget
 
 sealed interface DetailsAction {
     data object Retry : DetailsAction
     data object InstallPrimary : DetailsAction
+    data object OnDismissDowngradeWarning : DetailsAction
     data object UninstallApp : DetailsAction
     data class DownloadAsset(
         val downloadUrl: String,

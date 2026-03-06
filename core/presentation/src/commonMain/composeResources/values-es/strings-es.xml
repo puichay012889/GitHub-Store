@@ -309,6 +309,7 @@
     <!-- Errors & states -->
     <string name="no_description">Sin descripción proporcionada.</string>
     <string name="no_release_notes">Sin notas de versión.</string>
+    <string name="report_issue">Reportar problema</string>
 
     <!-- Install status -->
     <string name="not_available">No disponible</string>

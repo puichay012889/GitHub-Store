@@ -263,6 +263,7 @@
     <string name="no_repos_with_releases">Aucun dépôt avec des versions installables</string>
     <string name="no_installed_repos">Aucun dépôt installé</string>
     <string name="no_favorite_repos">Aucun dépôt favori</string>
+    <string name="report_issue">Signaler un problème</string>
 
     <!-- Developer Profile - Repository Item -->
     <string name="updated_x_ago">Mis à jour %1$s</string>

@@ -150,6 +150,7 @@
     <string name="retry">পুনরায় চেষ্টা করুন</string>
     <string name="no_description">কোনো বিবরণ দেওয়া হয়নি।</string>
     <string name="no_release_notes">কোনো রিলিজ নোট নেই।</string>
+    <string name="report_issue">সমস্যা রিপোর্ট করুন</string>
 
     <!-- Headers -->
     <string name="about_this_app">এই অ্যাপ বৃত্তান্ত</string>

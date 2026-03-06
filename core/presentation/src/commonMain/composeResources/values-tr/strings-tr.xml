@@ -149,6 +149,7 @@
     <string name="retry">Tekrar dene</string>
     <string name="no_description">Açıklama sağlanmadı.</string>
     <string name="no_release_notes">Sürüm notu yok</string>
+    <string name="report_issue">Sorun bildir</string>
 
     <!-- Headers -->
     <string name="about_this_app">Bu uygulama hakkında</string>

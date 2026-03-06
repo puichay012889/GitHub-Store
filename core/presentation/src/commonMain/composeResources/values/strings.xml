@@ -171,6 +171,7 @@
     <string name="retry">Retry</string>
     <string name="no_description">No description provided.</string>
     <string name="no_release_notes">No release notes.</string>
+    <string name="report_issue">Report Issue</string>
 
     <!-- Headers -->
     <string name="about_this_app">About this app</string>

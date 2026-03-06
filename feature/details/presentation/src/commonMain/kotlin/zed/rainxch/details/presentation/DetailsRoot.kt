@@ -40,18 +40,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import zed.rainxch.githubstore.core.presentation.res.*
 import io.github.fletchmckee.liquid.LiquidState
 import io.github.fletchmckee.liquid.liquefiable
 import io.github.fletchmckee.liquid.liquid
@@ -59,7 +57,6 @@ import io.github.fletchmckee.liquid.rememberLiquidState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import zed.rainxch.core.presentation.theme.GithubStoreTheme
 import zed.rainxch.core.presentation.utils.ObserveAsEvents
@@ -69,10 +66,30 @@ import zed.rainxch.details.presentation.components.sections.about
 import zed.rainxch.details.presentation.components.sections.author
 import zed.rainxch.details.presentation.components.sections.header
 import zed.rainxch.details.presentation.components.sections.logs
+import zed.rainxch.details.presentation.components.sections.reportIssue
 import zed.rainxch.details.presentation.components.sections.stats
 import zed.rainxch.details.presentation.components.sections.whatsNew
 import zed.rainxch.details.presentation.components.states.ErrorState
+import zed.rainxch.details.presentation.model.TranslationTarget
 import zed.rainxch.details.presentation.utils.LocalTopbarLiquidState
+import zed.rainxch.githubstore.core.presentation.res.Res
+import zed.rainxch.githubstore.core.presentation.res.add_to_favourites
+import zed.rainxch.githubstore.core.presentation.res.cancel
+import zed.rainxch.githubstore.core.presentation.res.dismiss
+import zed.rainxch.githubstore.core.presentation.res.downgrade_requires_uninstall
+import zed.rainxch.githubstore.core.presentation.res.downgrade_warning_message
+import zed.rainxch.githubstore.core.presentation.res.install_permission_blocked_message
+import zed.rainxch.githubstore.core.presentation.res.install_permission_unavailable
+import zed.rainxch.githubstore.core.presentation.res.navigate_back
+import zed.rainxch.githubstore.core.presentation.res.open_repository
+import zed.rainxch.githubstore.core.presentation.res.open_with_external_installer
+import zed.rainxch.githubstore.core.presentation.res.remove_from_favourites
+import zed.rainxch.githubstore.core.presentation.res.repository_not_starred
+import zed.rainxch.githubstore.core.presentation.res.repository_starred
+import zed.rainxch.githubstore.core.presentation.res.share_repository
+import zed.rainxch.githubstore.core.presentation.res.star_from_github
+import zed.rainxch.githubstore.core.presentation.res.uninstall_first
+import zed.rainxch.githubstore.core.presentation.res.unstar_from_github
 
 @Composable
 fun DetailsRoot(
@@ -84,9 +101,6 @@ fun DetailsRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-    var downgradeWarning by remember {
-        mutableStateOf<DetailsEvent.ShowDowngradeWarning?>(null)
-    }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -94,27 +108,49 @@ fun DetailsRoot(
                 onOpenRepositoryInApp(event.repositoryId)
             }
 
-            is DetailsEvent.InstallTrackingFailed -> {
-
-            }
-
             is DetailsEvent.OnMessage -> {
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(event.message)
                 }
             }
-
-            is DetailsEvent.ShowDowngradeWarning -> {
-                downgradeWarning = event
-            }
         }
     }
 
-    downgradeWarning?.let { warning ->
+    DetailsScreen(
+        state = state,
+        snackbarHostState = snackbarHostState,
+        onAction = { action ->
+            when (action) {
+                DetailsAction.OnNavigateBackClick -> {
+                    onNavigateBack()
+                }
+
+                is DetailsAction.OpenDeveloperProfile -> {
+                    onNavigateToDeveloperProfile(action.username)
+                }
+
+                is DetailsAction.OnMessage -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(getString(action.messageText))
+                    }
+                }
+
+                else -> {
+                    viewModel.onAction(action)
+                }
+            }
+        }
+    )
+
+    state.downgradeWarning?.let { warning ->
         AlertDialog(
-            onDismissRequest = { downgradeWarning = null },
+            onDismissRequest = {
+                viewModel.onAction(DetailsAction.OnDismissDowngradeWarning)
+            },
             title = {
-                Text(text = stringResource(Res.string.downgrade_requires_uninstall))
+                Text(
+                    text = stringResource(Res.string.downgrade_requires_uninstall)
+                )
             },
             text = {
                 Text(
@@ -128,7 +164,7 @@ fun DetailsRoot(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        downgradeWarning = null
+                        viewModel.onAction(DetailsAction.OnDismissDowngradeWarning)
                         viewModel.onAction(DetailsAction.UninstallApp)
                     }
                 ) {
@@ -139,8 +175,14 @@ fun DetailsRoot(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { downgradeWarning = null }) {
-                    Text(text = stringResource(Res.string.cancel))
+                TextButton(
+                    onClick = {
+                        viewModel.onAction(DetailsAction.OnDismissDowngradeWarning)
+                    }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.cancel)
+                    )
                 }
             }
         )
@@ -177,32 +219,6 @@ fun DetailsRoot(
             }
         )
     }
-
-    DetailsScreen(
-        state = state,
-        snackbarHostState = snackbarHostState,
-        onAction = { action ->
-            when (action) {
-                DetailsAction.OnNavigateBackClick -> {
-                    onNavigateBack()
-                }
-
-                is DetailsAction.OpenDeveloperProfile -> {
-                    onNavigateToDeveloperProfile(action.username)
-                }
-
-                is DetailsAction.OnMessage -> {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(getString(action.messageText))
-                    }
-                }
-
-                else -> {
-                    viewModel.onAction(action)
-                }
-            }
-        }
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -226,7 +242,9 @@ fun DetailsScreen(
                 )
             },
             snackbarHost = {
-                SnackbarHost(snackbarHostState)
+                SnackbarHost(
+                    hostState = snackbarHostState
+                )
             },
             containerColor = MaterialTheme.colorScheme.background,
             modifier = Modifier.liquefiable(liquidTopbarState)
@@ -242,7 +260,12 @@ fun DetailsScreen(
                 onLanguageSelected = { language ->
                     when (state.languagePickerTarget) {
                         TranslationTarget.About -> onAction(DetailsAction.TranslateAbout(language.code))
-                        TranslationTarget.WhatsNew -> onAction(DetailsAction.TranslateWhatsNew(language.code))
+                        TranslationTarget.WhatsNew -> onAction(
+                            DetailsAction.TranslateWhatsNew(
+                                language.code
+                            )
+                        )
+
                         null -> {}
                     }
                     onAction(DetailsAction.DismissLanguagePicker)
@@ -370,6 +393,12 @@ fun DetailsScreen(
                                 },
                             )
                         }
+                    }
+
+                    state.repository?.let { repository ->
+                        reportIssue(
+                            repoUrl = repository.htmlUrl
+                        )
                     }
 
                     state.userProfile?.let { userProfile ->
@@ -524,16 +553,16 @@ private fun DetailsTopbar(
             )
             .then(
                 if (isLiquidFrostAvailable()) {
-                Modifier.liquid(liquidTopbarState) {
-                    this.shape = CutCornerShape(0.dp)
-                    if (isLiquidFrostAvailable()) {
-                        this.frost = 5.dp
+                    Modifier.liquid(liquidTopbarState) {
+                        this.shape = CutCornerShape(0.dp)
+                        if (isLiquidFrostAvailable()) {
+                            this.frost = 5.dp
+                        }
+                        this.curve = .25f
+                        this.refraction = .05f
+                        this.dispersion = .1f
                     }
-                    this.curve = .25f
-                    this.refraction = .05f
-                    this.dispersion = .1f
-                }
-            } else Modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest))
+                } else Modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest))
     )
 }
 

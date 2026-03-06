@@ -42,6 +42,7 @@ import zed.rainxch.core.domain.utils.ShareManager
 import zed.rainxch.details.domain.model.ReleaseCategory
 import zed.rainxch.details.domain.repository.DetailsRepository
 import zed.rainxch.details.domain.repository.TranslationRepository
+import zed.rainxch.details.presentation.model.DowngradeWarning
 import zed.rainxch.details.presentation.model.DownloadStage
 import zed.rainxch.details.presentation.model.InstallLogItem
 import zed.rainxch.details.presentation.model.LogResult
@@ -322,6 +323,12 @@ class DetailsViewModel(
                 loadInitial()
             }
 
+            DetailsAction.OnDismissDowngradeWarning -> {
+                _state.update { it.copy(
+                    downgradeWarning = null
+                ) }
+            }
+
             DetailsAction.InstallPrimary -> {
                 val primary = _state.value.primaryAsset
                 val release = _state.value.selectedRelease
@@ -340,15 +347,13 @@ class DetailsViewModel(
                         )
 
                         if (isDowngrade) {
-                            viewModelScope.launch {
-                                _events.send(
-                                    DetailsEvent.ShowDowngradeWarning(
-                                        packageName = installedApp.packageName,
-                                        currentVersion = installedApp.installedVersion,
-                                        targetVersion = release.tagName
-                                    )
+                            _state.update { it.copy(
+                                downgradeWarning = DowngradeWarning(
+                                    packageName = installedApp.packageName,
+                                    currentVersion = installedApp.installedVersion,
+                                    targetVersion = release.tagName
                                 )
-                            }
+                            ) }
                             return
                         }
                     }

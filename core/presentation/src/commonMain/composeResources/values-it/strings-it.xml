@@ -150,6 +150,7 @@
     <string name="retry">Riprova</string>
     <string name="no_description">Nessuna descrizione fornita.</string>
     <string name="no_release_notes">Nessuna nota di aggiornamento.</string>
+    <string name="report_issue">Segnala problema</string>
 
     <!-- Headers -->
     <string name="about_this_app">Informazioni su quest'app</string>

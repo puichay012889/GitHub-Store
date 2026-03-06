@@ -148,6 +148,7 @@
     <string name="retry">다시 시도</string>
     <string name="no_description">설명이 없습니다.</string>
     <string name="no_release_notes">릴리스 노트가 없습니다.</string>
+    <string name="report_issue">문제 신고</string>
 
     <!-- Headers -->
     <string name="about_this_app">이 앱 정보</string>

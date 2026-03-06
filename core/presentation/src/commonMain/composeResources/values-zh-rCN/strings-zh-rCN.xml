@@ -142,6 +142,7 @@
     <string name="installed_version">• 已安装：%1$s</string>
     <string name="architecture_compatible">架构兼容</string>
     <string name="update_to_version">更新到 %1$s</string>
+    <string name="report_issue">报告问题</string>
 
     <string name="error_load_details">无法加载详情</string>
     <string name="installer_saved_downloads">安装程序已保存到下载文件夹</string>

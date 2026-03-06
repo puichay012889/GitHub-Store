@@ -6,6 +6,13 @@ plugins {
     alias(libs.plugins.compose.hot.reload)
 }
 
+android {
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+}
+
 kotlin {
     sourceSets {
         androidMain.dependencies {

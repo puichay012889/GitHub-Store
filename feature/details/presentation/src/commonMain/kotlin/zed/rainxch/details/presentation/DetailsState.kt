@@ -8,9 +8,11 @@ import zed.rainxch.core.domain.model.GithubUserProfile
 import zed.rainxch.core.domain.model.InstalledApp
 import zed.rainxch.details.domain.model.ReleaseCategory
 import zed.rainxch.details.domain.model.RepoStats
+import zed.rainxch.details.presentation.model.DowngradeWarning
 import zed.rainxch.details.presentation.model.DownloadStage
 import zed.rainxch.details.presentation.model.InstallLogItem
 import zed.rainxch.details.presentation.model.TranslationState
+import zed.rainxch.details.presentation.model.TranslationTarget
 
 data class DetailsState(
     val isLoading: Boolean = true,
@@ -67,6 +69,8 @@ data class DetailsState(
 
     val isComingFromUpdate: Boolean = false,
 
+    val downgradeWarning: DowngradeWarning? = null,
+
     val showExternalInstallerPrompt: Boolean = false,
     val pendingInstallFilePath: String? = null,
 ) {
@@ -76,9 +80,4 @@ data class DetailsState(
             ReleaseCategory.PRE_RELEASE -> allReleases.filter { it.isPrerelease }
             ReleaseCategory.ALL -> allReleases
         }
-}
-
-sealed interface TranslationTarget {
-    data object About : TranslationTarget
-    data object WhatsNew : TranslationTarget
 }

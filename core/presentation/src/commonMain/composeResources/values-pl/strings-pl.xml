@@ -120,6 +120,7 @@
     <string name="open_in_browser">Otwórz w przeglądarce</string>
     <string name="cancel_download">Anuluj pobieranie</string>
     <string name="show_install_options">Pokaż opcje instalacji</string>
+    <string name="report_issue">Zgłoś problem</string>
 
     <string name="error_loading_details">Błąd podczas ładowania szczegółów</string>
     <string name="retry">Ponów</string>
