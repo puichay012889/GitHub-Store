@@ -2,7 +2,9 @@ package zed.rainxch.profile.presentation
 
 import zed.rainxch.core.domain.model.AppTheme
 import zed.rainxch.core.domain.model.FontTheme
+import zed.rainxch.core.domain.model.InstallerType
 import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.model.ShizukuAvailability
 import zed.rainxch.profile.domain.model.UserProfile
 import zed.rainxch.profile.presentation.model.ProxyType
 
@@ -22,5 +24,7 @@ data class ProfileState(
     val proxyPassword: String = "",
     val isProxyPasswordVisible: Boolean = false,
     val autoDetectClipboardLinks: Boolean = true,
-    val cacheSize: String = ""
+    val cacheSize: String = "",
+    val installerType: InstallerType = InstallerType.DEFAULT,
+    val shizukuAvailability: ShizukuAvailability = ShizukuAvailability.UNAVAILABLE
 )

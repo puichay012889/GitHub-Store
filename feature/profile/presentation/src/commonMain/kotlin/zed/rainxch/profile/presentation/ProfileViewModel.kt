@@ -15,6 +15,7 @@ import org.jetbrains.compose.resources.getString
 import zed.rainxch.core.domain.model.ProxyConfig
 import zed.rainxch.core.domain.repository.ProxyRepository
 import zed.rainxch.core.domain.repository.ThemesRepository
+import zed.rainxch.core.domain.system.InstallerStatusProvider
 import zed.rainxch.core.domain.utils.BrowserHelper
 import zed.rainxch.githubstore.core.presentation.res.Res
 import zed.rainxch.githubstore.core.presentation.res.failed_to_save_proxy_settings
@@ -27,7 +28,8 @@ class ProfileViewModel(
     private val browserHelper: BrowserHelper,
     private val themesRepository: ThemesRepository,
     private val profileRepository: ProfileRepository,
-    private val proxyRepository: ProxyRepository
+    private val proxyRepository: ProxyRepository,
+    private val installerStatusProvider: InstallerStatusProvider
 ) : ViewModel() {
 
     private var userProfileJob: Job? = null
@@ -44,6 +46,8 @@ class ProfileViewModel(
                 loadVersionName()
                 loadProxyConfig()
                 observeCacheSize()
+                loadInstallerPreference()
+                observeShizukuStatus()
 
                 hasLoadedInitialData = true
             }
@@ -186,6 +190,26 @@ class ProfileViewModel(
                             else -> it.proxyPassword
                         }
                     )
+                }
+            }
+        }
+    }
+
+    private fun loadInstallerPreference() {
+        viewModelScope.launch {
+            themesRepository.getInstallerType().collect { type ->
+                _state.update {
+                    it.copy(installerType = type)
+                }
+            }
+        }
+    }
+
+    private fun observeShizukuStatus() {
+        viewModelScope.launch {
+            installerStatusProvider.shizukuAvailability.collect { availability ->
+                _state.update {
+                    it.copy(shizukuAvailability = availability)
                 }
             }
         }
@@ -346,6 +370,16 @@ class ProfileViewModel(
                 viewModelScope.launch {
                     themesRepository.setAutoDetectClipboardLinks(action.enabled)
                 }
+            }
+
+            is ProfileAction.OnInstallerTypeSelected -> {
+                viewModelScope.launch {
+                    themesRepository.setInstallerType(action.type)
+                }
+            }
+
+            ProfileAction.OnRequestShizukuPermission -> {
+                installerStatusProvider.requestShizukuPermission()
             }
 
             ProfileAction.OnProxySave -> {

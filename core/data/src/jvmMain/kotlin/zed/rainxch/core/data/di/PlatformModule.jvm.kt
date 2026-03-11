@@ -17,7 +17,9 @@ import zed.rainxch.core.data.services.DesktopLocalizationManager
 import zed.rainxch.core.data.services.DesktopPackageMonitor
 import zed.rainxch.core.data.services.FileLocationsProvider
 import zed.rainxch.core.domain.system.Installer
+import zed.rainxch.core.domain.system.InstallerStatusProvider
 import zed.rainxch.core.data.services.LocalizationManager
+import zed.rainxch.core.data.services.DesktopInstallerStatusProvider
 import zed.rainxch.core.data.utils.DesktopShareManager
 import zed.rainxch.core.domain.network.Downloader
 import zed.rainxch.core.domain.system.PackageMonitor
@@ -85,5 +87,9 @@ actual val corePlatformModule = module {
 
     single<ShareManager> {
         DesktopShareManager()
+    }
+
+    single<InstallerStatusProvider> {
+        DesktopInstallerStatusProvider()
     }
 }

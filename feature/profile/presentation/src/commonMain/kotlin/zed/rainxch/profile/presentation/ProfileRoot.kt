@@ -34,6 +34,7 @@ import zed.rainxch.core.presentation.theme.GithubStoreTheme
 import zed.rainxch.core.presentation.utils.ObserveAsEvents
 import zed.rainxch.profile.presentation.components.LogoutDialog
 import zed.rainxch.profile.presentation.components.sections.about
+import zed.rainxch.profile.presentation.components.sections.installationSection
 import zed.rainxch.profile.presentation.components.sections.logout
 import zed.rainxch.profile.presentation.components.sections.networkSection
 import zed.rainxch.profile.presentation.components.sections.othersSection
@@ -191,6 +192,15 @@ fun ProfileScreen(
             }
 
             networkSection(
+                state = state,
+                onAction = onAction
+            )
+
+            item {
+                Spacer(Modifier.height(32.dp))
+            }
+
+            installationSection(
                 state = state,
                 onAction = onAction
             )
