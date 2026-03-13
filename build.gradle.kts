@@ -10,3 +10,19 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.room) apply false
 }
+
+subprojects {
+    afterEvaluate {
+        tasks.configureEach {
+            when (name) {
+                "preBuild",
+                "compileKotlinJvm",
+                "compileKotlinAndroid",
+                -> {
+                    val ktlintFormat = tasks.findByName("ktlintFormat")
+                    if (ktlintFormat != null) dependsOn(ktlintFormat)
+                }
+            }
+        }
+    }
+}

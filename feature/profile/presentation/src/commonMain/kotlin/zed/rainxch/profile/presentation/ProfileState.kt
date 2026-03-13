@@ -3,7 +3,6 @@ package zed.rainxch.profile.presentation
 import zed.rainxch.core.domain.model.AppTheme
 import zed.rainxch.core.domain.model.FontTheme
 import zed.rainxch.core.domain.model.InstallerType
-import zed.rainxch.core.domain.model.ProxyConfig
 import zed.rainxch.core.domain.model.ShizukuAvailability
 import zed.rainxch.profile.domain.model.UserProfile
 import zed.rainxch.profile.presentation.model.ProxyType

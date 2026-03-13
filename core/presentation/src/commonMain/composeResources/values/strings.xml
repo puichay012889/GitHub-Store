@@ -151,7 +151,6 @@
 
     <!-- Snackbar -->
     <string name="logout_success">Logged out successfully, redirecting...</string>
-    <string name="cache_cleared">Cache cleared successfully</string>
 
     <!-- Dialog -->
     <string name="warning">Warning!</string>
@@ -176,7 +175,6 @@
     <string name="retry">Retry</string>
     <string name="no_description">No description provided.</string>
     <string name="no_release_notes">No release notes.</string>
-    <string name="report_issue">Report Issue</string>
 
     <!-- Headers -->
     <string name="about_this_app">About this app</string>
@@ -191,6 +189,7 @@
     <string name="install_latest">Install latest</string>
     <string name="reinstall">Reinstall</string>
     <string name="update_app">Update app</string>
+    <string name="report_issue">Report issue</string>
 
     <!-- Download stages -->
     <string name="downloading">Downloading</string>
@@ -468,9 +467,46 @@
     <string name="no_github_link_in_clipboard">No GitHub link found in clipboard</string>
 
     <string name="storage">Storage</string>
-    <string name="clear_cache">Clear Cache</string>
+    <string name="clear_cache">Clear cache</string>
     <string name="current_size">Current size:</string>
     <string name="clear">Clear</string>
+
+    <string name="sponsor_title">Support GitHub Store</string>
+    <string name="sponsor_button">Support the project</string>
+    <string name="sponsor_hero_title">Built with love,\nmaintained with coffee</string>
+    <string name="sponsor_hero_subtitle">GitHub Store has reached over 130,000 downloads and 7,700 GitHub stars — 100% free, with no ads and no tracking.</string>
+
+    <string name="sponsor_personal_note">I developed and maintain this project completely on my own while finishing school. Your support — even a small one — helps pay for infrastructure and continue developing the app.</string>
+
+    <string name="sponsor_kodee_title">Vote for GitHub Store!</string>
+    <string name="sponsor_kodee_subtitle">GitHub Store has been nominated for the Golden Kodee Awards at KotlinConf 2026.</string>
+
+    <string name="sponsor_kodee_register">1. Register</string>
+    <string name="sponsor_kodee_vote">2. Vote</string>
+    <string name="sponsor_kodee_deadline">Voting until March 22</string>
+
+    <string name="sponsor_kodee_step1">1. Register on the platform (Sign in with Google)</string>
+    <string name="sponsor_kodee_step2">2. Click “Vote” below</string>
+    <string name="sponsor_kodee_step3">3. Find Usmon Narzullayev and click “Vote”</string>
+
+    <string name="sponsor_github_sponsors">GitHub Sponsors</string>
+    <string name="sponsor_github_sponsors_desc">Recurring or one-time support via GitHub</string>
+
+    <string name="sponsor_buy_me_coffee">Buy Me a Coffee</string>
+    <string name="sponsor_buy_me_coffee_desc">Quick one-time support</string>
+
+    <string name="sponsor_other_ways_title">OTHER WAYS TO HELP</string>
+
+    <string name="sponsor_star_repo">Star the repository</string>
+    <string name="sponsor_star_repo_desc">Helps others discover GitHub Store</string>
+
+    <string name="sponsor_report_bugs">Report a bug</string>
+    <string name="sponsor_report_bugs_desc">Helps make the app better</string>
+
+    <string name="sponsor_share">Share with friends</string>
+    <string name="sponsor_share_desc">Tell other developers about it</string>
+
+    <string name="sponsor_thank_you">Any support — financial or not — helps keep the project alive. Thank you!</string>
 
     <!-- Installation method settings -->
     <string name="section_installation">Installation</string>

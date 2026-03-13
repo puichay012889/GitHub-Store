@@ -30,6 +30,7 @@ kotlinx-collections-immutable = "0.4.0"
 koin = "4.1.1"
 ktor = "3.4.0"
 room = "2.8.4"
+slf4jSimple = "2.0.17"
 sqlite = "2.6.2"
 datastore = "1.2.0"
 compose-jetbrains = "1.10.1"
@@ -45,6 +46,8 @@ hidden-api = "4.4.0"
 jsystemthemedetector = "3.9.1"
 work = "2.11.1"
 resources="1.10.1"
+
+ktlint-gradle = "12.1.1"
 
 projectApplicationId = "zed.rainxch.githubstore"
 projectVersionName = "1.6.2"
@@ -100,6 +103,7 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 # Room
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4jSimple" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 
 # Image loading
@@ -154,6 +158,8 @@ hidden-api-stub = { module = "dev.rikka.hidden:stub", version.ref = "hidden-api"
 
 # Liquid effect
 liquid = { module = "io.github.fletchmckee.liquid:liquid", version.ref = "liquid" }
+
+ktlint-gradlePlugin = { group = "org.jlleitschuh.gradle", name="ktlint-gradle", version.ref = "ktlint-gradle" }
 
 [plugins]
 

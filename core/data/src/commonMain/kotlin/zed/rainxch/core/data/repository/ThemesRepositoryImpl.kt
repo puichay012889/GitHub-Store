@@ -13,7 +13,7 @@ import zed.rainxch.core.domain.model.InstallerType
 import zed.rainxch.core.domain.repository.ThemesRepository
 
 class ThemesRepositoryImpl(
-    private val preferences: DataStore<Preferences>
+    private val preferences: DataStore<Preferences>,
 ) : ThemesRepository {
     private val THEME_KEY = stringPreferencesKey("app_theme")
     private val AMOLED_KEY = booleanPreferencesKey("amoled_theme")
@@ -22,12 +22,11 @@ class ThemesRepositoryImpl(
     private val AUTO_DETECT_CLIPBOARD_KEY = booleanPreferencesKey("auto_detect_clipboard_links")
     private val INSTALLER_TYPE_KEY = stringPreferencesKey("installer_type")
 
-    override fun getThemeColor(): Flow<AppTheme> {
-        return preferences.data.map { prefs ->
+    override fun getThemeColor(): Flow<AppTheme> =
+        preferences.data.map { prefs ->
             val themeName = prefs[THEME_KEY]
             AppTheme.fromName(themeName)
         }
-    }
 
     override suspend fun setThemeColor(theme: AppTheme) {
         preferences.edit { prefs ->
@@ -35,11 +34,10 @@ class ThemesRepositoryImpl(
         }
     }
 
-    override fun getIsDarkTheme(): Flow<Boolean?> {
-        return preferences.data.map { prefs ->
+    override fun getIsDarkTheme(): Flow<Boolean?> =
+        preferences.data.map { prefs ->
             prefs[IS_DARK_THEME_KEY]
         }
-    }
 
     override suspend fun setDarkTheme(isDarkTheme: Boolean?) {
         preferences.edit { prefs ->
@@ -51,12 +49,10 @@ class ThemesRepositoryImpl(
         }
     }
 
-
-    override fun getAmoledTheme(): Flow<Boolean> {
-        return preferences.data.map { prefs ->
+    override fun getAmoledTheme(): Flow<Boolean> =
+        preferences.data.map { prefs ->
             prefs[AMOLED_KEY] ?: false
         }
-    }
 
     override suspend fun setAmoledTheme(enabled: Boolean) {
         preferences.edit { prefs ->
@@ -64,12 +60,11 @@ class ThemesRepositoryImpl(
         }
     }
 
-    override fun getFontTheme(): Flow<FontTheme> {
-        return preferences.data.map { prefs ->
+    override fun getFontTheme(): Flow<FontTheme> =
+        preferences.data.map { prefs ->
             val fontName = prefs[FONT_KEY]
             FontTheme.fromName(fontName)
         }
-    }
 
     override suspend fun setFontTheme(fontTheme: FontTheme) {
         preferences.edit { prefs ->
@@ -77,11 +72,10 @@ class ThemesRepositoryImpl(
         }
     }
 
-    override fun getAutoDetectClipboardLinks(): Flow<Boolean> {
-        return preferences.data.map { prefs ->
+    override fun getAutoDetectClipboardLinks(): Flow<Boolean> =
+        preferences.data.map { prefs ->
             prefs[AUTO_DETECT_CLIPBOARD_KEY] ?: false
         }
-    }
 
     override suspend fun setAutoDetectClipboardLinks(enabled: Boolean) {
         preferences.edit { prefs ->

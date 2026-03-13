@@ -10,6 +10,7 @@ class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
             with(pluginManager) {
                 apply("zed.rainxch.convention.android.application")
                 apply("org.jetbrains.kotlin.plugin.compose")
+                apply("zed.rainxch.convention.ktlint")
             }
 
             val commonExtension = extensions.getByType<ApplicationExtension>()
