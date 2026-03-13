@@ -93,59 +93,84 @@ class ShizukuInstallerWrapper(
     // ==================== Overridden methods (may use Shizuku) ====================
 
     override suspend fun ensurePermissionsOrThrow(extOrMime: String) {
+        Logger.d(TAG) { "ensurePermissionsOrThrow() — extOrMime=$extOrMime, cachedType=$cachedInstallerType, status=${shizukuServiceManager.status.value}" }
         if (shouldUseShizuku()) {
-            // Shizuku installs don't need the "install from unknown sources" permission
             Logger.d(TAG) { "Shizuku active — skipping unknown sources permission check" }
             return
         }
+        Logger.d(TAG) { "Delegating ensurePermissionsOrThrow to AndroidInstaller" }
         androidInstaller.ensurePermissionsOrThrow(extOrMime)
     }
 
     override suspend fun install(filePath: String, extOrMime: String) {
+        Logger.d(TAG) { "install() called — filePath=$filePath, extOrMime=$extOrMime" }
+        Logger.d(TAG) { "cachedInstallerType=$cachedInstallerType, shizukuStatus=${shizukuServiceManager.status.value}" }
+
         if (shouldUseShizuku()) {
+            Logger.d(TAG) { "Shizuku is enabled and READY — attempting Shizuku install" }
             try {
                 val service = shizukuServiceManager.getService()
                 if (service != null) {
-                    Logger.d(TAG) { "Installing via Shizuku: $filePath" }
-                    val result = service.installPackage(filePath)
-                    if (result == 0) {
-                        Logger.d(TAG) { "Shizuku install succeeded: $filePath" }
-                        return
+                    val file = java.io.File(filePath)
+                    val pfd = android.os.ParcelFileDescriptor.open(
+                        file,
+                        android.os.ParcelFileDescriptor.MODE_READ_WRITE
+                    )
+                    pfd.use {
+                        Logger.d(TAG) { "Got Shizuku service, calling installPackage($filePath, size=${file.length()})..." }
+                        val result = service.installPackage(it, file.length())
+                        Logger.d(TAG) { "Shizuku installPackage() returned: $result" }
+                        if (result == 0) {
+                            Logger.d(TAG) { "Shizuku install SUCCEEDED for: $filePath" }
+                            return
+                        }
+                        Logger.w(TAG) { "Shizuku install FAILED with code: $result" }
+                        throw IllegalStateException("Shizuku install failed (code: $result)")
                     }
-                    Logger.w(TAG) { "Shizuku install returned error code: $result" }
-                    throw IllegalStateException("Shizuku install failed (code: $result)")
                 } else {
-                    Logger.w(TAG) { "Shizuku service unavailable, falling back to standard installer" }
+                    Logger.w(TAG) { "Shizuku service is NULL, falling back to standard installer" }
                 }
             } catch (e: IllegalStateException) {
-                // Re-throw Shizuku errors so the caller knows it failed
+                Logger.e(TAG) { "Shizuku install error (re-throwing): ${e.message}" }
                 throw e
             } catch (e: Exception) {
-                Logger.w(TAG) { "Shizuku install error, falling back: ${e.message}" }
+                Logger.e(TAG) { "Shizuku install exception, falling back: ${e.javaClass.simpleName}: ${e.message}" }
+                Logger.e(TAG) { e.stackTraceToString() }
             }
+        } else {
+            Logger.d(TAG) { "Not using Shizuku (enabled=${isShizukuEnabled()}, status=${shizukuServiceManager.status.value})" }
         }
-        // Fallback to standard installer
+
+        Logger.d(TAG) { "Using standard AndroidInstaller for: $filePath" }
         androidInstaller.install(filePath, extOrMime)
     }
 
     override fun uninstall(packageName: String) {
+        Logger.d(TAG) { "uninstall() called — packageName=$packageName" }
+        Logger.d(TAG) { "cachedInstallerType=$cachedInstallerType, shizukuStatus=${shizukuServiceManager.status.value}" }
+
         if (isShizukuEnabled() && shizukuServiceManager.status.value == ShizukuStatus.READY) {
+            Logger.d(TAG) { "Attempting Shizuku uninstall..." }
             try {
                 val service = shizukuServiceManager.installerService
                 if (service != null) {
-                    Logger.d(TAG) { "Uninstalling via Shizuku: $packageName" }
+                    Logger.d(TAG) { "Got cached service, calling uninstallPackage($packageName)..." }
                     val result = service.uninstallPackage(packageName)
+                    Logger.d(TAG) { "Shizuku uninstallPackage() returned: $result" }
                     if (result == 0) {
-                        Logger.d(TAG) { "Shizuku uninstall succeeded: $packageName" }
+                        Logger.d(TAG) { "Shizuku uninstall SUCCEEDED for: $packageName" }
                         return
                     }
-                    Logger.w(TAG) { "Shizuku uninstall returned error code: $result, falling back" }
+                    Logger.w(TAG) { "Shizuku uninstall FAILED with code: $result, falling back" }
+                } else {
+                    Logger.w(TAG) { "Cached Shizuku service is NULL, falling back" }
                 }
             } catch (e: Exception) {
-                Logger.w(TAG) { "Shizuku uninstall error, falling back: ${e.message}" }
+                Logger.e(TAG) { "Shizuku uninstall exception, falling back: ${e.javaClass.simpleName}: ${e.message}" }
             }
         }
-        // Fallback to standard uninstall dialog
+
+        Logger.d(TAG) { "Using standard AndroidInstaller uninstall for: $packageName" }
         androidInstaller.uninstall(packageName)
     }
 

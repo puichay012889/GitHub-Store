@@ -97,16 +97,24 @@ class ShizukuServiceManager(
     }
 
     private fun computeStatus(): ShizukuStatus {
-        if (!isShizukuInstalled()) return ShizukuStatus.NOT_INSTALLED
+        val installed = isShizukuInstalled()
+        Logger.d(TAG) { "computeStatus() — shizukuInstalled=$installed" }
+        if (!installed) return ShizukuStatus.NOT_INSTALLED
 
         return try {
-            if (!Shizuku.pingBinder()) return ShizukuStatus.NOT_RUNNING
-            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
+            val binderAlive = Shizuku.pingBinder()
+            Logger.d(TAG) { "computeStatus() — pingBinder=$binderAlive" }
+            if (!binderAlive) return ShizukuStatus.NOT_RUNNING
+
+            val permResult = Shizuku.checkSelfPermission()
+            Logger.d(TAG) { "computeStatus() — checkSelfPermission=$permResult (GRANTED=${PackageManager.PERMISSION_GRANTED})" }
+            if (permResult != PackageManager.PERMISSION_GRANTED) {
                 return ShizukuStatus.PERMISSION_NEEDED
             }
+            Logger.d(TAG) { "computeStatus() — READY" }
             ShizukuStatus.READY
         } catch (e: Exception) {
-            Logger.w(TAG) { "Error checking Shizuku status: ${e.message}" }
+            Logger.w(TAG) { "Error checking Shizuku status: ${e.javaClass.simpleName}: ${e.message}" }
             ShizukuStatus.NOT_RUNNING
         }
     }
@@ -140,40 +148,53 @@ class ShizukuServiceManager(
      * Returns null if Shizuku is not ready.
      */
     suspend fun getService(): IShizukuInstallerService? {
-        if (_status.value != ShizukuStatus.READY) return null
+        Logger.d(TAG) { "getService() — current status=${_status.value}" }
+        if (_status.value != ShizukuStatus.READY) {
+            Logger.w(TAG) { "getService() — Shizuku not READY (status=${_status.value}), returning null" }
+            return null
+        }
 
         // Return cached service if still alive
         installerService?.let { service ->
             try {
-                service.asBinder().pingBinder()
-                return service
-            } catch (_: Exception) {
+                val alive = service.asBinder().pingBinder()
+                Logger.d(TAG) { "getService() — cached service ping=$alive" }
+                if (alive) return service
+                Logger.w(TAG) { "getService() — cached service binder dead, rebinding..." }
+                installerService = null
+            } catch (e: Exception) {
+                Logger.w(TAG) { "getService() — cached service error: ${e.message}, rebinding..." }
                 installerService = null
             }
+        } ?: run {
+            Logger.d(TAG) { "getService() — no cached service, binding..." }
         }
 
         return bindService()
     }
 
     private suspend fun bindService(): IShizukuInstallerService? {
+        Logger.d(TAG) { "bindService() — attempting to bind Shizuku UserService..." }
         return try {
             suspendCancellableCoroutine { continuation ->
-                val args = Shizuku.UserServiceArgs(
-                    ComponentName(
-                        context.packageName,
-                        ShizukuInstallerServiceImpl::class.java.name
-                    )
+                val componentName = ComponentName(
+                    context.packageName,
+                    ShizukuInstallerServiceImpl::class.java.name
                 )
+                Logger.d(TAG) { "bindService() — component: $componentName" }
+
+                val args = Shizuku.UserServiceArgs(componentName)
                     .daemon(false)
                     .processNameSuffix("installer")
                     .version(1)
 
                 val connection = object : ServiceConnection {
                     override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+                        Logger.d(TAG) { "onServiceConnected() — name=$name, binder=${binder?.javaClass?.name}, binderAlive=${binder?.pingBinder()}" }
                         val service = IShizukuInstallerService.Stub.asInterface(binder)
                         installerService = service
                         serviceConnection = this
-                        Logger.d(TAG) { "Shizuku installer service connected" }
+                        Logger.d(TAG) { "Shizuku installer service connected and cached" }
                         if (continuation.isActive) {
                             continuation.resume(service)
                         }
@@ -181,20 +202,24 @@ class ShizukuServiceManager(
 
                     override fun onServiceDisconnected(name: ComponentName?) {
                         installerService = null
-                        Logger.d(TAG) { "Shizuku installer service disconnected" }
+                        Logger.d(TAG) { "Shizuku installer service disconnected: $name" }
                     }
                 }
 
+                Logger.d(TAG) { "Calling Shizuku.bindUserService()..." }
                 Shizuku.bindUserService(args, connection)
+                Logger.d(TAG) { "Shizuku.bindUserService() called, waiting for callback..." }
 
                 continuation.invokeOnCancellation {
+                    Logger.d(TAG) { "bindService() coroutine cancelled, unbinding..." }
                     try {
                         Shizuku.unbindUserService(args, connection, true)
                     } catch (_: Exception) {}
                 }
             }
         } catch (e: Exception) {
-            Logger.w(TAG) { "Failed to bind Shizuku service: ${e.message}" }
+            Logger.e(TAG) { "Failed to bind Shizuku service: ${e.javaClass.simpleName}: ${e.message}" }
+            Logger.e(TAG) { e.stackTraceToString() }
             null
         }
     }

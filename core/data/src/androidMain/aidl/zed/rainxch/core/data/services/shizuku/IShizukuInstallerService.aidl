@@ -1,7 +1,7 @@
 package zed.rainxch.core.data.services.shizuku;
 
 interface IShizukuInstallerService {
-    int installPackage(String apkPath);
+    int installPackage(in ParcelFileDescriptor pfd, long fileSize);
     int uninstallPackage(String packageName);
     void destroy();
 }
