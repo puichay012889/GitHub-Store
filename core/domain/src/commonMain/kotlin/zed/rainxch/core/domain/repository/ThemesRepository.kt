@@ -20,4 +20,6 @@ interface ThemesRepository {
     suspend fun setInstallerType(type: InstallerType)
     fun getAutoUpdateEnabled(): Flow<Boolean>
     suspend fun setAutoUpdateEnabled(enabled: Boolean)
+    fun getUpdateCheckInterval(): Flow<Long>
+    suspend fun setUpdateCheckInterval(hours: Long)
 }

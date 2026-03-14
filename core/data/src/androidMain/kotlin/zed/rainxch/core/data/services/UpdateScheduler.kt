@@ -69,6 +69,43 @@ object UpdateScheduler {
     }
 
     /**
+     * Force-reschedules the periodic update check with a new interval.
+     * Uses UPDATE policy to replace the existing schedule immediately.
+     * Call this when the user changes the update check interval in settings.
+     */
+    fun reschedule(
+        context: Context,
+        intervalHours: Long,
+    ) {
+        val constraints =
+            Constraints
+                .Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+
+        val request =
+            PeriodicWorkRequestBuilder<UpdateCheckWorker>(
+                repeatInterval = intervalHours,
+                repeatIntervalTimeUnit = TimeUnit.HOURS,
+            ).setConstraints(constraints)
+                .setBackoffCriteria(
+                    BackoffPolicy.EXPONENTIAL,
+                    30,
+                    TimeUnit.MINUTES,
+                ).build()
+
+        WorkManager
+            .getInstance(context)
+            .enqueueUniquePeriodicWork(
+                uniqueWorkName = UpdateCheckWorker.WORK_NAME,
+                existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.UPDATE,
+                request = request,
+            )
+
+        Logger.i { "UpdateScheduler: Rescheduled periodic update check to every ${intervalHours}h" }
+    }
+
+    /**
      * Enqueues a one-time [AutoUpdateWorker] to download and silently install
      * all available updates via Shizuku. Uses KEEP policy to avoid duplicate runs.
      */

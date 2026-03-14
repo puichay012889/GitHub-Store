@@ -24,9 +24,11 @@ import zed.rainxch.core.data.utils.AndroidBrowserHelper
 import zed.rainxch.core.data.utils.AndroidClipboardHelper
 import zed.rainxch.core.data.utils.AndroidShareManager
 import zed.rainxch.core.domain.network.Downloader
+import zed.rainxch.core.data.services.AndroidUpdateScheduleManager
 import zed.rainxch.core.domain.system.Installer
 import zed.rainxch.core.domain.system.InstallerStatusProvider
 import zed.rainxch.core.domain.system.PackageMonitor
+import zed.rainxch.core.domain.system.UpdateScheduleManager
 import zed.rainxch.core.domain.utils.AppLauncher
 import zed.rainxch.core.domain.utils.BrowserHelper
 import zed.rainxch.core.domain.utils.ClipboardHelper
@@ -118,6 +120,12 @@ actual val corePlatformModule = module {
 
     single<ShareManager> {
         AndroidShareManager(
+            context = androidContext()
+        )
+    }
+
+    single<UpdateScheduleManager> {
+        AndroidUpdateScheduleManager(
             context = androidContext()
         )
     }

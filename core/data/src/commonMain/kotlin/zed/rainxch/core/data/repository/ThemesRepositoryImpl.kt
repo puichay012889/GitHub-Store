@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -22,6 +23,7 @@ class ThemesRepositoryImpl(
     private val AUTO_DETECT_CLIPBOARD_KEY = booleanPreferencesKey("auto_detect_clipboard_links")
     private val INSTALLER_TYPE_KEY = stringPreferencesKey("installer_type")
     private val AUTO_UPDATE_KEY = booleanPreferencesKey("auto_update_enabled")
+    private val UPDATE_CHECK_INTERVAL_KEY = longPreferencesKey("update_check_interval_hours")
 
     override fun getThemeColor(): Flow<AppTheme> =
         preferences.data.map { prefs ->
@@ -106,5 +108,20 @@ class ThemesRepositoryImpl(
         preferences.edit { prefs ->
             prefs[AUTO_UPDATE_KEY] = enabled
         }
+    }
+
+    override fun getUpdateCheckInterval(): Flow<Long> =
+        preferences.data.map { prefs ->
+            prefs[UPDATE_CHECK_INTERVAL_KEY] ?: DEFAULT_UPDATE_CHECK_INTERVAL_HOURS
+        }
+
+    override suspend fun setUpdateCheckInterval(hours: Long) {
+        preferences.edit { prefs ->
+            prefs[UPDATE_CHECK_INTERVAL_KEY] = hours
+        }
+    }
+
+    companion object {
+        const val DEFAULT_UPDATE_CHECK_INTERVAL_HOURS = 6L
     }
 }

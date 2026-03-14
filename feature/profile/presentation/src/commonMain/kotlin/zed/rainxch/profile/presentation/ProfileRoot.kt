@@ -35,6 +35,7 @@ import zed.rainxch.githubstore.core.presentation.res.*
 import zed.rainxch.profile.presentation.components.LogoutDialog
 import zed.rainxch.profile.presentation.components.sections.about
 import zed.rainxch.profile.presentation.components.sections.installationSection
+import zed.rainxch.profile.presentation.components.sections.updatesSection
 import zed.rainxch.profile.presentation.components.sections.logout
 import zed.rainxch.profile.presentation.components.sections.networkSection
 import zed.rainxch.profile.presentation.components.sections.othersSection
@@ -202,6 +203,11 @@ fun ProfileScreen(
             }
 
             installationSection(
+                state = state,
+                onAction = onAction
+            )
+
+            updatesSection(
                 state = state,
                 onAction = onAction
             )

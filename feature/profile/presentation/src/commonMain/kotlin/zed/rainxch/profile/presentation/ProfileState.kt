@@ -27,4 +27,5 @@ data class ProfileState(
     val installerType: InstallerType = InstallerType.DEFAULT,
     val shizukuAvailability: ShizukuAvailability = ShizukuAvailability.UNAVAILABLE,
     val autoUpdateEnabled: Boolean = false,
+    val updateCheckIntervalHours: Long = 6L,
 )

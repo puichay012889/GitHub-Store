@@ -16,6 +16,7 @@ import zed.rainxch.core.domain.model.ProxyConfig
 import zed.rainxch.core.domain.repository.ProxyRepository
 import zed.rainxch.core.domain.repository.ThemesRepository
 import zed.rainxch.core.domain.system.InstallerStatusProvider
+import zed.rainxch.core.domain.system.UpdateScheduleManager
 import zed.rainxch.core.domain.utils.BrowserHelper
 import zed.rainxch.githubstore.core.presentation.res.Res
 import zed.rainxch.githubstore.core.presentation.res.failed_to_save_proxy_settings
@@ -30,6 +31,7 @@ class ProfileViewModel(
     private val profileRepository: ProfileRepository,
     private val installerStatusProvider: InstallerStatusProvider,
     private val proxyRepository: ProxyRepository,
+    private val updateScheduleManager: UpdateScheduleManager,
 ) : ViewModel() {
     private var userProfileJob: Job? = null
 
@@ -48,6 +50,7 @@ class ProfileViewModel(
                 loadInstallerPreference()
                 observeShizukuStatus()
                 loadAutoUpdatePreference()
+                loadUpdateCheckInterval()
 
                 hasLoadedInitialData = true
             }
@@ -229,6 +232,16 @@ class ProfileViewModel(
         }
     }
 
+    private fun loadUpdateCheckInterval() {
+        viewModelScope.launch {
+            themesRepository.getUpdateCheckInterval().collect { hours ->
+                _state.update {
+                    it.copy(updateCheckIntervalHours = hours)
+                }
+            }
+        }
+    }
+
     fun onAction(action: ProfileAction) {
         when (action) {
             ProfileAction.OnHelpClick -> {
@@ -399,6 +412,13 @@ class ProfileViewModel(
             is ProfileAction.OnAutoUpdateToggled -> {
                 viewModelScope.launch {
                     themesRepository.setAutoUpdateEnabled(action.enabled)
+                }
+            }
+
+            is ProfileAction.OnUpdateCheckIntervalChanged -> {
+                viewModelScope.launch {
+                    themesRepository.setUpdateCheckInterval(action.hours)
+                    updateScheduleManager.reschedule(action.hours)
                 }
             }
 

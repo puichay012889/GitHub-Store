@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,9 +21,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.InstallMobile
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -89,6 +93,36 @@ fun LazyListScope.installationSection(
                 }
             )
         }
+    }
+}
+
+/**
+ * Updates section — always visible on Android (not gated on Shizuku).
+ * Shows the update check interval picker so all users can configure
+ * how often background update checks run.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+fun LazyListScope.updatesSection(
+    state: ProfileState,
+    onAction: (ProfileAction) -> Unit,
+) {
+    if (getPlatform() != Platform.ANDROID) return
+
+    item {
+        Spacer(Modifier.height(32.dp))
+
+        SectionHeader(
+            text = stringResource(Res.string.section_updates).uppercase()
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        UpdateCheckIntervalCard(
+            selectedIntervalHours = state.updateCheckIntervalHours,
+            onIntervalSelected = { hours ->
+                onAction(ProfileAction.OnUpdateCheckIntervalChanged(hours))
+            }
+        )
     }
 }
 
@@ -331,6 +365,86 @@ private fun AutoUpdateCard(
                 checked = enabled,
                 onCheckedChange = onToggle
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun UpdateCheckIntervalCard(
+    selectedIntervalHours: Long,
+    onIntervalSelected: (Long) -> Unit,
+) {
+    val intervals = listOf(
+        3L to Res.string.interval_3h,
+        6L to Res.string.interval_6h,
+        12L to Res.string.interval_12h,
+        24L to Res.string.interval_24h,
+    )
+
+    ExpressiveCard {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Schedule,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(8.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.update_check_interval_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = stringResource(Res.string.update_check_interval_description),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                intervals.forEach { (hours, labelRes) ->
+                    val isSelected = selectedIntervalHours == hours
+
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { onIntervalSelected(hours) },
+                        label = {
+                            Text(
+                                text = stringResource(labelRes),
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    )
+                }
+            }
         }
     }
 }
