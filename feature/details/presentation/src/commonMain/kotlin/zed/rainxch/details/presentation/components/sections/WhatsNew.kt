@@ -22,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.compose.Markdown
+import io.github.fletchmckee.liquid.LiquidState
 import io.github.fletchmckee.liquid.liquefiable
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.jetbrains.compose.resources.stringResource
@@ -123,102 +125,126 @@ fun LazyListScope.whatsNew(
                         modifier = Modifier.liquefiable(liquidState),
                     )
                 }
+            }
+        }
+    }
 
-                Spacer(Modifier.height(12.dp))
+    item {
+        val liquidState = LocalTopbarLiquidState.current
 
-                val density = LocalDensity.current
-                val colors = rememberMarkdownColors()
-                val typography = rememberMarkdownTypography()
-                val flavour = remember { GFMFlavourDescriptor() }
-                val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
+        Spacer(Modifier.height(12.dp))
 
-                val displayContent =
-                    if (translationState.isShowingTranslation && translationState.translatedText != null) {
-                        translationState.translatedText
-                    } else {
-                        release.description ?: stringResource(Res.string.no_release_notes)
-                    }
+        ExpandableMarkdownContent(
+            translationState = translationState,
+            release = release,
+            collapsedHeight = collapsedHeight,
+            isExpanded = isExpanded,
+            liquidState = liquidState,
+            onToggleExpanded = onToggleExpanded,
+        )
+    }
+}
 
-                AnimatedContent(
-                    targetState = displayContent,
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    label = "whats_new_content",
-                ) { content ->
-                    val collapsedHeightPx = with(density) { collapsedHeight.toPx() }
-                    var contentHeightPx by remember(content, collapsedHeightPx) {
-                        mutableFloatStateOf(0f)
-                    }
-                    val needsExpansion =
-                        remember(contentHeightPx, collapsedHeightPx) {
-                            contentHeightPx > collapsedHeightPx && collapsedHeightPx > 0f
-                        }
+@Composable
+private fun ExpandableMarkdownContent(
+    translationState: TranslationState,
+    release: GithubRelease,
+    collapsedHeight: Dp,
+    isExpanded: Boolean,
+    liquidState: LiquidState,
+    onToggleExpanded: () -> Unit,
+) {
+    val displayContent =
+        if (translationState.isShowingTranslation && translationState.translatedText != null) {
+            translationState.translatedText
+        } else {
+            release.description ?: stringResource(Res.string.no_release_notes)
+        }
 
-                    Column(
-                        modifier = Modifier.animateContentSize(),
-                    ) {
-                        Box {
-                            Box(
-                                modifier =
-                                    if (!isExpanded && needsExpansion) {
-                                        Modifier.heightIn(max = collapsedHeight).clipToBounds()
-                                    } else {
-                                        Modifier
-                                    },
-                            ) {
-                                Markdown(
-                                    content = content,
-                                    colors = colors,
-                                    typography = typography,
-                                    flavour = flavour,
-                                    imageTransformer = MarkdownImageTransformer,
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .liquefiable(liquidState)
-                                            .onGloballyPositioned { coordinates ->
-                                                val measured = coordinates.size.height.toFloat()
-                                                if (measured > contentHeightPx) {
-                                                    contentHeightPx = measured
-                                                }
-                                            },
-                                )
-                            }
+    val density = LocalDensity.current
+    val colors = rememberMarkdownColors()
+    val typography = rememberMarkdownTypography()
+    val flavour = remember { GFMFlavourDescriptor() }
+    val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
 
-                            if (!isExpanded && needsExpansion) {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .align(Alignment.BottomCenter)
-                                            .fillMaxWidth()
-                                            .height(80.dp)
-                                            .background(
-                                                Brush.verticalGradient(
-                                                    0f to cardColor.copy(alpha = 0f),
-                                                    1f to cardColor,
-                                                ),
-                                            ),
-                                )
-                            }
-                        }
+    AnimatedContent(
+        targetState = displayContent,
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        label = "whats_new_content",
+    ) { content ->
 
-                        if (needsExpansion) {
-                            TextButton(
-                                onClick = onToggleExpanded,
-                                modifier = Modifier.align(Alignment.CenterHorizontally),
-                            ) {
-                                Text(
-                                    text =
-                                        if (isExpanded) {
-                                            stringResource(Res.string.show_less)
-                                        } else {
-                                            stringResource(Res.string.read_more)
-                                        },
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                        }
-                    }
+        val collapsedHeightPx = with(density) { collapsedHeight.toPx() }
+        var contentHeightPx by remember(content, collapsedHeightPx) {
+            mutableFloatStateOf(0f)
+        }
+        val needsExpansion =
+            remember(contentHeightPx, collapsedHeightPx) {
+                contentHeightPx > collapsedHeightPx && collapsedHeightPx > 0f
+            }
+
+        Column(
+            modifier = Modifier.animateContentSize(),
+        ) {
+            Box {
+                Box(
+                    modifier =
+                        if (!isExpanded && needsExpansion) {
+                            Modifier.heightIn(max = collapsedHeight).clipToBounds()
+                        } else {
+                            Modifier
+                        },
+                ) {
+                    Markdown(
+                        content = content,
+                        colors = colors,
+                        typography = typography,
+                        flavour = flavour,
+                        imageTransformer = MarkdownImageTransformer,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .liquefiable(liquidState)
+                                .onGloballyPositioned { coordinates ->
+                                    val measured = coordinates.size.height.toFloat()
+                                    if (measured > contentHeightPx) {
+                                        contentHeightPx = measured
+                                    }
+                                },
+                    )
+                }
+
+                if (!isExpanded && needsExpansion) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .background(
+                                    Brush.verticalGradient(
+                                        0f to cardColor.copy(alpha = 0f),
+                                        1f to cardColor,
+                                    ),
+                                ),
+                    )
+                }
+            }
+
+            if (needsExpansion) {
+                TextButton(
+                    onClick = onToggleExpanded,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                ) {
+                    Text(
+                        text =
+                            if (isExpanded) {
+                                stringResource(Res.string.show_less)
+                            } else {
+                                stringResource(Res.string.read_more)
+                            },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
         }

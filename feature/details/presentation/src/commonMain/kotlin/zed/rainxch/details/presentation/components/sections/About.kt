@@ -131,7 +131,8 @@ fun LazyListScope.about(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .liquefiable(liquidState),
+                        .liquefiable(liquidState)
+                        .animateContentSize(),
             )
         }
     }
