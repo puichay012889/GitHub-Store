@@ -541,4 +541,6 @@
     <string name="translation_error_retry">Reintentar</string>
     <string name="translated_from">Detectado automáticamente: %1$s</string>
     <string name="select_language">Seleccionar idioma</string>
+    <string name="update_package_mismatch">Paquete no coincide: el APK es %1$s, pero la aplicación instalada es %2$s. Actualización bloqueada.</string>
+    <string name="update_signing_key_mismatch">Clave de firma no coincide: la actualización fue firmada por un desarrollador diferente. Actualización bloqueada.</string>
 </resources>

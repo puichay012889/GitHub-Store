@@ -61,6 +61,7 @@ import zed.rainxch.githubstore.core.presentation.res.link_copied_to_clipboard
 import zed.rainxch.githubstore.core.presentation.res.rate_limit_exceeded
 import zed.rainxch.githubstore.core.presentation.res.removed_from_favourites
 import zed.rainxch.githubstore.core.presentation.res.translation_failed
+import zed.rainxch.githubstore.core.presentation.res.update_package_mismatch
 import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
@@ -1113,6 +1114,28 @@ class DetailsViewModel(
                     size = sizeBytes,
                     tag = releaseTag,
                     result = Error("Failed to extract APK info"),
+                )
+                return
+            }
+
+            // Validate package name matches on updates
+            val trackedApp = _state.value.installedApp
+            if (isUpdate && trackedApp != null && apkInfo.packageName != trackedApp.packageName) {
+                logger.error("Package name mismatch on update: APK=${apkInfo.packageName}, installed=${trackedApp.packageName}")
+                _state.value = _state.value.copy(
+                    downloadStage = DownloadStage.IDLE,
+                    installError = getString(
+                        Res.string.update_package_mismatch,
+                        apkInfo.packageName,
+                        trackedApp.packageName,
+                    ),
+                )
+                currentAssetName = null
+                appendLog(
+                    assetName = assetName,
+                    size = sizeBytes,
+                    tag = releaseTag,
+                    result = Error("Package name mismatch"),
                 )
                 return
             }

@@ -581,4 +581,6 @@
     <string name="imported_apps_summary">Imported %1$d apps</string>
     <string name="imported_skipped">, %1$d skipped</string>
     <string name="imported_failed">, %1$d failed</string>
+    <string name="update_package_mismatch">Package mismatch: the APK is %1$s, but the installed app is %2$s. Update blocked.</string>
+    <string name="update_signing_key_mismatch">Signing key mismatch: the update was signed by a different developer. Update blocked.</string>
 </resources>

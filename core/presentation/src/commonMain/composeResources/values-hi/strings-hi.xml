@@ -580,4 +580,6 @@
     <string name="translation_error_retry">पुनः प्रयास</string>
     <string name="translated_from">स्वतः पहचाना गया: %1$s</string>
     <string name="select_language">भाषा चुनें</string>
+    <string name="update_package_mismatch">पैकेज मेल नहीं खाता: APK %1$s है, लेकिन इंस्टॉल किया गया ऐप %2$s है। अपडेट ब्लॉक किया गया।</string>
+    <string name="update_signing_key_mismatch">साइनिंग कुंजी मेल नहीं खाती: अपडेट किसी अन्य डेवलपर द्वारा साइन किया गया था। अपडेट ब्लॉक किया गया।</string>
 </resources>

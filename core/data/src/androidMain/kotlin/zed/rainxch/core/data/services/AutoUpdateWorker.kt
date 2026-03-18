@@ -154,6 +154,18 @@ class AutoUpdateWorker(
             installer.getApkInfoExtractor().extractPackageInfo(filePath)
                 ?: throw IllegalStateException("Failed to extract APK info for ${app.appName}")
 
+        // Validate package name matches
+        if (apkInfo.packageName != app.packageName) {
+            Logger.e {
+                "AutoUpdateWorker: Package name mismatch for ${app.appName}! " +
+                    "Expected: ${app.packageName}, got: ${apkInfo.packageName}. " +
+                    "Skipping auto-update."
+            }
+            throw IllegalStateException(
+                "Package name mismatch for ${app.appName}: expected ${app.packageName}, got ${apkInfo.packageName}",
+            )
+        }
+
         val currentApp = installedAppsRepository.getAppByPackage(app.packageName)
 
         if (currentApp?.signingFingerprint != null) {

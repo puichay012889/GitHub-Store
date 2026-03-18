@@ -581,4 +581,6 @@
     <string name="translation_error_retry">إعادة المحاولة</string>
     <string name="translated_from">اكتشاف تلقائي: %1$s</string>
     <string name="select_language">اختر اللغة</string>
+    <string name="update_package_mismatch">عدم تطابق الحزمة: ملف APK هو %1$s، لكن التطبيق المثبت هو %2$s. تم حظر التحديث.</string>
+    <string name="update_signing_key_mismatch">عدم تطابق مفتاح التوقيع: تم توقيع التحديث بواسطة مطور مختلف. تم حظر التحديث.</string>
 </resources>

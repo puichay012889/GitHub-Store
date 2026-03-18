@@ -544,4 +544,6 @@
     <string name="translation_error_retry">Повторить</string>
     <string name="translated_from">Автоопределение: %1$s</string>
     <string name="select_language">Выбрать язык</string>
+    <string name="update_package_mismatch">Несоответствие пакета: APK — %1$s, но установленное приложение — %2$s. Обновление заблокировано.</string>
+    <string name="update_signing_key_mismatch">Несоответствие ключа подписи: обновление подписано другим разработчиком. Обновление заблокировано.</string>
 </resources>

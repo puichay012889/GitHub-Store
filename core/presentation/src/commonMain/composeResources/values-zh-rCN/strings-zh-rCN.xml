@@ -543,4 +543,6 @@
     <string name="translation_error_retry">重试</string>
     <string name="translated_from">自动检测：%1$s</string>
     <string name="select_language">选择语言</string>
+    <string name="update_package_mismatch">包名不匹配：APK 为 %1$s，但已安装的应用为 %2$s。更新已阻止。</string>
+    <string name="update_signing_key_mismatch">签名密钥不匹配：更新由不同的开发者签名。更新已阻止。</string>
 </resources>
