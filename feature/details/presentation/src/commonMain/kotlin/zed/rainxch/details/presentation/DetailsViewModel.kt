@@ -6,10 +6,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -22,12 +22,9 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
-import zed.rainxch.core.domain.model.ApkPackageInfo
 import zed.rainxch.core.domain.model.FavoriteRepo
 import zed.rainxch.core.domain.model.GithubAsset
 import zed.rainxch.core.domain.model.GithubRelease
-import zed.rainxch.core.domain.model.InstallSource
-import zed.rainxch.core.domain.model.InstalledApp
 import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.RateLimitException
 import zed.rainxch.core.domain.network.Downloader
@@ -45,6 +42,13 @@ import zed.rainxch.core.domain.utils.ShareManager
 import zed.rainxch.details.domain.model.ReleaseCategory
 import zed.rainxch.details.domain.repository.DetailsRepository
 import zed.rainxch.details.domain.repository.TranslationRepository
+import zed.rainxch.details.domain.system.ApkValidationResult
+import zed.rainxch.details.domain.system.AttestationVerifier
+import zed.rainxch.details.domain.system.FingerprintCheckResult
+import zed.rainxch.details.domain.system.InstallationManager
+import zed.rainxch.details.domain.system.SaveInstalledAppParams
+import zed.rainxch.details.domain.system.UpdateInstalledAppParams
+import zed.rainxch.details.domain.util.VersionHelper
 import zed.rainxch.details.presentation.model.AttestationStatus
 import zed.rainxch.details.presentation.model.DowngradeWarning
 import zed.rainxch.details.presentation.model.DownloadStage
@@ -66,8 +70,6 @@ import zed.rainxch.githubstore.core.presentation.res.removed_from_favourites
 import zed.rainxch.githubstore.core.presentation.res.translation_failed
 import zed.rainxch.githubstore.core.presentation.res.update_package_mismatch
 import java.io.File
-import java.io.FileInputStream
-import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock.System
@@ -93,6 +95,8 @@ class DetailsViewModel(
     private val isComingFromUpdate: Boolean,
     private val tweaksRepository: TweaksRepository,
     private val seenReposRepository: SeenReposRepository,
+    private val installationManager: InstallationManager,
+    private val attestationVerifier: AttestationVerifier,
 ) : ViewModel() {
     private var hasLoadedInitialData = false
     private var currentDownloadJob: Job? = null
@@ -123,13 +127,257 @@ class DetailsViewModel(
 
     private val rateLimited = AtomicBoolean(false)
 
-    private fun observeLiquidGlassEnabled() {
+    fun confirmUninstall() {
+        _state.update { it.copy(showUninstallConfirmation = false) }
+        val installedApp = _state.value.installedApp ?: return
+        logger.debug("Uninstalling app (confirmed): ${installedApp.packageName}")
         viewModelScope.launch {
-            tweaksRepository.getLiquidGlassEnabled().collect { enabled ->
+            try {
+                installer.uninstall(installedApp.packageName)
+            } catch (e: Exception) {
+                logger.error("Failed to request uninstall for ${installedApp.packageName}: ${e.message}")
+                _events.send(
+                    DetailsEvent.OnMessage(
+                        getString(Res.string.failed_to_uninstall, installedApp.packageName),
+                    ),
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    fun onAction(action: DetailsAction) {
+        when (action) {
+            DetailsAction.Retry -> {
+                hasLoadedInitialData = false
+                loadInitial()
+            }
+
+            DetailsAction.OnDismissDowngradeWarning -> {
+                dismissDowngradeWarning()
+            }
+
+            DetailsAction.OnDismissSigningKeyWarning -> {
                 _state.update {
-                    it.copy(isLiquidGlassEnabled = enabled)
+                    it.copy(
+                        signingKeyWarning = null,
+                        downloadStage = DownloadStage.IDLE,
+                    )
+                }
+                currentAssetName = null
+            }
+
+            DetailsAction.OnOverrideSigningKeyWarning -> {
+                overrideSigningKeyWarning()
+            }
+
+            DetailsAction.InstallPrimary -> {
+                install()
+            }
+
+            DetailsAction.OnRequestUninstall -> {
+                _state.update { it.copy(showUninstallConfirmation = true) }
+            }
+
+            DetailsAction.OnDismissUninstallConfirmation -> {
+                _state.update { it.copy(showUninstallConfirmation = false) }
+            }
+
+            DetailsAction.OnConfirmUninstall -> {
+                confirmUninstall()
+            }
+
+            DetailsAction.UninstallApp -> {
+                uninstallApp()
+            }
+
+            is DetailsAction.DownloadAsset -> {
+                val release = _state.value.selectedRelease
+                downloadAsset(
+                    downloadUrl = action.downloadUrl,
+                    assetName = action.assetName,
+                    sizeBytes = action.sizeBytes,
+                    releaseTag = release?.tagName ?: "",
+                )
+            }
+
+            DetailsAction.CancelCurrentDownload -> {
+                cancelCurrentDownload()
+            }
+
+            DetailsAction.OnToggleFavorite -> {
+                toggleFavourite()
+            }
+
+            DetailsAction.OnShareClick -> {
+                share()
+            }
+
+            DetailsAction.UpdateApp -> {
+                update()
+            }
+
+            DetailsAction.OpenApp -> {
+                openApp()
+            }
+
+            DetailsAction.OpenRepoInBrowser -> {
+                _state.value.repository?.htmlUrl?.let {
+                    helper.openUrl(url = it)
                 }
             }
+
+            DetailsAction.OpenAuthorInBrowser -> {
+                _state.value.userProfile?.htmlUrl?.let {
+                    helper.openUrl(url = it)
+                }
+            }
+
+            DetailsAction.OpenInObtainium -> {
+                openObtainium()
+            }
+
+            DetailsAction.OpenInAppManager -> {
+                openAppManager()
+            }
+
+            DetailsAction.OnToggleInstallDropdown -> {
+                _state.update {
+                    it.copy(isInstallDropdownExpanded = !it.isInstallDropdownExpanded)
+                }
+            }
+
+            is DetailsAction.SelectReleaseCategory -> {
+                selectReleaseCategory(action)
+            }
+
+            is DetailsAction.SelectRelease -> {
+                val release = action.release
+                val (installable, primary) = recomputeAssetsForRelease(release)
+                whatsNewTranslationJob?.cancel()
+
+                _state.update {
+                    it.copy(
+                        selectedRelease = release,
+                        installableAssets = installable,
+                        primaryAsset = primary,
+                        isVersionPickerVisible = false,
+                        whatsNewTranslation = TranslationState(),
+                    )
+                }
+            }
+
+            DetailsAction.ToggleVersionPicker -> {
+                _state.update {
+                    it.copy(isVersionPickerVisible = !it.isVersionPickerVisible)
+                }
+            }
+
+            DetailsAction.ToggleAboutExpanded -> {
+                _state.update {
+                    it.copy(isAboutExpanded = !it.isAboutExpanded)
+                }
+            }
+
+            DetailsAction.ToggleWhatsNewExpanded -> {
+                _state.update {
+                    it.copy(isWhatsNewExpanded = !it.isWhatsNewExpanded)
+                }
+            }
+
+            is DetailsAction.TranslateAbout -> {
+                val readme = _state.value.readmeMarkdown ?: return
+                aboutTranslationJob?.cancel()
+                aboutTranslationJob =
+                    translateContent(
+                        text = readme,
+                        targetLanguageCode = action.targetLanguageCode,
+                        updateState = { ts -> _state.update { it.copy(aboutTranslation = ts) } },
+                        getCurrentState = { _state.value.aboutTranslation },
+                    )
+            }
+
+            is DetailsAction.TranslateWhatsNew -> {
+                val description = _state.value.selectedRelease?.description ?: return
+                whatsNewTranslationJob?.cancel()
+                whatsNewTranslationJob =
+                    translateContent(
+                        text = description,
+                        targetLanguageCode = action.targetLanguageCode,
+                        updateState = { ts -> _state.update { it.copy(whatsNewTranslation = ts) } },
+                        getCurrentState = { _state.value.whatsNewTranslation },
+                    )
+            }
+
+            DetailsAction.ToggleAboutTranslation -> {
+                _state.update {
+                    val current = it.aboutTranslation
+                    it.copy(aboutTranslation = current.copy(isShowingTranslation = !current.isShowingTranslation))
+                }
+            }
+
+            DetailsAction.ToggleWhatsNewTranslation -> {
+                _state.update {
+                    val current = it.whatsNewTranslation
+                    it.copy(whatsNewTranslation = current.copy(isShowingTranslation = !current.isShowingTranslation))
+                }
+            }
+
+            is DetailsAction.ShowLanguagePicker -> {
+                _state.update {
+                    it.copy(
+                        isLanguagePickerVisible = true,
+                        languagePickerTarget = action.target,
+                    )
+                }
+            }
+
+            DetailsAction.DismissLanguagePicker -> {
+                _state.update {
+                    it.copy(isLanguagePickerVisible = false, languagePickerTarget = null)
+                }
+            }
+
+            DetailsAction.OpenWithExternalInstaller -> {
+                openExternalInstaller()
+            }
+
+            DetailsAction.DismissExternalInstallerPrompt -> {
+                _state.value =
+                    _state.value.copy(
+                        showExternalInstallerPrompt = false,
+                        pendingInstallFilePath = null,
+                    )
+            }
+
+            DetailsAction.InstallWithExternalApp -> {
+                installViaExternalApp()
+            }
+
+            DetailsAction.OnNavigateBackClick -> {
+                // Handled in composable
+            }
+
+            is DetailsAction.OpenDeveloperProfile -> {
+                // Handled in composable
+            }
+
+            is DetailsAction.OnMessage -> {
+                // Handled in composable
+            }
+
+            is DetailsAction.SelectDownloadAsset -> {
+                _state.update { state -> state.copy(primaryAsset = action.release) }
+            }
+
+            DetailsAction.ToggleReleaseAssetsPicker -> {
+                _state.update { state -> state.copy(isReleaseSelectorVisible = !state.isReleaseSelectorVisible) }
+            }
+        }
+    }
+
+    private fun observeLiquidGlassEnabled() {
+        viewModelScope.launch {
         }
     }
 
@@ -142,6 +390,980 @@ class DetailsViewModel(
                 }.orEmpty()
         val primary = installer.choosePrimaryAsset(installable)
         return installable to primary
+    }
+
+    private fun observeInstalledApp(repoId: Long) {
+        viewModelScope.launch {
+            installedAppsRepository
+                .getAppByRepoIdAsFlow(repoId)
+                .distinctUntilChanged()
+                .collect { app ->
+                    _state.update { it.copy(installedApp = app) }
+                }
+        }
+    }
+
+    private fun installViaExternalApp() {
+        currentDownloadJob?.cancel()
+        val job =
+            viewModelScope.launch {
+                try {
+                    val primary = _state.value.primaryAsset
+                    val release = _state.value.selectedRelease
+
+                    if (primary != null && release != null) {
+                        currentAssetName = primary.name
+
+                        appendLog(
+                            assetName = primary.name,
+                            size = primary.size,
+                            tag = release.tagName,
+                            result = LogResult.DownloadStarted,
+                        )
+
+                        _state.value =
+                            _state.value.copy(
+                                downloadError = null,
+                                installError = null,
+                                downloadProgressPercent = null,
+                                downloadStage = DownloadStage.DOWNLOADING,
+                            )
+
+                        downloader
+                            .download(primary.downloadUrl, primary.name)
+                            .collect { p ->
+                                _state.value =
+                                    _state.value.copy(downloadProgressPercent = p.percent)
+                                if (p.percent == 100) {
+                                    _state.value =
+                                        _state.value.copy(downloadStage = DownloadStage.VERIFYING)
+                                }
+                            }
+
+                        val filePath =
+                            downloader.getDownloadedFilePath(primary.name)
+                                ?: throw IllegalStateException("Downloaded file not found")
+
+                        appendLog(
+                            assetName = primary.name,
+                            size = primary.size,
+                            tag = release.tagName,
+                            result = LogResult.Downloaded,
+                        )
+
+                        _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
+                        currentAssetName = null
+
+                        installer.openWithExternalInstaller(filePath)
+
+                        appendLog(
+                            assetName = primary.name,
+                            size = primary.size,
+                            tag = release.tagName,
+                            result = LogResult.OpenedInExternalInstaller,
+                        )
+                    }
+                } catch (e: CancellationException) {
+                    logger.debug("Install with external app cancelled")
+                    _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
+                    currentAssetName = null
+                    throw e
+                } catch (t: Throwable) {
+                    logger.error("Failed to install with external app: ${t.message}")
+                    _state.value =
+                        _state.value.copy(
+                            downloadStage = DownloadStage.IDLE,
+                            installError = t.message,
+                        )
+                    currentAssetName = null
+
+                    _state.value.primaryAsset?.let { asset ->
+                        _state.value.selectedRelease?.let { release ->
+                            appendLog(
+                                assetName = asset.name,
+                                size = asset.size,
+                                tag = release.tagName,
+                                result = Error(t.message),
+                            )
+                        }
+                    }
+                }
+            }
+
+        currentDownloadJob = job
+        job.invokeOnCompletion {
+            if (currentDownloadJob === job) {
+                currentDownloadJob = null
+            }
+        }
+
+        _state.update {
+            it.copy(isInstallDropdownExpanded = false)
+        }
+    }
+
+    private fun openExternalInstaller() {
+        val filePath = _state.value.pendingInstallFilePath
+        if (filePath != null) {
+            try {
+                installer.openWithExternalInstaller(filePath)
+                _state.value.primaryAsset?.let { asset ->
+                    _state.value.selectedRelease?.let { release ->
+                        appendLog(
+                            assetName = asset.name,
+                            size = asset.size,
+                            tag = release.tagName,
+                            result = LogResult.OpenedInExternalInstaller,
+                        )
+                    }
+                }
+            } catch (t: Throwable) {
+                logger.error("Failed to open with external installer: ${t.message}")
+                _state.value = _state.value.copy(installError = t.message)
+            }
+        }
+        _state.value =
+            _state.value.copy(
+                showExternalInstallerPrompt = false,
+                pendingInstallFilePath = null,
+            )
+    }
+
+    private fun selectReleaseCategory(action: DetailsAction.SelectReleaseCategory) {
+        val newCategory = action.category
+        val filtered =
+            when (newCategory) {
+                ReleaseCategory.STABLE -> _state.value.allReleases.filter { !it.isPrerelease }
+                ReleaseCategory.PRE_RELEASE -> _state.value.allReleases.filter { it.isPrerelease }
+                ReleaseCategory.ALL -> _state.value.allReleases
+            }
+        val newSelected = filtered.firstOrNull()
+        val (installable, primary) = recomputeAssetsForRelease(newSelected)
+
+        whatsNewTranslationJob?.cancel()
+        _state.update {
+            it.copy(
+                selectedReleaseCategory = newCategory,
+                selectedRelease = newSelected,
+                installableAssets = installable,
+                primaryAsset = primary,
+                whatsNewTranslation = TranslationState(),
+            )
+        }
+    }
+
+    private fun openAppManager() {
+        viewModelScope.launch {
+            try {
+                val primary = _state.value.primaryAsset
+                val release = _state.value.selectedRelease
+
+                if (primary != null && release != null) {
+                    currentAssetName = primary.name
+
+                    appendLog(
+                        assetName = primary.name,
+                        size = primary.size,
+                        tag = release.tagName,
+                        result = LogResult.PreparingForAppManager,
+                    )
+
+                    _state.value =
+                        _state.value.copy(
+                            downloadError = null,
+                            installError = null,
+                            downloadProgressPercent = null,
+                            downloadStage = DownloadStage.DOWNLOADING,
+                        )
+
+                    downloader.download(primary.downloadUrl, primary.name).collect { p ->
+                        _state.value =
+                            _state.value.copy(downloadProgressPercent = p.percent)
+                        if (p.percent == 100) {
+                            _state.value =
+                                _state.value.copy(downloadStage = DownloadStage.VERIFYING)
+                        }
+                    }
+
+                    val filePath =
+                        downloader.getDownloadedFilePath(primary.name)
+                            ?: throw IllegalStateException("Downloaded file not found")
+
+                    appendLog(
+                        assetName = primary.name,
+                        size = primary.size,
+                        tag = release.tagName,
+                        result = LogResult.Downloaded,
+                    )
+
+                    _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
+                    currentAssetName = null
+
+                    installer.openInAppManager(
+                        filePath = filePath,
+                        onOpenInstaller = {
+                            viewModelScope.launch {
+                                _events.send(
+                                    DetailsEvent.OnOpenRepositoryInApp(APP_MANAGER_REPO_ID),
+                                )
+                            }
+                        },
+                    )
+
+                    appendLog(
+                        assetName = primary.name,
+                        size = primary.size,
+                        tag = release.tagName,
+                        result = LogResult.OpenedInAppManager,
+                    )
+                }
+            } catch (t: Throwable) {
+                logger.error("Failed to open in AppManager: ${t.message}")
+                _state.value =
+                    _state.value.copy(
+                        downloadStage = DownloadStage.IDLE,
+                        installError = t.message,
+                    )
+                currentAssetName = null
+
+                _state.value.primaryAsset?.let { asset ->
+                    _state.value.selectedRelease?.let { release ->
+                        appendLog(
+                            assetName = asset.name,
+                            size = asset.size,
+                            tag = release.tagName,
+                            result = Error(t.message),
+                        )
+                    }
+                }
+            }
+        }
+        _state.update {
+            it.copy(isInstallDropdownExpanded = false)
+        }
+    }
+
+    private fun openObtainium() {
+        val repo = _state.value.repository
+        repo?.owner?.login?.let {
+            installer.openInObtainium(
+                repoOwner = it,
+                repoName = repo.name,
+                onOpenInstaller = {
+                    viewModelScope.launch {
+                        _events.send(
+                            DetailsEvent.OnOpenRepositoryInApp(OBTAINIUM_REPO_ID),
+                        )
+                    }
+                },
+            )
+        }
+        _state.update {
+            it.copy(isInstallDropdownExpanded = false)
+        }
+    }
+
+    private fun openApp() {
+        val installedApp = _state.value.installedApp ?: return
+        val launched = installer.openApp(installedApp.packageName)
+        if (!launched) {
+            viewModelScope.launch {
+                _events.send(
+                    DetailsEvent.OnMessage(
+                        getString(
+                            Res.string.failed_to_open_app,
+                            installedApp.appName,
+                        ),
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun update() {
+        val installedApp = _state.value.installedApp
+        val selectedRelease = _state.value.selectedRelease
+
+        if (installedApp != null && selectedRelease != null && installedApp.isUpdateAvailable) {
+            val latestAsset =
+                _state.value.installableAssets.firstOrNull {
+                    it.name == installedApp.latestAssetName
+                } ?: _state.value.primaryAsset
+
+            if (latestAsset != null) {
+                installAsset(
+                    downloadUrl = latestAsset.downloadUrl,
+                    assetName = latestAsset.name,
+                    sizeBytes = latestAsset.size,
+                    releaseTag = selectedRelease.tagName,
+                    isUpdate = true,
+                )
+            }
+        }
+    }
+
+    private fun share() {
+        viewModelScope.launch {
+            _state.value.repository?.let { repo ->
+                runCatching {
+                    shareManager.shareText("https://github-store.org/app?repo=${repo.fullName}")
+                }.onFailure { t ->
+                    logger.error("Failed to share link: ${t.message}")
+                    _events.send(
+                        DetailsEvent.OnMessage(getString(Res.string.failed_to_share_link)),
+                    )
+                    return@launch
+                }
+
+                if (platform != Platform.ANDROID) {
+                    _events.send(DetailsEvent.OnMessage(getString(Res.string.link_copied_to_clipboard)))
+                }
+            }
+        }
+    }
+
+    private fun toggleFavourite() {
+        viewModelScope.launch {
+            try {
+                val repo = _state.value.repository ?: return@launch
+                val selectedRelease = _state.value.selectedRelease
+
+                val favoriteRepo =
+                    FavoriteRepo(
+                        repoId = repo.id,
+                        repoName = repo.name,
+                        repoOwner = repo.owner.login,
+                        repoOwnerAvatarUrl = repo.owner.avatarUrl,
+                        repoDescription = repo.description,
+                        primaryLanguage = repo.language,
+                        repoUrl = repo.htmlUrl,
+                        latestVersion = selectedRelease?.tagName,
+                        latestReleaseUrl = selectedRelease?.htmlUrl,
+                        addedAt = System.now().toEpochMilliseconds(),
+                        lastSyncedAt = System.now().toEpochMilliseconds(),
+                    )
+
+                favouritesRepository.toggleFavorite(favoriteRepo)
+
+                val newFavoriteState = favouritesRepository.isFavoriteSync(repo.id)
+                _state.value = _state.value.copy(isFavourite = newFavoriteState)
+
+                _events.send(
+                    element =
+                        DetailsEvent.OnMessage(
+                            message =
+                                getString(
+                                    resource =
+                                        if (newFavoriteState) {
+                                            Res.string.added_to_favourites
+                                        } else {
+                                            Res.string.removed_from_favourites
+                                        },
+                                ),
+                        ),
+                )
+            } catch (t: Throwable) {
+                logger.error("Failed to toggle favorite: ${t.message}")
+            }
+        }
+    }
+
+    private fun cancelCurrentDownload() {
+        currentDownloadJob?.cancel()
+        currentDownloadJob = null
+
+        val assetName = currentAssetName
+        if (assetName != null) {
+            cachedDownloadAssetName = assetName
+            val releaseTag = _state.value.selectedRelease?.tagName ?: ""
+            val totalSize = _state.value.totalBytes ?: _state.value.downloadedBytes
+            appendLog(
+                assetName = assetName,
+                tag = releaseTag,
+                size = totalSize,
+                result = LogResult.Cancelled,
+            )
+            logger.debug("Download cancelled – keeping file for potential reuse: $assetName")
+        }
+
+        currentAssetName = null
+        _state.value =
+            _state.value.copy(
+                isDownloading = false,
+                downloadProgressPercent = null,
+                downloadStage = DownloadStage.IDLE,
+            )
+    }
+
+    private fun uninstallApp() {
+        val installedApp = _state.value.installedApp ?: return
+        logger.debug("Uninstalling app: ${installedApp.packageName}")
+        viewModelScope.launch {
+            try {
+                installer.uninstall(installedApp.packageName)
+            } catch (e: Exception) {
+                logger.error("Failed to request uninstall for ${installedApp.packageName}: ${e.message}")
+                _events.send(
+                    DetailsEvent.OnMessage(
+                        getString(Res.string.failed_to_uninstall, installedApp.packageName),
+                    ),
+                )
+            }
+        }
+    }
+
+    private fun install() {
+        val primary = _state.value.primaryAsset
+        val release = _state.value.selectedRelease
+        val installedApp = _state.value.installedApp
+
+        if (primary != null && release != null) {
+            if (installedApp != null &&
+                !installedApp.isPendingInstall &&
+                VersionHelper.normalizeVersion(release.tagName) !=
+                VersionHelper.normalizeVersion(
+                    installedApp.installedVersion,
+                ) &&
+                platform == Platform.ANDROID
+            ) {
+                val isDowngrade =
+                    VersionHelper.isDowngradeVersion(
+                        candidate = release.tagName,
+                        current = installedApp.installedVersion,
+                        allReleases = _state.value.allReleases,
+                    )
+
+                if (isDowngrade) {
+                    _state.update {
+                        it.copy(
+                            downgradeWarning =
+                                DowngradeWarning(
+                                    packageName = installedApp.packageName,
+                                    currentVersion = installedApp.installedVersion,
+                                    targetVersion = release.tagName,
+                                ),
+                        )
+                    }
+                    return
+                }
+            }
+
+            installAsset(
+                downloadUrl = primary.downloadUrl,
+                assetName = primary.name,
+                sizeBytes = primary.size,
+                releaseTag = release.tagName,
+            )
+        }
+    }
+
+    private fun overrideSigningKeyWarning() {
+        val warning = _state.value.signingKeyWarning ?: return
+        dismissDowngradeWarning()
+        viewModelScope.launch {
+            try {
+                val ext = warning.pendingAssetName.substringAfterLast('.', "").lowercase()
+                installer.install(warning.pendingFilePath, ext)
+
+                if (platform == Platform.ANDROID) {
+                    saveInstalledAppToDatabase(
+                        assetName = warning.pendingAssetName,
+                        assetUrl = warning.pendingDownloadUrl,
+                        assetSize = warning.pendingSizeBytes,
+                        releaseTag = warning.pendingReleaseTag,
+                        isUpdate = warning.pendingIsUpdate,
+                        filePath = warning.pendingFilePath,
+                    )
+                }
+
+                _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
+                currentAssetName = null
+                appendLog(
+                    assetName = warning.pendingAssetName,
+                    size = warning.pendingSizeBytes,
+                    tag = warning.pendingReleaseTag,
+                    result = if (warning.pendingIsUpdate) LogResult.Updated else LogResult.Installed,
+                )
+            } catch (t: Throwable) {
+                logger.error("Install after override failed: ${t.message}")
+                _state.value =
+                    _state.value.copy(
+                        downloadStage = DownloadStage.IDLE,
+                        installError = t.message,
+                    )
+                currentAssetName = null
+            }
+        }
+    }
+
+    private fun dismissDowngradeWarning() {
+        _state.update {
+            it.copy(
+                downgradeWarning = null,
+            )
+        }
+    }
+
+    private fun installAsset(
+        downloadUrl: String,
+        assetName: String,
+        sizeBytes: Long,
+        releaseTag: String,
+        isUpdate: Boolean = false,
+    ) {
+        currentDownloadJob?.cancel()
+        currentDownloadJob =
+            viewModelScope.launch {
+                try {
+                    val filePath: String =
+                        downloadAsset(
+                            assetName = assetName,
+                            sizeBytes = sizeBytes,
+                            releaseTag = releaseTag,
+                            isUpdate = isUpdate,
+                            downloadUrl = downloadUrl,
+                        ) ?: return@launch
+
+                    installAsset(
+                        isUpdate = isUpdate,
+                        filePath = filePath,
+                        assetName = assetName,
+                        downloadUrl = downloadUrl,
+                        sizeBytes = sizeBytes,
+                        releaseTag = releaseTag,
+                    )
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (t: Throwable) {
+                    logger.error("Install failed: ${t.message}")
+                    t.printStackTrace()
+                    _state.value =
+                        _state.value.copy(
+                            downloadStage = DownloadStage.IDLE,
+                            installError = t.message,
+                        )
+                    currentAssetName = null
+                    appendLog(
+                        assetName = assetName,
+                        size = sizeBytes,
+                        tag = releaseTag,
+                        result = Error(t.message),
+                    )
+                }
+            }
+    }
+
+    private suspend fun installAsset(
+        isUpdate: Boolean,
+        filePath: String,
+        assetName: String,
+        downloadUrl: String,
+        sizeBytes: Long,
+        releaseTag: String,
+    ) {
+        _state.value = _state.value.copy(downloadStage = DownloadStage.INSTALLING)
+
+        val ext = assetName.substringAfterLast('.', "").lowercase()
+        val isApk = ext == "apk"
+
+        if (isApk) {
+            val validationResult =
+                installationManager.validateApk(
+                    filePath = filePath,
+                    isUpdate = isUpdate,
+                    trackedPackageName = _state.value.installedApp?.packageName,
+                )
+
+            when (validationResult) {
+                is ApkValidationResult.ExtractionFailed -> {
+                    logger.error("Failed to extract APK info for $assetName")
+                    _state.value =
+                        _state.value.copy(
+                            downloadStage = DownloadStage.IDLE,
+                            installError = "Failed to verify APK package info",
+                        )
+                    currentAssetName = null
+                    appendLog(
+                        assetName = assetName,
+                        size = sizeBytes,
+                        tag = releaseTag,
+                        result = Error("Failed to extract APK info"),
+                    )
+                    return
+                }
+
+                is ApkValidationResult.PackageMismatch -> {
+                    logger.error(
+                        "Package name mismatch on update: " +
+                            "APK=${validationResult.apkPackageName}, " +
+                            "installed=${validationResult.installedPackageName}",
+                    )
+                    _state.value =
+                        _state.value.copy(
+                            downloadStage = DownloadStage.IDLE,
+                            installError =
+                                getString(
+                                    Res.string.update_package_mismatch,
+                                    validationResult.apkPackageName,
+                                    validationResult.installedPackageName,
+                                ),
+                        )
+                    currentAssetName = null
+                    appendLog(
+                        assetName = assetName,
+                        size = sizeBytes,
+                        tag = releaseTag,
+                        result = Error("Package name mismatch"),
+                    )
+                    return
+                }
+
+                is ApkValidationResult.Valid -> {
+                    val fpResult =
+                        installationManager.checkSigningFingerprint(validationResult.apkInfo)
+                    if (fpResult is FingerprintCheckResult.Mismatch) {
+                        _state.update { state ->
+                            state.copy(
+                                signingKeyWarning =
+                                    SigningKeyWarning(
+                                        packageName = validationResult.apkInfo.packageName,
+                                        expectedFingerprint = fpResult.expectedFingerprint,
+                                        actualFingerprint = fpResult.actualFingerprint,
+                                        pendingDownloadUrl = downloadUrl,
+                                        pendingAssetName = assetName,
+                                        pendingSizeBytes = sizeBytes,
+                                        pendingReleaseTag = releaseTag,
+                                        pendingIsUpdate = isUpdate,
+                                        pendingFilePath = filePath,
+                                    ),
+                            )
+                        }
+                        appendLog(
+                            assetName = assetName,
+                            size = sizeBytes,
+                            tag = releaseTag,
+                            result = Error("Signing key changed"),
+                        )
+                        return
+                    }
+                }
+            }
+        }
+
+        val installOutcome = installer.install(filePath, ext)
+
+        // Launch attestation check asynchronously (non-blocking)
+        launchAttestationCheck(filePath)
+
+        if (platform == Platform.ANDROID) {
+            saveInstalledAppToDatabase(
+                assetName = assetName,
+                assetUrl = downloadUrl,
+                assetSize = sizeBytes,
+                releaseTag = releaseTag,
+                isUpdate = isUpdate,
+                filePath = filePath,
+                installOutcome = installOutcome,
+            )
+        } else {
+            viewModelScope.launch {
+                _events.send(DetailsEvent.OnMessage(getString(Res.string.installer_saved_downloads)))
+            }
+        }
+
+        _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
+        currentAssetName = null
+        appendLog(
+            assetName = assetName,
+            size = sizeBytes,
+            tag = releaseTag,
+            result =
+                if (isUpdate) {
+                    LogResult.Updated
+                } else {
+                    LogResult.Installed
+                },
+        )
+    }
+
+    private fun launchAttestationCheck(filePath: String) {
+        val repo = _state.value.repository ?: return
+        val owner = repo.owner.login
+        val repoName = repo.name
+
+        _state.update { it.copy(attestationStatus = AttestationStatus.CHECKING) }
+
+        viewModelScope.launch {
+            val verified = attestationVerifier.verify(owner, repoName, filePath)
+            _state.update {
+                it.copy(
+                    attestationStatus =
+                        if (verified) AttestationStatus.VERIFIED else AttestationStatus.UNVERIFIED,
+                )
+            }
+        }
+    }
+
+    private suspend fun downloadAsset(
+        assetName: String,
+        sizeBytes: Long,
+        releaseTag: String,
+        isUpdate: Boolean,
+        downloadUrl: String,
+    ): String? {
+        currentAssetName = assetName
+
+        appendLog(
+            assetName = assetName,
+            size = sizeBytes,
+            tag = releaseTag,
+            result =
+                if (isUpdate) {
+                    LogResult.UpdateStarted
+                } else {
+                    LogResult.DownloadStarted
+                },
+        )
+        _state.value =
+            _state.value.copy(
+                downloadError = null,
+                installError = null,
+                downloadProgressPercent = null,
+                attestationStatus = AttestationStatus.UNCHECKED,
+            )
+
+        val existingPath = downloader.getDownloadedFilePath(assetName)
+        val filePath: String
+
+        val existingFile = existingPath?.let { File(it) }
+        if (existingFile != null && existingFile.exists() && existingFile.length() == sizeBytes) {
+            logger.debug("Reusing already downloaded file: $assetName")
+            filePath = existingPath
+            _state.value =
+                _state.value.copy(
+                    downloadProgressPercent = 100,
+                    downloadedBytes = sizeBytes,
+                    totalBytes = sizeBytes,
+                    downloadStage = DownloadStage.VERIFYING,
+                )
+        } else {
+            _state.value =
+                _state.value.copy(
+                    downloadStage = DownloadStage.DOWNLOADING,
+                    downloadedBytes = 0L,
+                    totalBytes = sizeBytes,
+                )
+            downloader.download(downloadUrl, assetName).collect { p ->
+                _state.value =
+                    _state.value.copy(
+                        downloadProgressPercent = p.percent,
+                        downloadedBytes = p.bytesDownloaded,
+                        totalBytes = p.totalBytes ?: sizeBytes,
+                    )
+                if (p.percent == 100) {
+                    _state.value =
+                        _state.value.copy(downloadStage = DownloadStage.VERIFYING)
+                }
+            }
+
+            filePath = downloader.getDownloadedFilePath(assetName)
+                ?: throw IllegalStateException("Downloaded file not found")
+
+            cachedDownloadAssetName = assetName
+        }
+
+        appendLog(
+            assetName = assetName,
+            size = sizeBytes,
+            tag = releaseTag,
+            result = LogResult.Downloaded,
+        )
+        val ext = assetName.substringAfterLast('.', "").lowercase()
+
+        if (!installer.isSupported(ext)) {
+            throw IllegalStateException("Asset type .$ext not supported")
+        }
+
+        try {
+            installer.ensurePermissionsOrThrow(extOrMime = ext)
+        } catch (e: IllegalStateException) {
+            logger.warn("Install permission blocked: ${e.message}")
+            _state.value =
+                _state.value.copy(
+                    downloadStage = DownloadStage.IDLE,
+                    showExternalInstallerPrompt = true,
+                    pendingInstallFilePath = filePath,
+                )
+            currentAssetName = null
+            appendLog(
+                assetName = assetName,
+                size = sizeBytes,
+                tag = releaseTag,
+                result = LogResult.PermissionBlocked,
+            )
+            return null
+        }
+
+        return filePath
+    }
+
+    private suspend fun saveInstalledAppToDatabase(
+        assetName: String,
+        assetUrl: String,
+        assetSize: Long,
+        releaseTag: String,
+        isUpdate: Boolean,
+        filePath: String,
+        installOutcome: InstallOutcome = InstallOutcome.DELEGATED_TO_SYSTEM,
+    ) {
+        val repo = _state.value.repository ?: return
+        if (platform != Platform.ANDROID || !assetName.lowercase().endsWith(".apk")) return
+
+        val apkInfo = installer.getApkInfoExtractor().extractPackageInfo(filePath)
+        if (apkInfo == null) {
+            logger.error("Failed to extract APK info for $assetName")
+            return
+        }
+
+        if (isUpdate) {
+            installationManager.updateInstalledAppVersion(
+                UpdateInstalledAppParams(
+                    apkInfo = apkInfo,
+                    assetName = assetName,
+                    assetUrl = assetUrl,
+                    releaseTag = releaseTag,
+                ),
+            )
+        } else {
+            val reloaded =
+                installationManager.saveNewInstalledApp(
+                    SaveInstalledAppParams(
+                        repo = repo,
+                        apkInfo = apkInfo,
+                        assetName = assetName,
+                        assetUrl = assetUrl,
+                        assetSize = assetSize,
+                        releaseTag = releaseTag,
+                        isPendingInstall = installOutcome != InstallOutcome.COMPLETED,
+                        isFavourite = _state.value.isFavourite,
+                    ),
+                )
+            _state.value = _state.value.copy(installedApp = reloaded)
+        }
+    }
+
+    private fun downloadAsset(
+        downloadUrl: String,
+        assetName: String,
+        sizeBytes: Long,
+        releaseTag: String,
+    ) {
+        currentDownloadJob?.cancel()
+        currentDownloadJob =
+            viewModelScope.launch {
+                try {
+                    currentAssetName = assetName
+
+                    appendLog(
+                        assetName = assetName,
+                        size = sizeBytes,
+                        tag = releaseTag,
+                        result = LogResult.DownloadStarted,
+                    )
+                    _state.value =
+                        _state.value.copy(
+                            isDownloading = true,
+                            downloadError = null,
+                            installError = null,
+                            downloadProgressPercent = null,
+                        )
+
+                    downloader.download(downloadUrl, assetName).collect { p ->
+                        _state.value = _state.value.copy(downloadProgressPercent = p.percent)
+                    }
+
+                    _state.value = _state.value.copy(isDownloading = false)
+                    currentAssetName = null
+                    appendLog(
+                        assetName = assetName,
+                        size = sizeBytes,
+                        tag = releaseTag,
+                        result = LogResult.Downloaded,
+                    )
+                } catch (t: Throwable) {
+                    _state.value =
+                        _state.value.copy(
+                            isDownloading = false,
+                            downloadError = t.message,
+                        )
+                    currentAssetName = null
+                    appendLog(
+                        assetName = assetName,
+                        size = sizeBytes,
+                        tag = releaseTag,
+                        result = LogResult.Error(t.message),
+                    )
+                }
+            }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun appendLog(
+        assetName: String,
+        size: Long,
+        tag: String,
+        result: LogResult,
+    ) {
+        val now =
+            System
+                .now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .format(
+                    LocalDateTime.Format {
+                        year()
+                        char('-')
+                        monthNumber()
+                        char('-')
+                        day()
+                        char(' ')
+                        hour()
+                        char(':')
+                        minute()
+                        char(':')
+                        second()
+                    },
+                )
+        val newItem =
+            InstallLogItem(
+                timeIso = now,
+                assetName = assetName,
+                assetSizeBytes = size,
+                releaseTag = tag,
+                result = result,
+            )
+        _state.value =
+            _state.value.copy(
+                installLogs = listOf(newItem) + _state.value.installLogs,
+            )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        currentDownloadJob?.cancel()
+
+        val assetsToClean = listOfNotNull(currentAssetName, cachedDownloadAssetName).distinct()
+        if (assetsToClean.isNotEmpty()) {
+            viewModelScope.launch(NonCancellable) {
+                for (asset in assetsToClean) {
+                    try {
+                        downloader.cancelDownload(asset)
+                        logger.debug("Cleaned up download on screen leave: $asset")
+                    } catch (t: Throwable) {
+                        logger.error("Failed to clean download on leave: ${t.message}")
+                    }
+                }
+            }
+        }
     }
 
     @OptIn(ExperimentalTime::class)
@@ -312,6 +1534,8 @@ class DetailsViewModel(
                 val isObtainiumAvailable = installer.isObtainiumInstalled()
                 val isAppManagerAvailable = installer.isAppManagerInstalled()
 
+                val liquidGlassEnabled = tweaksRepository.getLiquidGlassEnabled().first()
+
                 logger.debug("Loaded repo: ${repo.name}, installedApp: ${installedApp?.packageName}")
 
                 _state.value =
@@ -336,6 +1560,7 @@ class DetailsViewModel(
                         installedApp = installedApp,
                         deviceLanguageCode = translationRepository.getDeviceLanguageCode(),
                         isComingFromUpdate = isComingFromUpdate,
+                        isLiquidGlassEnabled = liquidGlassEnabled,
                     )
 
                 observeInstalledApp(repo.id)
@@ -353,1251 +1578,6 @@ class DetailsViewModel(
                         isLoading = false,
                         errorMessage = t.message ?: "Failed to load details",
                     )
-            }
-        }
-    }
-
-    private fun observeInstalledApp(repoId: Long) {
-        viewModelScope.launch {
-            installedAppsRepository
-                .getAppByRepoIdAsFlow(repoId)
-                .distinctUntilChanged()
-                .collect { app ->
-                    _state.update { it.copy(installedApp = app) }
-                }
-        }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    fun onAction(action: DetailsAction) {
-        when (action) {
-            DetailsAction.Retry -> {
-                hasLoadedInitialData = false
-                loadInitial()
-            }
-
-            DetailsAction.OnDismissDowngradeWarning -> {
-                _state.update {
-                    it.copy(
-                        downgradeWarning = null,
-                    )
-                }
-            }
-
-            DetailsAction.OnDismissSigningKeyWarning -> {
-                _state.update {
-                    it.copy(
-                        signingKeyWarning = null,
-                        downloadStage = DownloadStage.IDLE,
-                    )
-                }
-                currentAssetName = null
-            }
-
-            DetailsAction.OnOverrideSigningKeyWarning -> {
-                val warning = _state.value.signingKeyWarning ?: return
-                _state.update { it.copy(signingKeyWarning = null) }
-                viewModelScope.launch {
-                    try {
-                        val ext = warning.pendingAssetName.substringAfterLast('.', "").lowercase()
-                        installer.install(warning.pendingFilePath, ext)
-
-                        if (platform == Platform.ANDROID) {
-                            saveInstalledAppToDatabase(
-                                assetName = warning.pendingAssetName,
-                                assetUrl = warning.pendingDownloadUrl,
-                                assetSize = warning.pendingSizeBytes,
-                                releaseTag = warning.pendingReleaseTag,
-                                isUpdate = warning.pendingIsUpdate,
-                                filePath = warning.pendingFilePath,
-                            )
-                        }
-
-                        _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
-                        currentAssetName = null
-                        appendLog(
-                            assetName = warning.pendingAssetName,
-                            size = warning.pendingSizeBytes,
-                            tag = warning.pendingReleaseTag,
-                            result = if (warning.pendingIsUpdate) LogResult.Updated else LogResult.Installed,
-                        )
-                    } catch (t: Throwable) {
-                        logger.error("Install after override failed: ${t.message}")
-                        _state.value =
-                            _state.value.copy(
-                                downloadStage = DownloadStage.IDLE,
-                                installError = t.message,
-                            )
-                        currentAssetName = null
-                    }
-                }
-            }
-
-            DetailsAction.InstallPrimary -> {
-                val primary = _state.value.primaryAsset
-                val release = _state.value.selectedRelease
-                val installedApp = _state.value.installedApp
-
-                if (primary != null && release != null) {
-                    if (installedApp != null &&
-                        !installedApp.isPendingInstall &&
-                        normalizeVersion(release.tagName) != normalizeVersion(installedApp.installedVersion) &&
-                        platform == Platform.ANDROID
-                    ) {
-                        val isDowngrade =
-                            isDowngradeVersion(
-                                candidate = release.tagName,
-                                current = installedApp.installedVersion,
-                                allReleases = _state.value.allReleases,
-                            )
-
-                        if (isDowngrade) {
-                            _state.update {
-                                it.copy(
-                                    downgradeWarning =
-                                        DowngradeWarning(
-                                            packageName = installedApp.packageName,
-                                            currentVersion = installedApp.installedVersion,
-                                            targetVersion = release.tagName,
-                                        ),
-                                )
-                            }
-                            return
-                        }
-                    }
-
-                    installAsset(
-                        downloadUrl = primary.downloadUrl,
-                        assetName = primary.name,
-                        sizeBytes = primary.size,
-                        releaseTag = release.tagName,
-                    )
-                }
-            }
-
-            DetailsAction.OnRequestUninstall -> {
-                _state.update { it.copy(showUninstallConfirmation = true) }
-            }
-
-            DetailsAction.OnDismissUninstallConfirmation -> {
-                _state.update { it.copy(showUninstallConfirmation = false) }
-            }
-
-            DetailsAction.OnConfirmUninstall -> {
-                _state.update { it.copy(showUninstallConfirmation = false) }
-                val installedApp = _state.value.installedApp ?: return
-                logger.debug("Uninstalling app (confirmed): ${installedApp.packageName}")
-                viewModelScope.launch {
-                    try {
-                        installer.uninstall(installedApp.packageName)
-                    } catch (e: Exception) {
-                        logger.error("Failed to request uninstall for ${installedApp.packageName}: ${e.message}")
-                        _events.send(
-                            DetailsEvent.OnMessage(
-                                getString(Res.string.failed_to_uninstall, installedApp.packageName),
-                            ),
-                        )
-                    }
-                }
-            }
-
-            DetailsAction.UninstallApp -> {
-                // Legacy direct uninstall (used from downgrade warning flow)
-                val installedApp = _state.value.installedApp ?: return
-                logger.debug("Uninstalling app: ${installedApp.packageName}")
-                viewModelScope.launch {
-                    try {
-                        installer.uninstall(installedApp.packageName)
-                    } catch (e: Exception) {
-                        logger.error("Failed to request uninstall for ${installedApp.packageName}: ${e.message}")
-                        _events.send(
-                            DetailsEvent.OnMessage(
-                                getString(Res.string.failed_to_uninstall, installedApp.packageName),
-                            ),
-                        )
-                    }
-                }
-            }
-
-            is DetailsAction.DownloadAsset -> {
-                val release = _state.value.selectedRelease
-                downloadAsset(
-                    downloadUrl = action.downloadUrl,
-                    assetName = action.assetName,
-                    sizeBytes = action.sizeBytes,
-                    releaseTag = release?.tagName ?: "",
-                )
-            }
-
-            DetailsAction.CancelCurrentDownload -> {
-                currentDownloadJob?.cancel()
-                currentDownloadJob = null
-
-                val assetName = currentAssetName
-                if (assetName != null) {
-                    cachedDownloadAssetName = assetName
-                    val releaseTag = _state.value.selectedRelease?.tagName ?: ""
-                    val totalSize = _state.value.totalBytes ?: _state.value.downloadedBytes
-                    appendLog(
-                        assetName = assetName,
-                        tag = releaseTag,
-                        size = totalSize,
-                        result = LogResult.Cancelled,
-                    )
-                    logger.debug("Download cancelled – keeping file for potential reuse: $assetName")
-                }
-
-                currentAssetName = null
-                _state.value =
-                    _state.value.copy(
-                        isDownloading = false,
-                        downloadProgressPercent = null,
-                        downloadStage = DownloadStage.IDLE,
-                    )
-            }
-
-            DetailsAction.OnToggleFavorite -> {
-                viewModelScope.launch {
-                    try {
-                        val repo = _state.value.repository ?: return@launch
-                        val selectedRelease = _state.value.selectedRelease
-
-                        val favoriteRepo =
-                            FavoriteRepo(
-                                repoId = repo.id,
-                                repoName = repo.name,
-                                repoOwner = repo.owner.login,
-                                repoOwnerAvatarUrl = repo.owner.avatarUrl,
-                                repoDescription = repo.description,
-                                primaryLanguage = repo.language,
-                                repoUrl = repo.htmlUrl,
-                                latestVersion = selectedRelease?.tagName,
-                                latestReleaseUrl = selectedRelease?.htmlUrl,
-                                addedAt = System.now().toEpochMilliseconds(),
-                                lastSyncedAt = System.now().toEpochMilliseconds(),
-                            )
-
-                        favouritesRepository.toggleFavorite(favoriteRepo)
-
-                        val newFavoriteState = favouritesRepository.isFavoriteSync(repo.id)
-                        _state.value = _state.value.copy(isFavourite = newFavoriteState)
-
-                        _events.send(
-                            element =
-                                DetailsEvent.OnMessage(
-                                    message =
-                                        getString(
-                                            resource =
-                                                if (newFavoriteState) {
-                                                    Res.string.added_to_favourites
-                                                } else {
-                                                    Res.string.removed_from_favourites
-                                                },
-                                        ),
-                                ),
-                        )
-                    } catch (t: Throwable) {
-                        logger.error("Failed to toggle favorite: ${t.message}")
-                    }
-                }
-            }
-
-            DetailsAction.OnShareClick -> {
-                viewModelScope.launch {
-                    _state.value.repository?.let { repo ->
-                        runCatching {
-                            shareManager.shareText("https://github-store.org/app?repo=${repo.fullName}")
-                        }.onFailure { t ->
-                            logger.error("Failed to share link: ${t.message}")
-                            _events.send(
-                                DetailsEvent.OnMessage(getString(Res.string.failed_to_share_link)),
-                            )
-                            return@launch
-                        }
-
-                        if (platform != Platform.ANDROID) {
-                            _events.send(DetailsEvent.OnMessage(getString(Res.string.link_copied_to_clipboard)))
-                        }
-                    }
-                }
-            }
-
-            DetailsAction.UpdateApp -> {
-                val installedApp = _state.value.installedApp
-                val selectedRelease = _state.value.selectedRelease
-
-                if (installedApp != null && selectedRelease != null && installedApp.isUpdateAvailable) {
-                    val latestAsset =
-                        _state.value.installableAssets.firstOrNull {
-                            it.name == installedApp.latestAssetName
-                        } ?: _state.value.primaryAsset
-
-                    if (latestAsset != null) {
-                        installAsset(
-                            downloadUrl = latestAsset.downloadUrl,
-                            assetName = latestAsset.name,
-                            sizeBytes = latestAsset.size,
-                            releaseTag = selectedRelease.tagName,
-                            isUpdate = true,
-                        )
-                    }
-                }
-            }
-
-            DetailsAction.OpenApp -> {
-                val installedApp = _state.value.installedApp ?: return
-                val launched = installer.openApp(installedApp.packageName)
-                if (!launched) {
-                    viewModelScope.launch {
-                        _events.send(
-                            DetailsEvent.OnMessage(
-                                getString(
-                                    Res.string.failed_to_open_app,
-                                    installedApp.appName,
-                                ),
-                            ),
-                        )
-                    }
-                }
-            }
-
-            DetailsAction.OpenRepoInBrowser -> {
-                _state.value.repository?.htmlUrl?.let {
-                    helper.openUrl(url = it)
-                }
-            }
-
-            DetailsAction.OpenAuthorInBrowser -> {
-                _state.value.userProfile?.htmlUrl?.let {
-                    helper.openUrl(url = it)
-                }
-            }
-
-            DetailsAction.OpenInObtainium -> {
-                val repo = _state.value.repository
-                repo?.owner?.login?.let {
-                    installer.openInObtainium(
-                        repoOwner = it,
-                        repoName = repo.name,
-                        onOpenInstaller = {
-                            viewModelScope.launch {
-                                _events.send(
-                                    DetailsEvent.OnOpenRepositoryInApp(OBTAINIUM_REPO_ID),
-                                )
-                            }
-                        },
-                    )
-                }
-                _state.update {
-                    it.copy(isInstallDropdownExpanded = false)
-                }
-            }
-
-            DetailsAction.OpenInAppManager -> {
-                viewModelScope.launch {
-                    try {
-                        val primary = _state.value.primaryAsset
-                        val release = _state.value.selectedRelease
-
-                        if (primary != null && release != null) {
-                            currentAssetName = primary.name
-
-                            appendLog(
-                                assetName = primary.name,
-                                size = primary.size,
-                                tag = release.tagName,
-                                result = LogResult.PreparingForAppManager,
-                            )
-
-                            _state.value =
-                                _state.value.copy(
-                                    downloadError = null,
-                                    installError = null,
-                                    downloadProgressPercent = null,
-                                    downloadStage = DownloadStage.DOWNLOADING,
-                                )
-
-                            downloader.download(primary.downloadUrl, primary.name).collect { p ->
-                                _state.value =
-                                    _state.value.copy(downloadProgressPercent = p.percent)
-                                if (p.percent == 100) {
-                                    _state.value =
-                                        _state.value.copy(downloadStage = DownloadStage.VERIFYING)
-                                }
-                            }
-
-                            val filePath =
-                                downloader.getDownloadedFilePath(primary.name)
-                                    ?: throw IllegalStateException("Downloaded file not found")
-
-                            appendLog(
-                                assetName = primary.name,
-                                size = primary.size,
-                                tag = release.tagName,
-                                result = LogResult.Downloaded,
-                            )
-
-                            _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
-                            currentAssetName = null
-
-                            installer.openInAppManager(
-                                filePath = filePath,
-                                onOpenInstaller = {
-                                    viewModelScope.launch {
-                                        _events.send(
-                                            DetailsEvent.OnOpenRepositoryInApp(APP_MANAGER_REPO_ID),
-                                        )
-                                    }
-                                },
-                            )
-
-                            appendLog(
-                                assetName = primary.name,
-                                size = primary.size,
-                                tag = release.tagName,
-                                result = LogResult.OpenedInAppManager,
-                            )
-                        }
-                    } catch (t: Throwable) {
-                        logger.error("Failed to open in AppManager: ${t.message}")
-                        _state.value =
-                            _state.value.copy(
-                                downloadStage = DownloadStage.IDLE,
-                                installError = t.message,
-                            )
-                        currentAssetName = null
-
-                        _state.value.primaryAsset?.let { asset ->
-                            _state.value.selectedRelease?.let { release ->
-                                appendLog(
-                                    assetName = asset.name,
-                                    size = asset.size,
-                                    tag = release.tagName,
-                                    result = LogResult.Error(t.message),
-                                )
-                            }
-                        }
-                    }
-                }
-                _state.update {
-                    it.copy(isInstallDropdownExpanded = false)
-                }
-            }
-
-            DetailsAction.OnToggleInstallDropdown -> {
-                _state.update {
-                    it.copy(isInstallDropdownExpanded = !it.isInstallDropdownExpanded)
-                }
-            }
-
-            is DetailsAction.SelectReleaseCategory -> {
-                val newCategory = action.category
-                val filtered =
-                    when (newCategory) {
-                        ReleaseCategory.STABLE -> _state.value.allReleases.filter { !it.isPrerelease }
-                        ReleaseCategory.PRE_RELEASE -> _state.value.allReleases.filter { it.isPrerelease }
-                        ReleaseCategory.ALL -> _state.value.allReleases
-                    }
-                val newSelected = filtered.firstOrNull()
-                val (installable, primary) = recomputeAssetsForRelease(newSelected)
-
-                whatsNewTranslationJob?.cancel()
-                _state.update {
-                    it.copy(
-                        selectedReleaseCategory = newCategory,
-                        selectedRelease = newSelected,
-                        installableAssets = installable,
-                        primaryAsset = primary,
-                        whatsNewTranslation = TranslationState(),
-                    )
-                }
-            }
-
-            is DetailsAction.SelectRelease -> {
-                val release = action.release
-                val (installable, primary) = recomputeAssetsForRelease(release)
-                whatsNewTranslationJob?.cancel()
-
-                _state.update {
-                    it.copy(
-                        selectedRelease = release,
-                        installableAssets = installable,
-                        primaryAsset = primary,
-                        isVersionPickerVisible = false,
-                        whatsNewTranslation = TranslationState(),
-                    )
-                }
-            }
-
-            DetailsAction.ToggleVersionPicker -> {
-                _state.update {
-                    it.copy(isVersionPickerVisible = !it.isVersionPickerVisible)
-                }
-            }
-
-            DetailsAction.ToggleAboutExpanded -> {
-                _state.update {
-                    it.copy(isAboutExpanded = !it.isAboutExpanded)
-                }
-            }
-
-            DetailsAction.ToggleWhatsNewExpanded -> {
-                _state.update {
-                    it.copy(isWhatsNewExpanded = !it.isWhatsNewExpanded)
-                }
-            }
-
-            is DetailsAction.TranslateAbout -> {
-                val readme = _state.value.readmeMarkdown ?: return
-                aboutTranslationJob?.cancel()
-                aboutTranslationJob =
-                    translateContent(
-                        text = readme,
-                        targetLanguageCode = action.targetLanguageCode,
-                        updateState = { ts -> _state.update { it.copy(aboutTranslation = ts) } },
-                        getCurrentState = { _state.value.aboutTranslation },
-                    )
-            }
-
-            is DetailsAction.TranslateWhatsNew -> {
-                val description = _state.value.selectedRelease?.description ?: return
-                whatsNewTranslationJob?.cancel()
-                whatsNewTranslationJob =
-                    translateContent(
-                        text = description,
-                        targetLanguageCode = action.targetLanguageCode,
-                        updateState = { ts -> _state.update { it.copy(whatsNewTranslation = ts) } },
-                        getCurrentState = { _state.value.whatsNewTranslation },
-                    )
-            }
-
-            DetailsAction.ToggleAboutTranslation -> {
-                _state.update {
-                    val current = it.aboutTranslation
-                    it.copy(aboutTranslation = current.copy(isShowingTranslation = !current.isShowingTranslation))
-                }
-            }
-
-            DetailsAction.ToggleWhatsNewTranslation -> {
-                _state.update {
-                    val current = it.whatsNewTranslation
-                    it.copy(whatsNewTranslation = current.copy(isShowingTranslation = !current.isShowingTranslation))
-                }
-            }
-
-            is DetailsAction.ShowLanguagePicker -> {
-                _state.update {
-                    it.copy(
-                        isLanguagePickerVisible = true,
-                        languagePickerTarget = action.target,
-                    )
-                }
-            }
-
-            DetailsAction.DismissLanguagePicker -> {
-                _state.update {
-                    it.copy(isLanguagePickerVisible = false, languagePickerTarget = null)
-                }
-            }
-
-            DetailsAction.OpenWithExternalInstaller -> {
-                val filePath = _state.value.pendingInstallFilePath
-                if (filePath != null) {
-                    try {
-                        installer.openWithExternalInstaller(filePath)
-                        _state.value.primaryAsset?.let { asset ->
-                            _state.value.selectedRelease?.let { release ->
-                                appendLog(
-                                    assetName = asset.name,
-                                    size = asset.size,
-                                    tag = release.tagName,
-                                    result = LogResult.OpenedInExternalInstaller,
-                                )
-                            }
-                        }
-                    } catch (t: Throwable) {
-                        logger.error("Failed to open with external installer: ${t.message}")
-                        _state.value = _state.value.copy(installError = t.message)
-                    }
-                }
-                _state.value =
-                    _state.value.copy(
-                        showExternalInstallerPrompt = false,
-                        pendingInstallFilePath = null,
-                    )
-            }
-
-            DetailsAction.DismissExternalInstallerPrompt -> {
-                _state.value =
-                    _state.value.copy(
-                        showExternalInstallerPrompt = false,
-                        pendingInstallFilePath = null,
-                    )
-            }
-
-            DetailsAction.InstallWithExternalApp -> {
-                currentDownloadJob?.cancel()
-                val job =
-                    viewModelScope.launch {
-                        try {
-                            val primary = _state.value.primaryAsset
-                            val release = _state.value.selectedRelease
-
-                            if (primary != null && release != null) {
-                                currentAssetName = primary.name
-
-                                appendLog(
-                                    assetName = primary.name,
-                                    size = primary.size,
-                                    tag = release.tagName,
-                                    result = LogResult.DownloadStarted,
-                                )
-
-                                _state.value =
-                                    _state.value.copy(
-                                        downloadError = null,
-                                        installError = null,
-                                        downloadProgressPercent = null,
-                                        downloadStage = DownloadStage.DOWNLOADING,
-                                    )
-
-                                downloader
-                                    .download(primary.downloadUrl, primary.name)
-                                    .collect { p ->
-                                        _state.value =
-                                            _state.value.copy(downloadProgressPercent = p.percent)
-                                        if (p.percent == 100) {
-                                            _state.value =
-                                                _state.value.copy(downloadStage = DownloadStage.VERIFYING)
-                                        }
-                                    }
-
-                                val filePath =
-                                    downloader.getDownloadedFilePath(primary.name)
-                                        ?: throw IllegalStateException("Downloaded file not found")
-
-                                appendLog(
-                                    assetName = primary.name,
-                                    size = primary.size,
-                                    tag = release.tagName,
-                                    result = LogResult.Downloaded,
-                                )
-
-                                _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
-                                currentAssetName = null
-
-                                installer.openWithExternalInstaller(filePath)
-
-                                appendLog(
-                                    assetName = primary.name,
-                                    size = primary.size,
-                                    tag = release.tagName,
-                                    result = LogResult.OpenedInExternalInstaller,
-                                )
-                            }
-                        } catch (e: CancellationException) {
-                            logger.debug("Install with external app cancelled")
-                            _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
-                            currentAssetName = null
-                            throw e
-                        } catch (t: Throwable) {
-                            logger.error("Failed to install with external app: ${t.message}")
-                            _state.value =
-                                _state.value.copy(
-                                    downloadStage = DownloadStage.IDLE,
-                                    installError = t.message,
-                                )
-                            currentAssetName = null
-
-                            _state.value.primaryAsset?.let { asset ->
-                                _state.value.selectedRelease?.let { release ->
-                                    appendLog(
-                                        assetName = asset.name,
-                                        size = asset.size,
-                                        tag = release.tagName,
-                                        result = Error(t.message),
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                currentDownloadJob = job
-                job.invokeOnCompletion {
-                    if (currentDownloadJob === job) {
-                        currentDownloadJob = null
-                    }
-                }
-
-                _state.update {
-                    it.copy(isInstallDropdownExpanded = false)
-                }
-            }
-
-            DetailsAction.OnNavigateBackClick -> {
-                // Handled in composable
-            }
-
-            is DetailsAction.OpenDeveloperProfile -> {
-                // Handled in composable
-            }
-
-            is DetailsAction.OnMessage -> {
-                // Handled in composable
-            }
-
-            is DetailsAction.SelectDownloadAsset -> {
-                _state.update { state -> state.copy(primaryAsset = action.release) }
-            }
-
-            DetailsAction.ToggleReleaseAssetsPicker -> {
-                _state.update { state -> state.copy(isReleaseSelectorVisible = !state.isReleaseSelectorVisible) }
-            }
-        }
-    }
-
-    private fun installAsset(
-        downloadUrl: String,
-        assetName: String,
-        sizeBytes: Long,
-        releaseTag: String,
-        isUpdate: Boolean = false,
-    ) {
-        currentDownloadJob?.cancel()
-        currentDownloadJob =
-            viewModelScope.launch {
-                try {
-                    val filePath: String =
-                        downloadAsset(
-                            assetName = assetName,
-                            sizeBytes = sizeBytes,
-                            releaseTag = releaseTag,
-                            isUpdate = isUpdate,
-                            downloadUrl = downloadUrl,
-                        ) ?: return@launch
-
-                    installAsset(
-                        isUpdate = isUpdate,
-                        filePath = filePath,
-                        assetName = assetName,
-                        downloadUrl = downloadUrl,
-                        sizeBytes = sizeBytes,
-                        releaseTag = releaseTag,
-                    )
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    throw e
-                } catch (t: Throwable) {
-                    logger.error("Install failed: ${t.message}")
-                    t.printStackTrace()
-                    _state.value =
-                        _state.value.copy(
-                            downloadStage = DownloadStage.IDLE,
-                            installError = t.message,
-                        )
-                    currentAssetName = null
-                    appendLog(
-                        assetName = assetName,
-                        size = sizeBytes,
-                        tag = releaseTag,
-                        result = Error(t.message),
-                    )
-                }
-            }
-    }
-
-    private suspend fun installAsset(
-        isUpdate: Boolean,
-        filePath: String,
-        assetName: String,
-        downloadUrl: String,
-        sizeBytes: Long,
-        releaseTag: String,
-    ) {
-        _state.value = _state.value.copy(downloadStage = DownloadStage.INSTALLING)
-
-        val ext = assetName.substringAfterLast('.', "").lowercase()
-        val isApk = ext == "apk"
-
-        if (isApk) {
-            val apkInfo = installer.getApkInfoExtractor().extractPackageInfo(filePath)
-            if (apkInfo == null) {
-                logger.error("Failed to extract APK info for $assetName")
-                _state.value = _state.value.copy(
-                    downloadStage = DownloadStage.IDLE,
-                    installError = "Failed to verify APK package info",
-                )
-                currentAssetName = null
-                appendLog(
-                    assetName = assetName,
-                    size = sizeBytes,
-                    tag = releaseTag,
-                    result = Error("Failed to extract APK info"),
-                )
-                return
-            }
-
-            // Validate package name matches on updates
-            val trackedApp = _state.value.installedApp
-            if (isUpdate && trackedApp != null && apkInfo.packageName != trackedApp.packageName) {
-                logger.error("Package name mismatch on update: APK=${apkInfo.packageName}, installed=${trackedApp.packageName}")
-                _state.value = _state.value.copy(
-                    downloadStage = DownloadStage.IDLE,
-                    installError = getString(
-                        Res.string.update_package_mismatch,
-                        apkInfo.packageName,
-                        trackedApp.packageName,
-                    ),
-                )
-                currentAssetName = null
-                appendLog(
-                    assetName = assetName,
-                    size = sizeBytes,
-                    tag = releaseTag,
-                    result = Error("Package name mismatch"),
-                )
-                return
-            }
-
-            val result =
-                checkFingerprints(
-                    apkPackageInfo = apkInfo,
-                )
-
-            result
-                .onFailure {
-                    val existingApp =
-                        installedAppsRepository.getAppByPackage(apkInfo.packageName)
-                    _state.update { state ->
-                        state.copy(
-                            signingKeyWarning =
-                                SigningKeyWarning(
-                                    packageName = apkInfo.packageName,
-                                    expectedFingerprint = existingApp?.signingFingerprint ?: "",
-                                    actualFingerprint = apkInfo.signingFingerprint ?: "",
-                                    pendingDownloadUrl = downloadUrl,
-                                    pendingAssetName = assetName,
-                                    pendingSizeBytes = sizeBytes,
-                                    pendingReleaseTag = releaseTag,
-                                    pendingIsUpdate = isUpdate,
-                                    pendingFilePath = filePath,
-                                ),
-                        )
-                    }
-                    appendLog(
-                        assetName = assetName,
-                        size = sizeBytes,
-                        tag = releaseTag,
-                        result = Error("Signing key changed"),
-                    )
-                    return
-                }
-        }
-
-        val installOutcome = installer.install(filePath, ext)
-
-        // Launch attestation check asynchronously (non-blocking)
-        launchAttestationCheck(filePath)
-
-        if (platform == Platform.ANDROID) {
-            saveInstalledAppToDatabase(
-                assetName = assetName,
-                assetUrl = downloadUrl,
-                assetSize = sizeBytes,
-                releaseTag = releaseTag,
-                isUpdate = isUpdate,
-                filePath = filePath,
-                installOutcome = installOutcome,
-            )
-        } else {
-            viewModelScope.launch {
-                _events.send(DetailsEvent.OnMessage(getString(Res.string.installer_saved_downloads)))
-            }
-        }
-
-        _state.value = _state.value.copy(downloadStage = DownloadStage.IDLE)
-        currentAssetName = null
-        appendLog(
-            assetName = assetName,
-            size = sizeBytes,
-            tag = releaseTag,
-            result =
-                if (isUpdate) {
-                    LogResult.Updated
-                } else {
-                    LogResult.Installed
-                },
-        )
-    }
-
-    private suspend fun checkFingerprints(apkPackageInfo: ApkPackageInfo): Result<Unit> {
-        val existingApp =
-            installedAppsRepository.getAppByPackage(apkPackageInfo.packageName)
-                ?: return Result.success(Unit)
-
-        if (existingApp.signingFingerprint == null) return Result.success(Unit)
-
-        if (apkPackageInfo.signingFingerprint == null) return Result.success(Unit)
-
-        return if (existingApp.signingFingerprint == apkPackageInfo.signingFingerprint) {
-            Result.success(Unit)
-        } else {
-            Result.failure(
-                IllegalStateException(
-                    "Signing key changed! Expected: ${existingApp.signingFingerprint}, got: ${apkPackageInfo.signingFingerprint}",
-                ),
-            )
-        }
-    }
-
-    private fun launchAttestationCheck(filePath: String) {
-        val repo = _state.value.repository ?: return
-        val owner = repo.owner.login
-        val repoName = repo.name
-
-        _state.update { it.copy(attestationStatus = AttestationStatus.CHECKING) }
-
-        viewModelScope.launch {
-            try {
-                val digest = computeSha256(filePath)
-                val verified = detailsRepository.checkAttestations(owner, repoName, digest)
-                _state.update {
-                    it.copy(
-                        attestationStatus =
-                            if (verified) AttestationStatus.VERIFIED else AttestationStatus.UNVERIFIED,
-                    )
-                }
-            } catch (e: Exception) {
-                logger.debug("Attestation check error: ${e.message}")
-                _state.update { it.copy(attestationStatus = AttestationStatus.UNVERIFIED) }
-            }
-        }
-    }
-
-    private fun computeSha256(filePath: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val buffer = ByteArray(8192)
-        FileInputStream(File(filePath)).use { fis ->
-            var bytesRead: Int
-            while (fis.read(buffer).also { bytesRead = it } != -1) {
-                digest.update(buffer, 0, bytesRead)
-            }
-        }
-        return digest.digest().joinToString("") { "%02x".format(it) }
-    }
-
-    private suspend fun downloadAsset(
-        assetName: String,
-        sizeBytes: Long,
-        releaseTag: String,
-        isUpdate: Boolean,
-        downloadUrl: String,
-    ): String? {
-        currentAssetName = assetName
-
-        appendLog(
-            assetName = assetName,
-            size = sizeBytes,
-            tag = releaseTag,
-            result =
-                if (isUpdate) {
-                    LogResult.UpdateStarted
-                } else {
-                    LogResult.DownloadStarted
-                },
-        )
-        _state.value =
-            _state.value.copy(
-                downloadError = null,
-                installError = null,
-                downloadProgressPercent = null,
-                attestationStatus = AttestationStatus.UNCHECKED,
-            )
-
-        val existingPath = downloader.getDownloadedFilePath(assetName)
-        val filePath: String
-
-        val existingFile = existingPath?.let { File(it) }
-        if (existingFile != null && existingFile.exists() && existingFile.length() == sizeBytes) {
-            logger.debug("Reusing already downloaded file: $assetName")
-            filePath = existingPath
-            _state.value =
-                _state.value.copy(
-                    downloadProgressPercent = 100,
-                    downloadedBytes = sizeBytes,
-                    totalBytes = sizeBytes,
-                    downloadStage = DownloadStage.VERIFYING,
-                )
-        } else {
-            _state.value =
-                _state.value.copy(
-                    downloadStage = DownloadStage.DOWNLOADING,
-                    downloadedBytes = 0L,
-                    totalBytes = sizeBytes,
-                )
-            downloader.download(downloadUrl, assetName).collect { p ->
-                _state.value =
-                    _state.value.copy(
-                        downloadProgressPercent = p.percent,
-                        downloadedBytes = p.bytesDownloaded,
-                        totalBytes = p.totalBytes ?: sizeBytes,
-                    )
-                if (p.percent == 100) {
-                    _state.value =
-                        _state.value.copy(downloadStage = DownloadStage.VERIFYING)
-                }
-            }
-
-            filePath = downloader.getDownloadedFilePath(assetName)
-                ?: throw IllegalStateException("Downloaded file not found")
-
-            cachedDownloadAssetName = assetName
-        }
-
-        appendLog(
-            assetName = assetName,
-            size = sizeBytes,
-            tag = releaseTag,
-            result = LogResult.Downloaded,
-        )
-        val ext = assetName.substringAfterLast('.', "").lowercase()
-
-        if (!installer.isSupported(ext)) {
-            throw IllegalStateException("Asset type .$ext not supported")
-        }
-
-        try {
-            installer.ensurePermissionsOrThrow(extOrMime = ext)
-        } catch (e: IllegalStateException) {
-            logger.warn("Install permission blocked: ${e.message}")
-            _state.value =
-                _state.value.copy(
-                    downloadStage = DownloadStage.IDLE,
-                    showExternalInstallerPrompt = true,
-                    pendingInstallFilePath = filePath,
-                )
-            currentAssetName = null
-            appendLog(
-                assetName = assetName,
-                size = sizeBytes,
-                tag = releaseTag,
-                result = LogResult.PermissionBlocked,
-            )
-            return null
-        }
-
-        return filePath
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private suspend fun saveInstalledAppToDatabase(
-        assetName: String,
-        assetUrl: String,
-        assetSize: Long,
-        releaseTag: String,
-        isUpdate: Boolean,
-        filePath: String,
-        installOutcome: InstallOutcome = InstallOutcome.DELEGATED_TO_SYSTEM,
-    ) {
-        try {
-            val repo = _state.value.repository ?: return
-
-            val apkInfo: ApkPackageInfo =
-                if (platform == Platform.ANDROID && assetName.lowercase().endsWith(".apk")) {
-                    val apkInfo = installer.getApkInfoExtractor().extractPackageInfo(filePath)
-                    if (apkInfo != null) {
-                        ApkPackageInfo(
-                            packageName = apkInfo.packageName,
-                            appName = apkInfo.appName,
-                            versionName = apkInfo.versionName,
-                            versionCode = apkInfo.versionCode,
-                            signingFingerprint = apkInfo.signingFingerprint,
-                        )
-                    } else {
-                        logger.error("Failed to extract APK info for $assetName")
-                        return
-                    }
-                } else {
-                    return
-                }
-
-            if (isUpdate) {
-                installedAppsRepository.updateAppVersion(
-                    packageName = apkInfo.packageName,
-                    newTag = releaseTag,
-                    newAssetName = assetName,
-                    newAssetUrl = assetUrl,
-                    newVersionName = apkInfo.versionName,
-                    newVersionCode = apkInfo.versionCode,
-                    signingFingerprint = apkInfo.signingFingerprint,
-                )
-            } else {
-                val installedApp =
-                    InstalledApp(
-                        packageName = apkInfo.packageName,
-                        repoId = repo.id,
-                        repoName = repo.name,
-                        repoOwner = repo.owner.login,
-                        repoOwnerAvatarUrl = repo.owner.avatarUrl,
-                        repoDescription = repo.description,
-                        primaryLanguage = repo.language,
-                        repoUrl = repo.htmlUrl,
-                        installedVersion = releaseTag,
-                        installedAssetName = assetName,
-                        installedAssetUrl = assetUrl,
-                        latestVersion = releaseTag,
-                        latestAssetName = assetName,
-                        latestAssetUrl = assetUrl,
-                        latestAssetSize = assetSize,
-                        appName = apkInfo.appName,
-                        installSource = InstallSource.THIS_APP,
-                        installedAt = System.now().toEpochMilliseconds(),
-                        lastCheckedAt = System.now().toEpochMilliseconds(),
-                        lastUpdatedAt = System.now().toEpochMilliseconds(),
-                        isUpdateAvailable = false,
-                        updateCheckEnabled = true,
-                        releaseNotes = "",
-                        systemArchitecture = installer.detectSystemArchitecture().name,
-                        fileExtension = assetName.substringAfterLast('.', ""),
-                        isPendingInstall = installOutcome != InstallOutcome.COMPLETED,
-                        installedVersionName = apkInfo.versionName,
-                        installedVersionCode = apkInfo.versionCode,
-                        latestVersionName = apkInfo.versionName,
-                        latestVersionCode = apkInfo.versionCode,
-                        signingFingerprint = apkInfo.signingFingerprint,
-                    )
-
-                installedAppsRepository.saveInstalledApp(installedApp)
-            }
-
-            if (_state.value.isFavourite) {
-                favouritesRepository.updateFavoriteInstallStatus(
-                    repoId = repo.id,
-                    installed = true,
-                    packageName = apkInfo.packageName,
-                )
-            }
-
-            delay(1000)
-            val updatedApp = installedAppsRepository.getAppByPackage(apkInfo.packageName)
-            _state.value = _state.value.copy(installedApp = updatedApp)
-
-            logger.debug("Successfully saved and reloaded app: ${updatedApp?.packageName}")
-        } catch (t: Throwable) {
-            logger.error("Failed to save installed app to database: ${t.message}")
-            t.printStackTrace()
-        }
-    }
-
-    private fun downloadAsset(
-        downloadUrl: String,
-        assetName: String,
-        sizeBytes: Long,
-        releaseTag: String,
-    ) {
-        currentDownloadJob?.cancel()
-        currentDownloadJob =
-            viewModelScope.launch {
-                try {
-                    currentAssetName = assetName
-
-                    appendLog(
-                        assetName = assetName,
-                        size = sizeBytes,
-                        tag = releaseTag,
-                        result = LogResult.DownloadStarted,
-                    )
-                    _state.value =
-                        _state.value.copy(
-                            isDownloading = true,
-                            downloadError = null,
-                            installError = null,
-                            downloadProgressPercent = null,
-                        )
-
-                    downloader.download(downloadUrl, assetName).collect { p ->
-                        _state.value = _state.value.copy(downloadProgressPercent = p.percent)
-                    }
-
-                    _state.value = _state.value.copy(isDownloading = false)
-                    currentAssetName = null
-                    appendLog(
-                        assetName = assetName,
-                        size = sizeBytes,
-                        tag = releaseTag,
-                        result = LogResult.Downloaded,
-                    )
-                } catch (t: Throwable) {
-                    _state.value =
-                        _state.value.copy(
-                            isDownloading = false,
-                            downloadError = t.message,
-                        )
-                    currentAssetName = null
-                    appendLog(
-                        assetName = assetName,
-                        size = sizeBytes,
-                        tag = releaseTag,
-                        result = LogResult.Error(t.message),
-                    )
-                }
-            }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    private fun appendLog(
-        assetName: String,
-        size: Long,
-        tag: String,
-        result: LogResult,
-    ) {
-        val now =
-            System
-                .now()
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-                .format(
-                    LocalDateTime.Format {
-                        year()
-                        char('-')
-                        monthNumber()
-                        char('-')
-                        day()
-                        char(' ')
-                        hour()
-                        char(':')
-                        minute()
-                        char(':')
-                        second()
-                    },
-                )
-        val newItem =
-            InstallLogItem(
-                timeIso = now,
-                assetName = assetName,
-                assetSizeBytes = size,
-                releaseTag = tag,
-                result = result,
-            )
-        _state.value =
-            _state.value.copy(
-                installLogs = listOf(newItem) + _state.value.installLogs,
-            )
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        currentDownloadJob?.cancel()
-
-        val assetsToClean = listOfNotNull(currentAssetName, cachedDownloadAssetName).distinct()
-        if (assetsToClean.isNotEmpty()) {
-            viewModelScope.launch(NonCancellable) {
-                for (asset in assetsToClean) {
-                    try {
-                        downloader.cancelDownload(asset)
-                        logger.debug("Cleaned up download on screen leave: $asset")
-                    } catch (t: Throwable) {
-                        logger.error("Failed to clean download on leave: ${t.message}")
-                    }
-                }
             }
         }
     }
@@ -1655,65 +1635,6 @@ class DetailsViewModel(
                 )
             }
         }
-
-    private fun normalizeVersion(version: String?): String = version?.removePrefix("v")?.removePrefix("V")?.trim() ?: ""
-
-    /**
-     * Returns true if [candidate] is strictly older than [current].
-     * Uses list-index order as primary heuristic (releases are newest-first),
-     * and falls back to semantic version comparison when list lookup fails.
-     */
-    private fun isDowngradeVersion(
-        candidate: String,
-        current: String,
-        allReleases: List<GithubRelease>,
-    ): Boolean {
-        val normalizedCandidate = normalizeVersion(candidate)
-        val normalizedCurrent = normalizeVersion(current)
-
-        if (normalizedCandidate == normalizedCurrent) return false
-
-        val candidateIndex =
-            allReleases.indexOfFirst {
-                normalizeVersion(it.tagName) == normalizedCandidate
-            }
-        val currentIndex =
-            allReleases.indexOfFirst {
-                normalizeVersion(it.tagName) == normalizedCurrent
-            }
-
-        if (candidateIndex != -1 && currentIndex != -1) {
-            return candidateIndex > currentIndex
-        }
-
-        return compareSemanticVersions(normalizedCandidate, normalizedCurrent) < 0
-    }
-
-    /**
-     * Compares two semantic version strings. Returns positive if a > b, negative if a < b, 0 if equal.
-     */
-    private fun compareSemanticVersions(
-        a: String,
-        b: String,
-    ): Int {
-        val aCore = a.split("-", limit = 2)
-        val bCore = b.split("-", limit = 2)
-        val aParts = aCore[0].split(".")
-        val bParts = bCore[0].split(".")
-
-        val maxLen = maxOf(aParts.size, bParts.size)
-        for (i in 0 until maxLen) {
-            val aPart = aParts.getOrNull(i)?.filter { it.isDigit() }?.toLongOrNull() ?: 0L
-            val bPart = bParts.getOrNull(i)?.filter { it.isDigit() }?.toLongOrNull() ?: 0L
-            if (aPart != bPart) return aPart.compareTo(bPart)
-        }
-
-        val aHasPre = aCore.size > 1
-        val bHasPre = bCore.size > 1
-        if (aHasPre != bHasPre) return if (aHasPre) -1 else 1
-
-        return 0
-    }
 
     private companion object {
         const val OBTAINIUM_REPO_ID: Long = 523534328
