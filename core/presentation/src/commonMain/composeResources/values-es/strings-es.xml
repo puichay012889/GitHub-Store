@@ -397,6 +397,8 @@
     <string name="auth_hint_try_again">Intenta iniciar sesión de nuevo para obtener un nuevo código.</string>
     <string name="auth_hint_check_connection">Revisa tu conexión a internet e intenta de nuevo.</string>
     <string name="auth_hint_denied">Rechazaste la solicitud de autorización. Intenta de nuevo si fue involuntario.</string>
+    <string name="auth_check_status">Ya he autorizado</string>
+    <string name="auth_polling_status">Comprobando…</string>
 
     <!-- Read More / Show Less -->
     <string name="read_more">Leer más</string>

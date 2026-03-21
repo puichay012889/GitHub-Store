@@ -395,6 +395,8 @@
     <string name="auth_hint_try_again">Spróbuj zalogować się ponownie, aby uzyskać nowy kod.</string>
     <string name="auth_hint_check_connection">Sprawdź połączenie internetowe i spróbuj ponownie.</string>
     <string name="auth_hint_denied">Odrzuciłeś żądanie autoryzacji. Spróbuj ponownie, jeśli było to niezamierzone.</string>
+    <string name="auth_check_status">Już autoryzowałem</string>
+    <string name="auth_polling_status">Sprawdzanie…</string>
 
     <!-- Read More / Show Less -->
     <string name="read_more">Czytaj więcej</string>

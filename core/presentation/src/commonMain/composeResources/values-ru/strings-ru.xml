@@ -397,6 +397,8 @@
     <string name="auth_hint_try_again">Пожалуйста, попробуйте войти снова для получения нового кода.</string>
     <string name="auth_hint_check_connection">Проверьте подключение к интернету и попробуйте снова.</string>
     <string name="auth_hint_denied">Вы отклонили запрос авторизации. Попробуйте снова, если это было непреднамеренно.</string>
+    <string name="auth_check_status">Я уже авторизовался</string>
+    <string name="auth_polling_status">Проверка…</string>
 
     <!-- Read More / Show Less -->
     <string name="read_more">Читать далее</string>

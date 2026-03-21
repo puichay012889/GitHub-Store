@@ -397,6 +397,8 @@
     <string name="auth_hint_try_again">Veuillez réessayer de vous connecter pour obtenir un nouveau code.</string>
     <string name="auth_hint_check_connection">Vérifiez votre connexion internet et réessayez.</string>
     <string name="auth_hint_denied">Vous avez refusé la demande d\'autorisation. Réessayez si c\'était involontaire.</string>
+    <string name="auth_check_status">J’ai déjà autorisé</string>
+    <string name="auth_polling_status">Vérification…</string>
 
     <!-- Read More / Show Less -->
     <string name="read_more">Lire la suite</string>

@@ -429,6 +429,8 @@
     <string name="auth_hint_try_again">Yeni bir kod almak için lütfen tekrar giriş yapmayı deneyin.</string>
     <string name="auth_hint_check_connection">Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.</string>
     <string name="auth_hint_denied">Yetkilendirme isteğini reddettiniz. İstemeden yaptıysanız tekrar deneyin.</string>
+    <string name="auth_check_status">Zaten yetkilendirdim</string>
+    <string name="auth_polling_status">Kontrol ediliyor…</string>
 
     <!-- Read More / Show Less -->
     <string name="read_more">Devamını oku</string>

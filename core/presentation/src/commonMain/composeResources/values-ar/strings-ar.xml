@@ -432,6 +432,8 @@
     <string name="auth_hint_try_again">يرجى محاولة تسجيل الدخول مرة أخرى للحصول على رمز جديد.</string>
     <string name="auth_hint_check_connection">يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.</string>
     <string name="auth_hint_denied">لقد رفضت طلب التفويض. حاول مرة أخرى إذا كان ذلك غير مقصود.</string>
+    <string name="auth_check_status">لقد قمت بالتفويض بالفعل</string>
+    <string name="auth_polling_status">جارٍ التحقق…</string>
 
     <!-- Read More / Show Less -->
     <string name="read_more">اقرأ المزيد</string>
