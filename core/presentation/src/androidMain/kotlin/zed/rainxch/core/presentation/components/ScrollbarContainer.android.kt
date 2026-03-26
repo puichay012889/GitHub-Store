@@ -10,17 +10,22 @@ actual fun ScrollbarContainer(
     listState: LazyListState,
     enabled: Boolean,
     modifier: Modifier,
-    content: @Composable () -> Unit,
+    content: `@Composable` () -> Unit,
 ) {
-    content()
+    Box(modifier = modifier) {
+        content()
+    }
 }
 
-@Composable
+`@Composable`
 actual fun ScrollbarContainer(
     gridState: LazyStaggeredGridState,
     enabled: Boolean,
     modifier: Modifier,
-    content: @Composable () -> Unit,
+    content: `@Composable` () -> Unit,
 ) {
-    content()
+    Box(modifier = modifier) {
+        content()
+    }
+}
 }
