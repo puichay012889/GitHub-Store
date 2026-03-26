@@ -611,4 +611,8 @@
     <string name="delete_downloads_confirmation_message">Bu işlem tüm APK ve kurulum dosyalarını kalıcı olarak silecek (%1$s). İstediğiniz zaman yeniden indirebilirsiniz.</string>
     <string name="downloads_cleared">Tüm indirilen paketler silindi.</string>
     <string name="unable_to_verify_attestation">Doğrulanamadı</string>
+
+    <string name="recent_searches">Son aramalar</string>
+    <string name="clear_all_history">Tümünü temizle</string>
+    <string name="remove_search_history_item">Kaldır</string>
 </resources>

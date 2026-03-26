@@ -574,4 +574,8 @@
     <string name="delete_downloads_confirmation_message">Esto eliminará permanentemente todos los APKs e instaladores (%1$s). Puedes volver a descargarlos en cualquier momento.</string>
     <string name="downloads_cleared">Todos los paquetes descargados han sido eliminados.</string>
     <string name="unable_to_verify_attestation">No se pudo verificar</string>
+
+    <string name="recent_searches">Búsquedas recientes</string>
+    <string name="clear_all_history">Borrar todo</string>
+    <string name="remove_search_history_item">Eliminar</string>
 </resources>

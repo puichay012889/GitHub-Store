@@ -30,4 +30,5 @@ data class SearchState(
     val clipboardLinks: ImmutableList<ParsedGithubLink> = persistentListOf(),
     val isClipboardBannerVisible: Boolean = false,
     val autoDetectClipboardEnabled: Boolean = true,
+    val recentSearches: ImmutableList<String> = persistentListOf(),
 )

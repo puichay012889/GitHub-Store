@@ -92,6 +92,7 @@ import zed.rainxch.core.presentation.theme.GithubStoreTheme
 import zed.rainxch.core.presentation.utils.ObserveAsEvents
 import zed.rainxch.githubstore.core.presentation.res.*
 import zed.rainxch.search.presentation.components.LanguageFilterBottomSheet
+import zed.rainxch.search.presentation.components.SearchHistorySection
 import zed.rainxch.search.presentation.components.SortByBottomSheet
 import zed.rainxch.search.presentation.model.ParsedGithubLink
 import zed.rainxch.search.presentation.model.ProgrammingLanguageUi
@@ -482,6 +483,26 @@ fun SearchScreen(
                         Modifier
                             .fillMaxWidth()
                             .padding(bottom = 6.dp),
+                )
+            }
+
+            // Show search history when query is empty
+            if (state.query.isBlank() &&
+                state.repositories.isEmpty() &&
+                state.recentSearches.isNotEmpty() &&
+                !state.isLoading
+            ) {
+                SearchHistorySection(
+                    recentSearches = state.recentSearches,
+                    onHistoryItemClick = { query ->
+                        onAction(SearchAction.OnHistoryItemClick(query))
+                    },
+                    onRemoveItem = { query ->
+                        onAction(SearchAction.OnRemoveHistoryItem(query))
+                    },
+                    onClearAll = {
+                        onAction(SearchAction.OnClearAllHistory)
+                    },
                 )
             }
 

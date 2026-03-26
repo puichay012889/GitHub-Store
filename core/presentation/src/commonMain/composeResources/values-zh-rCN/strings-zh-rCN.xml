@@ -577,4 +577,8 @@
     <string name="delete_downloads_confirmation_message">这将永久删除所有 APK 和安装程序（%1$s）。你可以随时重新下载。</string>
     <string name="downloads_cleared">所有已下载的包已被删除。</string>
     <string name="unable_to_verify_attestation">无法验证</string>
+
+    <string name="recent_searches">最近搜索</string>
+    <string name="clear_all_history">清除全部</string>
+    <string name="remove_search_history_item">移除</string>
 </resources>

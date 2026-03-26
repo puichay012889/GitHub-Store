@@ -7,7 +7,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -22,6 +21,7 @@ import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.RateLimitException
 import zed.rainxch.core.domain.repository.FavouritesRepository
 import zed.rainxch.core.domain.repository.InstalledAppsRepository
+import zed.rainxch.core.domain.repository.SearchHistoryRepository
 import zed.rainxch.core.domain.repository.SeenReposRepository
 import zed.rainxch.core.domain.repository.StarredRepository
 import zed.rainxch.core.domain.repository.TweaksRepository
@@ -53,15 +53,14 @@ class SearchViewModel(
     private val clipboardHelper: ClipboardHelper,
     private val tweaksRepository: TweaksRepository,
     private val seenReposRepository: SeenReposRepository,
+    private val searchHistoryRepository: SearchHistoryRepository,
 ) : ViewModel() {
     private var hasLoadedInitialData = false
     private var currentSearchJob: Job? = null
     private var currentPage = 1
-    private var searchDebounceJob: Job? = null
 
     companion object {
         private const val MIN_QUERY_LENGTH = 3
-        private const val DEBOUNCE_MS = 800L
     }
 
     private val _state = MutableStateFlow(SearchState())
@@ -78,6 +77,7 @@ class SearchViewModel(
                     observeSeenRepos()
                     observeHideSeenEnabled()
                     observeClipboardSetting()
+                    observeSearchHistory()
                     checkClipboardForLinks()
 
                     hasLoadedInitialData = true
@@ -175,6 +175,24 @@ class SearchViewModel(
             } catch (e: Exception) {
                 logger.debug("Failed to read clipboard: ${e.message}")
             }
+        }
+    }
+
+    private fun observeSearchHistory() {
+        viewModelScope.launch {
+            searchHistoryRepository.getRecentSearches().collect { searches ->
+                _state.update {
+                    it.copy(recentSearches = searches.toImmutableList())
+                }
+            }
+        }
+    }
+
+    private fun saveSearchToHistory(query: String) {
+        val trimmed = query.trim()
+        if (trimmed.length < MIN_QUERY_LENGTH) return
+        viewModelScope.launch {
+            searchHistoryRepository.addSearch(trimmed)
         }
     }
 
@@ -398,7 +416,7 @@ class SearchViewModel(
                         it.copy(selectedSearchPlatform = action.searchPlatform)
                     }
                     currentPage = 1
-                    searchDebounceJob?.cancel()
+    
                     performSearch(isInitial = true)
                 }
             }
@@ -409,7 +427,7 @@ class SearchViewModel(
                         it.copy(selectedLanguage = action.language)
                     }
                     currentPage = 1
-                    searchDebounceJob?.cancel()
+    
                     performSearch(isInitial = true)
                 }
             }
@@ -423,23 +441,8 @@ class SearchViewModel(
                     )
                 }
 
-                searchDebounceJob?.cancel()
-
-                if (isEntirelyGithubUrls(action.query)) {
-                    currentSearchJob?.cancel()
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            isLoadingMore = false,
-                            errorMessage = null,
-                            repositories = persistentListOf(),
-                            totalCount = null,
-                        )
-                    }
-                    return
-                }
-
                 if (action.query.isBlank()) {
+                    currentSearchJob?.cancel()
                     _state.update {
                         it.copy(
                             repositories = persistentListOf(),
@@ -449,26 +452,17 @@ class SearchViewModel(
                             totalCount = null,
                         )
                     }
-                } else if (action.query.trim().length < MIN_QUERY_LENGTH) {
+                } else if (isEntirelyGithubUrls(action.query)) {
                     currentSearchJob?.cancel()
                     _state.update {
                         it.copy(
                             isLoading = false,
                             isLoadingMore = false,
                             errorMessage = null,
+                            repositories = persistentListOf(),
+                            totalCount = null,
                         )
                     }
-                } else {
-                    searchDebounceJob =
-                        viewModelScope.launch {
-                            try {
-                                delay(DEBOUNCE_MS)
-                                currentPage = 1
-                                performSearch(isInitial = true)
-                            } catch (_: CancellationException) {
-                                logger.debug("Debounce cancelled (expected)")
-                            }
-                        }
                 }
             }
 
@@ -486,8 +480,9 @@ class SearchViewModel(
                     }
                     return
                 }
-                searchDebounceJob?.cancel()
+
                 currentPage = 1
+                saveSearchToHistory(_state.value.query)
                 performSearch(isInitial = true)
             }
 
@@ -515,7 +510,7 @@ class SearchViewModel(
                         it.copy(selectedSortBy = action.sortBy)
                     }
                     currentPage = 1
-                    searchDebounceJob?.cancel()
+    
                     performSearch(isInitial = true)
                 }
             }
@@ -526,7 +521,7 @@ class SearchViewModel(
                         it.copy(selectedSortOrder = action.sortOrder)
                     }
                     currentPage = 1
-                    searchDebounceJob?.cancel()
+    
                     performSearch(isInitial = true)
                 }
             }
@@ -545,7 +540,7 @@ class SearchViewModel(
 
             SearchAction.Retry -> {
                 currentPage = 1
-                searchDebounceJob?.cancel()
+
                 performSearch(isInitial = true)
             }
 
@@ -626,12 +621,36 @@ class SearchViewModel(
             is SearchAction.OnRepositoryDeveloperClick -> {
                 // Handled in composable
             }
+
+            is SearchAction.OnHistoryItemClick -> {
+                _state.update {
+                    it.copy(
+                        query = action.query,
+                        detectedLinks = persistentListOf(),
+                    )
+                }
+
+                currentPage = 1
+                saveSearchToHistory(action.query)
+                performSearch(isInitial = true)
+            }
+
+            is SearchAction.OnRemoveHistoryItem -> {
+                viewModelScope.launch {
+                    searchHistoryRepository.removeSearch(action.query)
+                }
+            }
+
+            SearchAction.OnClearAllHistory -> {
+                viewModelScope.launch {
+                    searchHistoryRepository.clearAll()
+                }
+            }
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         currentSearchJob?.cancel()
-        searchDebounceJob?.cancel()
     }
 }

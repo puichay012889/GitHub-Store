@@ -613,4 +613,8 @@
     <string name="delete_downloads_confirmation_message">এটি সব APK এবং ইনস্টলার স্থায়ীভাবে মুছে ফেলবে (%1$s)। আপনি যেকোনো সময় আবার ডাউনলোড করতে পারবেন।</string>
     <string name="downloads_cleared">সব ডাউনলোড করা প্যাকেজ মুছে ফেলা হয়েছে।</string>
     <string name="unable_to_verify_attestation">যাচাই করা যায়নি</string>
+
+    <string name="recent_searches">সাম্প্রতিক অনুসন্ধান</string>
+    <string name="clear_all_history">সব মুছুন</string>
+    <string name="remove_search_history_item">সরান</string>
 </resources>

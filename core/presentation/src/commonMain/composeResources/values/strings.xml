@@ -615,4 +615,9 @@
     <string name="clear_seen_history_description">Reset all seen repositories so they appear again in feeds</string>
     <string name="seen_history_cleared">Seen history cleared</string>
     <string name="seen_badge">Viewed</string>
+
+    <!-- Search history -->
+    <string name="recent_searches">Recent searches</string>
+    <string name="clear_all_history">Clear all</string>
+    <string name="remove_search_history_item">Remove</string>
 </resources>

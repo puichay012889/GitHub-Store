@@ -15,6 +15,7 @@ import zed.rainxch.core.data.local.db.AppDatabase
 import zed.rainxch.core.data.local.db.dao.CacheDao
 import zed.rainxch.core.data.local.db.dao.FavoriteRepoDao
 import zed.rainxch.core.data.local.db.dao.InstalledAppDao
+import zed.rainxch.core.data.local.db.dao.SearchHistoryDao
 import zed.rainxch.core.data.local.db.dao.SeenRepoDao
 import zed.rainxch.core.data.local.db.dao.StarredRepoDao
 import zed.rainxch.core.data.local.db.dao.UpdateHistoryDao
@@ -27,6 +28,7 @@ import zed.rainxch.core.data.repository.FavouritesRepositoryImpl
 import zed.rainxch.core.data.repository.InstalledAppsRepositoryImpl
 import zed.rainxch.core.data.repository.ProxyRepositoryImpl
 import zed.rainxch.core.data.repository.RateLimitRepositoryImpl
+import zed.rainxch.core.data.repository.SearchHistoryRepositoryImpl
 import zed.rainxch.core.data.repository.SeenReposRepositoryImpl
 import zed.rainxch.core.data.repository.StarredRepositoryImpl
 import zed.rainxch.core.data.repository.TweaksRepositoryImpl
@@ -39,6 +41,7 @@ import zed.rainxch.core.domain.repository.FavouritesRepository
 import zed.rainxch.core.domain.repository.InstalledAppsRepository
 import zed.rainxch.core.domain.repository.ProxyRepository
 import zed.rainxch.core.domain.repository.RateLimitRepository
+import zed.rainxch.core.domain.repository.SearchHistoryRepository
 import zed.rainxch.core.domain.repository.SeenReposRepository
 import zed.rainxch.core.domain.repository.StarredRepository
 import zed.rainxch.core.domain.repository.TweaksRepository
@@ -100,6 +103,12 @@ val coreModule =
         single<SeenReposRepository> {
             SeenReposRepositoryImpl(
                 seenRepoDao = get(),
+            )
+        }
+
+        single<SearchHistoryRepository> {
+            SearchHistoryRepositoryImpl(
+                searchHistoryDao = get(),
             )
         }
 
@@ -215,5 +224,9 @@ val databaseModule =
 
         single<SeenRepoDao> {
             get<AppDatabase>().seenRepoDao
+        }
+
+        single<SearchHistoryDao> {
+            get<AppDatabase>().searchHistoryDao
         }
     }

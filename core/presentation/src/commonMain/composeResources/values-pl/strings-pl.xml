@@ -577,4 +577,8 @@
     <string name="delete_downloads_confirmation_message">Spowoduje to trwałe usunięcie wszystkich APK i instalatorów (%1$s). Możesz je pobrać ponownie w dowolnym momencie.</string>
     <string name="downloads_cleared">Wszystkie pobrane pakiety zostały usunięte.</string>
     <string name="unable_to_verify_attestation">Nie można zweryfikować</string>
+
+    <string name="recent_searches">Ostatnie wyszukiwania</string>
+    <string name="clear_all_history">Wyczyść wszystko</string>
+    <string name="remove_search_history_item">Usuń</string>
 </resources>

@@ -612,4 +612,8 @@
     <string name="delete_downloads_confirmation_message">यह सभी APK और इंस्टॉलर को स्थायी रूप से हटा देगा (%1$s)। आप उन्हें कभी भी फिर से डाउनलोड कर सकते हैं।</string>
     <string name="downloads_cleared">सभी डाउनलोड किए गए पैकेज हटा दिए गए हैं।</string>
     <string name="unable_to_verify_attestation">सत्यापित नहीं किया जा सका</string>
+
+    <string name="recent_searches">हाल की खोजें</string>
+    <string name="clear_all_history">सभी साफ करें</string>
+    <string name="remove_search_history_item">हटाएँ</string>
 </resources>

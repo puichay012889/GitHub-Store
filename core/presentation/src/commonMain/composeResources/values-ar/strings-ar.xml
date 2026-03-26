@@ -614,4 +614,8 @@
     <string name="delete_downloads_confirmation_message">سيؤدي هذا إلى حذف جميع ملفات APK والمثبتات نهائيًا (%1$s). يمكنك إعادة تنزيلها في أي وقت.</string>
     <string name="downloads_cleared">تم حذف جميع الحزم التي تم تنزيلها.</string>
     <string name="unable_to_verify_attestation">تعذر التحقق</string>
+
+    <string name="recent_searches">عمليات البحث الأخيرة</string>
+    <string name="clear_all_history">مسح الكل</string>
+    <string name="remove_search_history_item">إزالة</string>
 </resources>

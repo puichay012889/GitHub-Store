@@ -577,4 +577,8 @@
     <string name="delete_downloads_confirmation_message">Это навсегда удалит все APK и установщики (%1$s). Вы сможете скачать их снова в любое время.</string>
     <string name="downloads_cleared">Все загруженные пакеты удалены.</string>
     <string name="unable_to_verify_attestation">Не удалось проверить</string>
+
+    <string name="recent_searches">Недавние поиски</string>
+    <string name="clear_all_history">Очистить всё</string>
+    <string name="remove_search_history_item">Удалить</string>
 </resources>

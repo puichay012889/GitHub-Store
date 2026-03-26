@@ -61,4 +61,14 @@ sealed interface SearchAction {
     data object OnFabClick : SearchAction
 
     data object DismissClipboardBanner : SearchAction
+
+    data class OnHistoryItemClick(
+        val query: String,
+    ) : SearchAction
+
+    data class OnRemoveHistoryItem(
+        val query: String,
+    ) : SearchAction
+
+    data object OnClearAllHistory : SearchAction
 }

@@ -576,4 +576,8 @@
     <string name="delete_downloads_confirmation_message">すべてのAPKとインストーラーが完全に削除されます（%1$s）。いつでも再ダウンロードできます。</string>
     <string name="downloads_cleared">すべてのダウンロード済みパッケージが削除されました。</string>
     <string name="unable_to_verify_attestation">確認できませんでした</string>
+
+    <string name="recent_searches">最近の検索</string>
+    <string name="clear_all_history">すべてクリア</string>
+    <string name="remove_search_history_item">削除</string>
 </resources>
