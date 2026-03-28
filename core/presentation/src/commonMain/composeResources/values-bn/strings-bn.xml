@@ -475,11 +475,11 @@
 
     <string name="sponsor_title">GitHub Store সমর্থন করুন</string>
     <string name="sponsor_button">প্রকল্পকে সমর্থন করুন</string>
-    <string name="sponsor_hero_title">ভালোবাসা দিয়ে তৈরি,\nকফি দিয়ে চালিত</string>
+    <string name="sponsor_hero_title">চিরকাল বিনামূল্যে।\nআপনাদের সহায়তায় চলে।</string>
 
-    <string name="sponsor_hero_subtitle">GitHub Store 130,000+ ডাউনলোড এবং 7,700+ GitHub স্টার অর্জন করেছে — ১০০% ফ্রি, কোনো বিজ্ঞাপন নেই, কোনো ট্র্যাকিং নেই।</string>
+    <string name="sponsor_hero_subtitle">আপনার সমর্থন GitHub Store কে বিনামূল্যে, স্বাধীন এবং সক্রিয়ভাবে রক্ষণাবেক্ষণ করে রাখে — কোনো বিজ্ঞাপন নেই, কোনো ট্র্যাকিং নেই, শুধু ওপেন-সোর্স অ্যাপ ইনস্টল করার একটি ভালো উপায়।</string>
 
-    <string name="sponsor_personal_note">আমি উচ্চ বিদ্যালয় শেষ করার সময় একাই এই প্রকল্পটি তৈরি ও রক্ষণাবেক্ষণ করছি। আপনার সমর্থন — ছোট হলেও — অ্যাপটিকে বাগমুক্ত রাখতে, অবকাঠামো খরচ চালাতে এবং নতুন ফিচার আনতে সাহায্য করে।</string>
+    <string name="sponsor_personal_note">আমি পড়াশোনা শেষ করতে করতে একাই এই প্রকল্পটি তৈরি ও রক্ষণাবেক্ষণ করছি। প্রতিটি অবদান — বড় হোক বা ছোট — সরাসরি সার্ভার খরচ, উন্নয়ন এবং সবার জন্য অ্যাপটিকে বিজ্ঞাপনমুক্ত রাখতে ব্যবহৃত হয়।</string>
 
     <string name="sponsor_kodee_title">GitHub Store এর জন্য ভোট দিন!</string>
     <string name="sponsor_kodee_subtitle">GitHub Store KotlinConf 2026 এর Golden Kodee Awards এর জন্য মনোনীত হয়েছে।</string>
@@ -494,23 +494,23 @@
     <string name="sponsor_kodee_step3">3. Usmon Narzullayev খুঁজে Vote চাপুন</string>
 
     <string name="sponsor_github_sponsors">GitHub Sponsors</string>
-    <string name="sponsor_github_sponsors_desc">GitHub এর মাধ্যমে একবার বা নিয়মিত সমর্থন</string>
+    <string name="sponsor_github_sponsors_desc">মাসিক বা একবারের — সরাসরি উন্নয়নে অবদান রাখে</string>
 
     <string name="sponsor_buy_me_coffee">Buy Me a Coffee</string>
-    <string name="sponsor_buy_me_coffee_desc">দ্রুত একবারের সমর্থন</string>
+    <string name="sponsor_buy_me_coffee_desc">দ্রুত একবারের অবদান</string>
 
     <string name="sponsor_other_ways_title">সহায়তার অন্যান্য উপায়</string>
 
     <string name="sponsor_star_repo">রিপোজিটরিতে স্টার দিন</string>
-    <string name="sponsor_star_repo_desc">অন্যদের GitHub Store খুঁজে পেতে সাহায্য করে</string>
+    <string name="sponsor_star_repo_desc">দৃশ্যমানতা বাড়ায় এবং অন্যদের খুঁজে পেতে সাহায্য করে</string>
 
     <string name="sponsor_report_bugs">বাগ রিপোর্ট করুন</string>
-    <string name="sponsor_report_bugs_desc">অ্যাপটিকে আরও ভালো করে</string>
+    <string name="sponsor_report_bugs_desc">প্রতিটি রিপোর্ট সবার জন্য অ্যাপটিকে আরও ভালো করে</string>
 
     <string name="sponsor_share">বন্ধুদের সাথে শেয়ার করুন</string>
-    <string name="sponsor_share_desc">অন্যান্য ডেভেলপারদের জানাতে সাহায্য করে</string>
+    <string name="sponsor_share_desc">মুখের কথাই সেরা মার্কেটিং</string>
 
-    <string name="sponsor_thank_you">যে কোনো সমর্থন — অর্থনৈতিক হোক বা না হোক — এই প্রকল্পটিকে বাঁচিয়ে রাখে। ধন্যবাদ!</string>
+    <string name="sponsor_thank_you">প্রতিটি অবদান — আর্থিক হোক বা না হোক — সত্যিই একটি পার্থক্য তৈরি করে। এর অংশ হওয়ার জন্য আপনাকে ধন্যবাদ।</string>
 
     <!-- Installation method settings -->
     <string name="section_installation">ইনস্টলেশন</string>

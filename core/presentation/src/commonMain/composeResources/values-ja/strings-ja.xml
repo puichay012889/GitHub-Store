@@ -440,10 +440,10 @@
 
     <string name="sponsor_title">GitHub Store を支援</string>
     <string name="sponsor_button">プロジェクトを支援</string>
-    <string name="sponsor_hero_title">愛を込めて作り、\nコーヒーで維持</string>
-    <string name="sponsor_hero_subtitle">GitHub Store は 13万以上のダウンロードと 7700 以上の GitHub スターを達成しました。完全無料、広告なし、追跡なし。</string>
+    <string name="sponsor_hero_title">ずっと無料。\nあなたの支援で成り立っています。</string>
+    <string name="sponsor_hero_subtitle">あなたの支援が GitHub Store を無料で、独立して、積極的にメンテナンスされた状態に保ちます — 広告なし、追跡なし、オープンソースアプリをインストールするためのより良い方法です。</string>
 
-    <string name="sponsor_personal_note">私は高校を卒業しながら、このプロジェクトを一人で開発・維持しています。小さな支援でも、バグ修正やインフラ費用、機能開発に役立ちます。</string>
+    <string name="sponsor_personal_note">学業を終えながら、このプロジェクトを一人で開発・維持しています。すべての貢献 — 大きくても小さくても — サーバー費用、開発、そしてアプリを全員に広告なしで提供し続けることに直接使われます。</string>
 
     <string name="sponsor_kodee_title">GitHub Store に投票！</string>
     <string name="sponsor_kodee_subtitle">KotlinConf 2026 の Golden Kodee Awards にノミネートされています。投票は2分で完了します。</string>
@@ -457,23 +457,23 @@
     <string name="sponsor_kodee_step3">3. Usmon Narzullayev を見つけて投票</string>
 
     <string name="sponsor_github_sponsors">GitHub Sponsors</string>
-    <string name="sponsor_github_sponsors_desc">GitHub 経由の定期または一回支援</string>
+    <string name="sponsor_github_sponsors_desc">月額または一回 — 開発を直接支援</string>
 
     <string name="sponsor_buy_me_coffee">Buy Me a Coffee</string>
-    <string name="sponsor_buy_me_coffee_desc">簡単な一回支援</string>
+    <string name="sponsor_buy_me_coffee_desc">手軽な一回限りの貢献</string>
 
     <string name="sponsor_other_ways_title">他の支援方法</string>
 
     <string name="sponsor_star_repo">リポジトリにスター</string>
-    <string name="sponsor_star_repo_desc">他の人が GitHub Store を見つけやすくなります</string>
+    <string name="sponsor_star_repo_desc">知名度を上げ、他の人が見つけやすくなります</string>
 
     <string name="sponsor_report_bugs">バグを報告</string>
-    <string name="sponsor_report_bugs_desc">アプリをより良くします</string>
+    <string name="sponsor_report_bugs_desc">すべての報告がアプリをみんなのために改善します</string>
 
     <string name="sponsor_share">友達と共有</string>
-    <string name="sponsor_share_desc">他の開発者に広める</string>
+    <string name="sponsor_share_desc">口コミが最高のマーケティングです</string>
 
-    <string name="sponsor_thank_you">金銭的であれそうでなくても、すべての支援がこのプロジェクトを支えています。ありがとうございます！</string>
+    <string name="sponsor_thank_you">すべての貢献 — 金銭的であろうとなかろうと — 本当に大きな力になります。参加してくれてありがとうございます。</string>
 
     <!-- Installation method settings -->
     <string name="section_installation">インストール</string>

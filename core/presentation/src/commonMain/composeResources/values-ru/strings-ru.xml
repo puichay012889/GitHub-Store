@@ -440,10 +440,10 @@
 
     <string name="sponsor_title">Поддержать GitHub Store</string>
     <string name="sponsor_button">Поддержать проект</string>
-    <string name="sponsor_hero_title">Создано с любовью,\nподдерживается кофе</string>
-    <string name="sponsor_hero_subtitle">GitHub Store достиг более 130 000 загрузок и 7 700 звёзд на GitHub — 100% бесплатно, без рекламы и отслеживания.</string>
+    <string name="sponsor_hero_title">Бесплатно навсегда.\nБлагодаря вам.</string>
+    <string name="sponsor_hero_subtitle">Ваша поддержка позволяет GitHub Store оставаться бесплатным, независимым и активно развиваемым — без рекламы, без отслеживания, просто лучший способ устанавливать open-source приложения.</string>
 
-    <string name="sponsor_personal_note">Я разработал и поддерживаю этот проект полностью самостоятельно, заканчивая школу. Ваша поддержка — даже небольшая — помогает оплачивать инфраструктуру и развивать приложение.</string>
+    <string name="sponsor_personal_note">Я разрабатываю и поддерживаю этот проект в одиночку, заканчивая учёбу. Каждый вклад — большой или маленький — идёт напрямую на серверные расходы, разработку и поддержание приложения без рекламы для всех.</string>
 
     <string name="sponsor_kodee_title">Голосуйте за GitHub Store!</string>
     <string name="sponsor_kodee_subtitle">GitHub Store номинирован на Golden Kodee Awards на KotlinConf 2026.</string>
@@ -457,23 +457,23 @@
     <string name="sponsor_kodee_step3">3. Найдите Usmon Narzullayev и нажмите «Голосовать»</string>
 
     <string name="sponsor_github_sponsors">GitHub Sponsors</string>
-    <string name="sponsor_github_sponsors_desc">Регулярная или разовая поддержка через GitHub</string>
+    <string name="sponsor_github_sponsors_desc">Ежемесячно или разово — напрямую финансирует разработку</string>
 
     <string name="sponsor_buy_me_coffee">Buy Me a Coffee</string>
-    <string name="sponsor_buy_me_coffee_desc">Быстрая разовая поддержка</string>
+    <string name="sponsor_buy_me_coffee_desc">Быстрый разовый вклад</string>
 
     <string name="sponsor_other_ways_title">ДРУГИЕ СПОСОБЫ ПОМОЧЬ</string>
 
     <string name="sponsor_star_repo">Поставить звезду репозиторию</string>
-    <string name="sponsor_star_repo_desc">Помогает другим найти GitHub Store</string>
+    <string name="sponsor_star_repo_desc">Повышает видимость и помогает другим его найти</string>
 
     <string name="sponsor_report_bugs">Сообщить об ошибке</string>
-    <string name="sponsor_report_bugs_desc">Делает приложение лучше</string>
+    <string name="sponsor_report_bugs_desc">Каждый отчёт делает приложение лучше для всех</string>
 
     <string name="sponsor_share">Поделиться с друзьями</string>
-    <string name="sponsor_share_desc">Расскажите другим разработчикам</string>
+    <string name="sponsor_share_desc">Сарафанное радио — лучший маркетинг</string>
 
-    <string name="sponsor_thank_you">Любая поддержка — финансовая или нет — помогает проекту жить. Спасибо!</string>
+    <string name="sponsor_thank_you">Каждый вклад — финансовый или нет — действительно имеет значение. Спасибо, что вы с нами.</string>
 
 
     <!-- Installation method settings -->

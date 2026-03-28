@@ -476,10 +476,10 @@
 
     <string name="sponsor_title">Supporta GitHub Store</string>
     <string name="sponsor_button">Supporta il progetto</string>
-    <string name="sponsor_hero_title">Costruito con amore,\nmantenuto con il caffè</string>
-    <string name="sponsor_hero_subtitle">GitHub Store ha raggiunto oltre 130.000 download e 7.700 stelle su GitHub — 100% gratuito, senza pubblicità né tracciamento.</string>
+    <string name="sponsor_hero_title">Gratuito per sempre.\nFinanziato da te.</string>
+    <string name="sponsor_hero_subtitle">Il tuo supporto mantiene GitHub Store gratuito, indipendente e attivamente aggiornato — niente pubblicità, niente tracciamento, solo un modo migliore per installare app open-source.</string>
 
-    <string name="sponsor_personal_note">Ho costruito e mantengo questo progetto completamente da solo mentre finisco il liceo. Il tuo supporto — anche piccolo — aiuta a mantenere l'app senza bug e a finanziare l'infrastruttura.</string>
+    <string name="sponsor_personal_note">Sviluppo e mantengo questo progetto da solo mentre finisco gli studi. Ogni contributo — grande o piccolo — va direttamente ai costi del server, allo sviluppo e a mantenere l'app senza pubblicità per tutti.</string>
 
     <string name="sponsor_kodee_title">Vota GitHub Store!</string>
     <string name="sponsor_kodee_subtitle">GitHub Store è nominato ai Golden Kodee Awards al KotlinConf 2026.</string>
@@ -493,23 +493,23 @@
     <string name="sponsor_kodee_step3">3. Trova Usmon Narzullayev e premi Vota</string>
 
     <string name="sponsor_github_sponsors">GitHub Sponsors</string>
-    <string name="sponsor_github_sponsors_desc">Supporto ricorrente o singolo via GitHub</string>
+    <string name="sponsor_github_sponsors_desc">Mensile o una tantum — finanzia direttamente lo sviluppo</string>
 
     <string name="sponsor_buy_me_coffee">Buy Me a Coffee</string>
-    <string name="sponsor_buy_me_coffee_desc">Supporto rapido una tantum</string>
+    <string name="sponsor_buy_me_coffee_desc">Contributo rapido una tantum</string>
 
     <string name="sponsor_other_ways_title">ALTRI MODI PER AIUTARE</string>
 
     <string name="sponsor_star_repo">Metti una stella al repository</string>
-    <string name="sponsor_star_repo_desc">Aiuta altri a scoprire GitHub Store</string>
+    <string name="sponsor_star_repo_desc">Aumenta la visibilità e aiuta gli altri a trovarlo</string>
 
     <string name="sponsor_report_bugs">Segnala bug</string>
-    <string name="sponsor_report_bugs_desc">Rende l'app migliore per tutti</string>
+    <string name="sponsor_report_bugs_desc">Ogni segnalazione migliora l'app per tutti</string>
 
     <string name="sponsor_share">Condividi con amici</string>
-    <string name="sponsor_share_desc">Diffondi la parola tra gli sviluppatori</string>
+    <string name="sponsor_share_desc">Il passaparola è il miglior marketing</string>
 
-    <string name="sponsor_thank_you">Ogni supporto — finanziario o meno — mantiene vivo questo progetto. Grazie!</string>
+    <string name="sponsor_thank_you">Ogni contributo — finanziario o meno — fa davvero la differenza. Grazie per farne parte.</string>
 
 
     <!-- Installation method settings -->

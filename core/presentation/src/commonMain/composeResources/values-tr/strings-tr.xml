@@ -472,11 +472,11 @@
 
     <string name="sponsor_title">GitHub Store'u Destekle</string>
     <string name="sponsor_button">Projeyi destekle</string>
-    <string name="sponsor_hero_title">Sevgiyle yapıldı,\nkahveyle sürdürüldü</string>
+    <string name="sponsor_hero_title">Sonsuza dek ücretsiz.\nSizin desteğinizle.</string>
 
-    <string name="sponsor_hero_subtitle">GitHub Store 130.000+ indirme ve 7.700+ GitHub yıldızına ulaştı — %100 ücretsiz, reklamsız ve izleme yok.</string>
+    <string name="sponsor_hero_subtitle">Desteğiniz GitHub Store'u ücretsiz, bağımsız ve aktif olarak güncel tutar — reklam yok, izleme yok, sadece açık kaynak uygulamaları yüklemenin daha iyi bir yolu.</string>
 
-    <string name="sponsor_personal_note">Bu projeyi liseyi bitirirken tamamen tek başıma geliştiriyorum ve sürdürüyorum.</string>
+    <string name="sponsor_personal_note">Okulu bitirirken bu projeyi tek başıma geliştiriyor ve sürdürüyorum. Her katkı — büyük ya da küçük — doğrudan sunucu maliyetlerine, geliştirmeye ve uygulamayı herkes için reklamsız tutmaya gidiyor.</string>
 
     <string name="sponsor_kodee_title">GitHub Store için oy ver!</string>
     <string name="sponsor_kodee_subtitle">GitHub Store KotlinConf 2026 Golden Kodee Awards için aday gösterildi.</string>
@@ -491,23 +491,23 @@
     <string name="sponsor_kodee_step3">3. Usmon Narzullayev'i bul ve Oy Ver'e tıkla</string>
 
     <string name="sponsor_github_sponsors">GitHub Sponsors</string>
-    <string name="sponsor_github_sponsors_desc">GitHub üzerinden tek seferlik veya düzenli destek</string>
+    <string name="sponsor_github_sponsors_desc">Aylık veya tek seferlik — doğrudan geliştirmeyi finanse eder</string>
 
     <string name="sponsor_buy_me_coffee">Buy Me a Coffee</string>
-    <string name="sponsor_buy_me_coffee_desc">Hızlı tek seferlik destek</string>
+    <string name="sponsor_buy_me_coffee_desc">Hızlı tek seferlik katkı</string>
 
     <string name="sponsor_other_ways_title">YARDIM ETMENİN DİĞER YOLLARI</string>
 
     <string name="sponsor_star_repo">Depoya yıldız ver</string>
-    <string name="sponsor_star_repo_desc">Başkalarının GitHub Store'u keşfetmesine yardımcı olur</string>
+    <string name="sponsor_star_repo_desc">Görünürlüğü artırır ve başkalarının bulmasına yardımcı olur</string>
 
     <string name="sponsor_report_bugs">Hata bildir</string>
-    <string name="sponsor_report_bugs_desc">Uygulamayı herkes için daha iyi yapar</string>
+    <string name="sponsor_report_bugs_desc">Her bildirim uygulamayı herkes için daha iyi yapar</string>
 
     <string name="sponsor_share">Arkadaşlarınla paylaş</string>
-    <string name="sponsor_share_desc">Diğer geliştiricilere duyur</string>
+    <string name="sponsor_share_desc">Ağızdan ağıza en iyi pazarlamadır</string>
 
-    <string name="sponsor_thank_you">Her destek — finansal olsun ya da olmasın — bu projeyi yaşatır. Teşekkürler!</string>
+    <string name="sponsor_thank_you">Her katkı — finansal olsun ya da olmasın — gerçek bir fark yaratır. Bunun parçası olduğunuz için teşekkürler.</string>
 
 
     <!-- Installation method settings -->
