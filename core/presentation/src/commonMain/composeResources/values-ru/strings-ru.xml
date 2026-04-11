@@ -630,6 +630,7 @@
     <string name="variant_picker_title">Предпочтительный вариант</string>
     <string name="variant_picker_description">Выберите, какой вариант APK будет устанавливаться при обновлениях. Выбор запоминается между релизами.</string>
     <string name="variant_picker_no_assets">В последнем релизе нет устанавливаемых ассетов.</string>
+    <string name="variant_picker_no_pinnable">В этом релизе нет вариантов с тегом версии, которые можно закрепить. Автоматический селектор продолжит выбирать лучший ассет для вашего устройства.</string>
     <string name="variant_picker_load_failed">Не удалось загрузить варианты. Проверьте подключение и попробуйте снова.</string>
     <string name="variant_picker_save_failed">Не удалось сохранить выбор. Попробуйте снова.</string>
     <string name="variant_picker_stale_title">Вариант изменился — выберите снова</string>

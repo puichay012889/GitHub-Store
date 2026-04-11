@@ -658,6 +658,7 @@
     <string name="variant_picker_title">선호 변형</string>
     <string name="variant_picker_description">업데이트에 설치할 APK 변형을 선택하세요. 선택은 릴리스 간에 기억됩니다.</string>
     <string name="variant_picker_no_assets">최신 릴리스에 설치 가능한 에셋이 없습니다.</string>
+    <string name="variant_picker_no_pinnable">이 릴리스에는 고정할 수 있는 버전 태그가 있는 변형이 없습니다. 자동 선택기는 계속해서 기기에 가장 적합한 에셋을 선택합니다.</string>
     <string name="variant_picker_load_failed">변형을 불러올 수 없습니다. 연결을 확인하고 다시 시도하세요.</string>
     <string name="variant_picker_save_failed">선택을 저장할 수 없습니다. 다시 시도하세요.</string>
     <string name="variant_picker_stale_title">변형이 변경되었습니다 — 다시 선택하세요</string>

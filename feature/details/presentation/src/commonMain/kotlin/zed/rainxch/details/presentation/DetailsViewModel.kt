@@ -386,9 +386,16 @@ class DetailsViewModel(
                             siblingAssetCount = installable.size,
                         )
                     val current = installedApp.preferredAssetVariant
-                    // Avoid hammering the DB / re-check when the user
-                    // tapped the asset that was already pinned.
-                    if (variant != null && !variant.equals(current, ignoreCase = true)) {
+                    val sameVariant = variant != null && variant.equals(current, ignoreCase = true)
+                    // Save when:
+                    //   * the user picked a non-null variant AND
+                    //   * either it differs from what's currently pinned,
+                    //     OR the stale flag is set (re-picking the same
+                    //     variant after a stale event must clear the
+                    //     flag — otherwise the warning lingers forever)
+                    val shouldSave =
+                        variant != null && (!sameVariant || installedApp.preferredVariantStale)
+                    if (shouldSave) {
                         viewModelScope.launch {
                             try {
                                 installedAppsRepository.setPreferredVariant(

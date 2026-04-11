@@ -624,6 +624,7 @@
     <string name="variant_picker_title">Variante préférée</string>
     <string name="variant_picker_description">Choisissez la variante d\'APK à installer pour les mises à jour. Le choix est mémorisé entre les versions.</string>
     <string name="variant_picker_no_assets">Aucun asset installable dans la dernière version.</string>
+    <string name="variant_picker_no_pinnable">Cette version n\'a pas de variantes étiquetées par version à épingler. Le sélecteur automatique continuera à choisir le meilleur asset pour votre appareil.</string>
     <string name="variant_picker_load_failed">Impossible de charger les variantes. Vérifiez votre connexion et réessayez.</string>
     <string name="variant_picker_save_failed">Impossible d\'enregistrer votre choix. Réessayez.</string>
     <string name="variant_picker_stale_title">La variante a changé — choisissez à nouveau</string>

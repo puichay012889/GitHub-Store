@@ -662,6 +662,7 @@
     <string name="variant_picker_title">পছন্দের ভ্যারিয়েন্ট</string>
     <string name="variant_picker_description">আপডেটের জন্য কোন APK ভ্যারিয়েন্ট ইনস্টল হবে তা বেছে নিন। পছন্দ রিলিজ জুড়ে মনে রাখা হয়।</string>
     <string name="variant_picker_no_assets">সর্বশেষ রিলিজে কোনো ইনস্টলযোগ্য অ্যাসেট নেই।</string>
+    <string name="variant_picker_no_pinnable">এই রিলিজে পিন করার মতো সংস্করণ-ট্যাগযুক্ত ভ্যারিয়েন্ট নেই। স্বয়ংক্রিয় নির্বাচক আপনার ডিভাইসের জন্য সেরা অ্যাসেট বেছে নেওয়া চালিয়ে যাবে।</string>
     <string name="variant_picker_load_failed">ভ্যারিয়েন্ট লোড করা যায়নি। আপনার সংযোগ যাচাই করে আবার চেষ্টা করুন।</string>
     <string name="variant_picker_save_failed">আপনার পছন্দ সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।</string>
     <string name="variant_picker_stale_title">ভ্যারিয়েন্ট পরিবর্তিত — আবার বেছে নিন</string>

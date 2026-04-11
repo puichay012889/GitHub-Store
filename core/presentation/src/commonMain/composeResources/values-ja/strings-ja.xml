@@ -623,6 +623,7 @@
     <string name="variant_picker_title">優先バリアント</string>
     <string name="variant_picker_description">アップデートでインストールするAPKバリアントを選択してください。選択はリリース間で記憶されます。</string>
     <string name="variant_picker_no_assets">最新リリースにインストール可能なアセットがありません。</string>
+    <string name="variant_picker_no_pinnable">このリリースには固定できるバージョン付きバリアントがありません。自動セレクターは引き続きデバイスに最適なアセットを選択します。</string>
     <string name="variant_picker_load_failed">バリアントを読み込めませんでした。接続を確認してもう一度お試しください。</string>
     <string name="variant_picker_save_failed">選択を保存できませんでした。もう一度お試しください。</string>
     <string name="variant_picker_stale_title">バリアントが変更されました — もう一度選択してください</string>

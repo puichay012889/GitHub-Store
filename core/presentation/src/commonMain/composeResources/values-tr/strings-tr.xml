@@ -660,6 +660,7 @@
     <string name="variant_picker_title">Tercih edilen varyant</string>
     <string name="variant_picker_description">Güncellemeler için hangi APK varyantının yüklenmesini istediğinizi seçin. Seçim sürümler arası hatırlanır.</string>
     <string name="variant_picker_no_assets">En son sürümde yüklenebilir varlık yok.</string>
+    <string name="variant_picker_no_pinnable">Bu sürümde sabitlenebilecek sürüm etiketli varyant yok. Otomatik seçici cihazınız için en iyi varlığı seçmeye devam edecek.</string>
     <string name="variant_picker_load_failed">Varyantlar yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
     <string name="variant_picker_save_failed">Seçiminiz kaydedilemedi. Tekrar deneyin.</string>
     <string name="variant_picker_stale_title">Varyant değişti — tekrar seçin</string>

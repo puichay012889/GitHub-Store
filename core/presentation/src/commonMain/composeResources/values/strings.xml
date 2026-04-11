@@ -670,6 +670,7 @@
     <string name="variant_picker_title">Preferred variant</string>
     <string name="variant_picker_description">Pick which APK variant should be installed for updates. The choice is remembered across releases.</string>
     <string name="variant_picker_no_assets">No installable assets in the latest release.</string>
+    <string name="variant_picker_no_pinnable">This release has no version-tagged variants to pin. The automatic picker will continue choosing the best asset for your device.</string>
     <string name="variant_picker_load_failed">Could not load variants. Check your connection and try again.</string>
     <string name="variant_picker_save_failed">Could not save your choice. Try again.</string>
     <string name="variant_picker_stale_title">Variant changed — pick again</string>

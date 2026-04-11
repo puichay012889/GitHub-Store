@@ -624,6 +624,7 @@
     <string name="variant_picker_title">首选变体</string>
     <string name="variant_picker_description">选择更新时要安装的 APK 变体。此选择会在不同版本之间记住。</string>
     <string name="variant_picker_no_assets">最新版本中没有可安装的资产。</string>
+    <string name="variant_picker_no_pinnable">此版本没有可固定的版本标记变体。自动选择器将继续为您的设备选择最佳资产。</string>
     <string name="variant_picker_load_failed">无法加载变体。请检查连接并重试。</string>
     <string name="variant_picker_save_failed">无法保存您的选择。请重试。</string>
     <string name="variant_picker_stale_title">变体已更改 — 请重新选择</string>

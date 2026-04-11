@@ -630,15 +630,28 @@ class AppsViewModel(
                         includePreReleases = app.includePreReleases,
                         fallbackToOlderReleases = app.fallbackToOlderReleases,
                     )
+                // Only assets whose filename has an extractable, non-empty
+                // variant tag are pinnable: an empty extract or null means
+                // we'd have nothing to remember release-over-release. The
+                // dialog filters its own list so users can't tap a row
+                // that would silently no-op.
+                val pinnableAssets =
+                    preview.matchedAssets.filter { asset ->
+                        AssetVariant.extract(asset.name)?.isNotEmpty() == true
+                    }
                 _state.update {
                     it.copy(
                         variantPickerLoading = false,
                         variantPickerOptions =
-                            preview.matchedAssets
+                            pinnableAssets
                                 .map { asset -> asset.toUi() }
                                 .toImmutableList(),
                         variantPickerError =
-                            if (preview.matchedAssets.isEmpty()) "no_assets" else null,
+                            when {
+                                preview.matchedAssets.isEmpty() -> "no_assets"
+                                pinnableAssets.isEmpty() -> "no_pinnable_variants"
+                                else -> null
+                            },
                     )
                 }
             } catch (e: CancellationException) {
@@ -692,13 +705,19 @@ class AppsViewModel(
             }
 
             if (resume) {
-                // Pick up the freshly-checked InstalledAppUi (the
-                // setPreferredVariant flow already re-ran checkForUpdates)
-                // and kick off the update with the new variant.
+                // Read the canonical InstalledApp directly from the
+                // repository rather than the in-memory state. The Flow
+                // that drives `_state.value.apps` propagates DAO writes
+                // asynchronously, so reading state right after
+                // setPreferredVariant — which itself runs an internal
+                // checkForUpdates write — can race and hand us the OLD
+                // pre-pick row, leading to an update with the wrong
+                // asset URL. A direct DAO read is synchronous and never
+                // races against pending Flow emissions.
                 val refreshed =
-                    _state.value.apps
-                        .firstOrNull { it.installedApp.packageName == app.packageName }
-                        ?.installedApp
+                    runCatching { installedAppsRepository.getAppByPackage(app.packageName) }
+                        .getOrNull()
+                        ?.toUi()
                 if (refreshed != null) {
                     updateSingleApp(refreshed)
                 }

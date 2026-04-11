@@ -663,6 +663,7 @@
     <string name="variant_picker_title">النوع المفضل</string>
     <string name="variant_picker_description">اختر نوع APK الذي يجب تثبيته للتحديثات. يتم تذكر الاختيار عبر الإصدارات.</string>
     <string name="variant_picker_no_assets">لا توجد أصول قابلة للتثبيت في أحدث إصدار.</string>
+    <string name="variant_picker_no_pinnable">لا تحتوي هذه النسخة على أنواع موسومة بالإصدار يمكن تثبيتها. سيستمر المحدد التلقائي في اختيار أفضل أصل لجهازك.</string>
     <string name="variant_picker_load_failed">تعذر تحميل الأنواع. تحقق من اتصالك وحاول مرة أخرى.</string>
     <string name="variant_picker_save_failed">تعذر حفظ اختيارك. حاول مرة أخرى.</string>
     <string name="variant_picker_stale_title">تغير النوع — اختر مرة أخرى</string>

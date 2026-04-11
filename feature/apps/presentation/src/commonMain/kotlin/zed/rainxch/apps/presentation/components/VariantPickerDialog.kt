@@ -115,6 +115,15 @@ fun VariantPickerDialog(
                         )
                     }
 
+                    state.variantPickerError == "no_pinnable_variants" -> {
+                        Text(
+                            text = stringResource(Res.string.variant_picker_no_pinnable),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                        )
+                    }
+
                     state.variantPickerError == "load_failed" -> {
                         Text(
                             text = stringResource(Res.string.variant_picker_load_failed),
@@ -220,13 +229,18 @@ private fun VariantOptionList(
         }
 
         items(state.variantPickerOptions, key = { it.id }) { asset ->
+            // The ViewModel guarantees every asset reaching this list has
+            // a non-null, non-empty extract — see openVariantPicker's
+            // pinnableAssets filter. Treat null as a defensive fallback
+            // and skip the row to keep the dialog tappable everywhere.
             val variant = AssetVariant.extract(asset.name)
-            val isCurrent = variant != null && variant.equals(current, ignoreCase = true)
+            if (variant.isNullOrEmpty()) return@items
+            val isCurrent = variant.equals(current, ignoreCase = true)
             VariantRow(
                 isSelected = isCurrent,
-                title = variant?.takeIf { it.isNotBlank() } ?: asset.name,
+                title = variant,
                 subtitle = asset.name + "  ·  " + formatBytes(asset.size),
-                onClick = { variant?.let(onPick) },
+                onClick = { onPick(variant) },
             )
         }
     }

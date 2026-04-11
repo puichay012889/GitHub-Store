@@ -24,13 +24,37 @@ import zed.rainxch.core.domain.model.GithubAsset
  */
 object AssetVariant {
     /**
-     * Matches the FIRST version-looking segment in a filename: an
-     * optional `v`/`V`, one or more digits, and any number of dotted
-     * digit groups after that. The leading character is required to be a
-     * separator so we don't false-match on names like `app2-installer`.
+     * Matches the FIRST version-looking segment in a filename. We require:
+     *
+     *   - A leading separator (`-`, `_`, or space) so we don't false-match
+     *     on names like `app2-installer` where `2` is part of the app name
+     *   - An optional `v`/`V` prefix (e.g. `-v1.2.3`)
+     *   - At least **two** dotted digit groups (`\d+(?:\.\d+)+`) so we don't
+     *     swallow architecture tokens like `_64`, `-v8`, or `-v7a` that have
+     *     no dots and are common in APK filenames
+     *   - A trailing token boundary (a separator or end-of-string) so we
+     *     don't accept partial matches like `1.2.3pre` (which would otherwise
+     *     leak `pre` into the variant tail)
+     *
+     * Examples that **do** match (and what gets captured):
+     *
+     *   `app-1.2.3`           → `-1.2.3`
+     *   `myapp-v2.0.1-arm64`  → `-v2.0.1`
+     *   `App_3.4.5_universal` → `_3.4.5`
+     *
+     * Examples that **don't** match (and why):
+     *
+     *   `arm64-v8a-app-1.2.3` →  `-v8` is rejected (no dot); `-1.2.3` matches
+     *                            instead, leaving an empty variant tail —
+     *                            preferable to extracting `a` as the variant
+     *   `app_64bit_v1.2.3`    →  `_64` is rejected (no dot); `_v1.2.3` matches
+     *   `app-1`               →  No match — single-digit versions are too
+     *                            ambiguous; the auto-picker handles them
+     *   `app-1.2.3pre`        →  No match — the trailing `pre` (no separator)
+     *                            isn't a clean token boundary
      */
     private val VERSION_SEGMENT =
-        Regex("[-_ ]v?\\d+(?:\\.\\d+)*", RegexOption.IGNORE_CASE)
+        Regex("[-_ ]v?\\d+(?:\\.\\d+)+(?=[-_. ]|$)", RegexOption.IGNORE_CASE)
 
     private val LEADING_SEPARATORS = charArrayOf('-', '_', ' ', '.')
 

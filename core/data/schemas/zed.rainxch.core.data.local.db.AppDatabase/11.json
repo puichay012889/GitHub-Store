@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 11,
-    "identityHash": "4ef44cac070a165197c60c485f778601",
+    "identityHash": "8954d1c4c5648189aa99dc390d5b39e3",
     "entities": [
       {
         "tableName": "installed_apps",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`packageName` TEXT NOT NULL, `repoId` INTEGER NOT NULL, `repoName` TEXT NOT NULL, `repoOwner` TEXT NOT NULL, `repoOwnerAvatarUrl` TEXT NOT NULL, `repoDescription` TEXT, `primaryLanguage` TEXT, `repoUrl` TEXT NOT NULL, `installedVersion` TEXT NOT NULL, `installedAssetName` TEXT, `installedAssetUrl` TEXT, `latestVersion` TEXT, `latestAssetName` TEXT, `latestAssetUrl` TEXT, `latestAssetSize` INTEGER, `appName` TEXT NOT NULL, `installSource` TEXT NOT NULL, `signingFingerprint` TEXT, `installedAt` INTEGER NOT NULL, `lastCheckedAt` INTEGER NOT NULL, `lastUpdatedAt` INTEGER NOT NULL, `isUpdateAvailable` INTEGER NOT NULL, `updateCheckEnabled` INTEGER NOT NULL, `releaseNotes` TEXT, `systemArchitecture` TEXT NOT NULL, `fileExtension` TEXT NOT NULL, `isPendingInstall` INTEGER NOT NULL, `installedVersionName` TEXT, `installedVersionCode` INTEGER NOT NULL, `latestVersionName` TEXT, `latestVersionCode` INTEGER, `latestReleasePublishedAt` TEXT, `includePreReleases` INTEGER NOT NULL, `assetFilterRegex` TEXT, `fallbackToOlderReleases` INTEGER NOT NULL, `preferredAssetVariant` TEXT, `preferredVariantStale` INTEGER NOT NULL, PRIMARY KEY(`packageName`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`packageName` TEXT NOT NULL, `repoId` INTEGER NOT NULL, `repoName` TEXT NOT NULL, `repoOwner` TEXT NOT NULL, `repoOwnerAvatarUrl` TEXT NOT NULL, `repoDescription` TEXT, `primaryLanguage` TEXT, `repoUrl` TEXT NOT NULL, `installedVersion` TEXT NOT NULL, `installedAssetName` TEXT, `installedAssetUrl` TEXT, `latestVersion` TEXT, `latestAssetName` TEXT, `latestAssetUrl` TEXT, `latestAssetSize` INTEGER, `appName` TEXT NOT NULL, `installSource` TEXT NOT NULL, `signingFingerprint` TEXT, `installedAt` INTEGER NOT NULL, `lastCheckedAt` INTEGER NOT NULL, `lastUpdatedAt` INTEGER NOT NULL, `isUpdateAvailable` INTEGER NOT NULL, `updateCheckEnabled` INTEGER NOT NULL, `releaseNotes` TEXT, `systemArchitecture` TEXT NOT NULL, `fileExtension` TEXT NOT NULL, `isPendingInstall` INTEGER NOT NULL, `installedVersionName` TEXT, `installedVersionCode` INTEGER NOT NULL, `latestVersionName` TEXT, `latestVersionCode` INTEGER, `latestReleasePublishedAt` TEXT, `includePreReleases` INTEGER NOT NULL, `assetFilterRegex` TEXT, `fallbackToOlderReleases` INTEGER NOT NULL DEFAULT 0, `preferredAssetVariant` TEXT, `preferredVariantStale` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`packageName`))",
         "fields": [
           {
             "fieldPath": "packageName",
@@ -201,7 +201,8 @@
             "fieldPath": "fallbackToOlderReleases",
             "columnName": "fallbackToOlderReleases",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "preferredAssetVariant",
@@ -212,7 +213,8 @@
             "fieldPath": "preferredVariantStale",
             "columnName": "preferredVariantStale",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -613,7 +615,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4ef44cac070a165197c60c485f778601')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8954d1c4c5648189aa99dc390d5b39e3')"
     ]
   }
 }

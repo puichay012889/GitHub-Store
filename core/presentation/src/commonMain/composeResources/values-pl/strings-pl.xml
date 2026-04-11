@@ -630,6 +630,7 @@
     <string name="variant_picker_title">Preferowany wariant</string>
     <string name="variant_picker_description">Wybierz, który wariant APK ma być instalowany przy aktualizacjach. Wybór jest zapamiętywany między wydaniami.</string>
     <string name="variant_picker_no_assets">Brak instalowalnych zasobów w najnowszym wydaniu.</string>
+    <string name="variant_picker_no_pinnable">To wydanie nie ma wariantów oznaczonych wersją do przypięcia. Automatyczny selektor będzie nadal wybierał najlepszy zasób dla Twojego urządzenia.</string>
     <string name="variant_picker_load_failed">Nie można załadować wariantów. Sprawdź połączenie i spróbuj ponownie.</string>
     <string name="variant_picker_save_failed">Nie można zapisać wyboru. Spróbuj ponownie.</string>
     <string name="variant_picker_stale_title">Wariant się zmienił — wybierz ponownie</string>

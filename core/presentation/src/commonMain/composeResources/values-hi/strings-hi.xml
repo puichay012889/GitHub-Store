@@ -661,6 +661,7 @@
     <string name="variant_picker_title">पसंदीदा वेरिएंट</string>
     <string name="variant_picker_description">चुनें कि अपडेट के लिए कौन सा APK वेरिएंट इंस्टॉल हो। चुनाव रिलीज़ों में याद रखा जाता है।</string>
     <string name="variant_picker_no_assets">नवीनतम रिलीज़ में कोई इंस्टॉल योग्य एसेट नहीं है।</string>
+    <string name="variant_picker_no_pinnable">इस रिलीज़ में पिन करने योग्य संस्करण-टैग वाले वेरिएंट नहीं हैं। स्वचालित चयनकर्ता आपके डिवाइस के लिए सबसे अच्छा एसेट चुनना जारी रखेगा।</string>
     <string name="variant_picker_load_failed">वेरिएंट लोड नहीं हो सका। अपना कनेक्शन जाँचें और पुनः प्रयास करें।</string>
     <string name="variant_picker_save_failed">आपका चयन सहेजा नहीं जा सका। पुनः प्रयास करें।</string>
     <string name="variant_picker_stale_title">वेरिएंट बदल गया — फिर से चुनें</string>
