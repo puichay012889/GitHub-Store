@@ -26,6 +26,7 @@ import zed.rainxch.core.domain.model.ApkPackageInfo
 import zed.rainxch.core.domain.model.FavoriteRepo
 import zed.rainxch.core.domain.model.GithubAsset
 import zed.rainxch.core.domain.model.GithubRelease
+import zed.rainxch.core.domain.model.InstalledApp
 import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.RateLimitException
 import zed.rainxch.core.domain.network.Downloader
@@ -503,7 +504,10 @@ class DetailsViewModel(
         }
     }
 
-    private fun recomputeAssetsForRelease(release: GithubRelease?): Pair<List<GithubAsset>, GithubAsset?> {
+    private fun recomputeAssetsForRelease(
+        release: GithubRelease?,
+        installedAppOverride: InstalledApp? = _state.value.installedApp,
+    ): Pair<List<GithubAsset>, GithubAsset?> {
         val installable =
             release
                 ?.assets
@@ -511,16 +515,25 @@ class DetailsViewModel(
                     installer.isAssetInstallable(asset.name)
                 }.orEmpty()
 
-        // If the user has a tracked variant for this app and the current
-        // release contains an asset with the same variant tag, default
-        // the picker to it. Falling back to the platform installer's
-        // arch-aware auto-pick keeps the existing behaviour for
-        // non-tracked repos and for tracked apps whose variant doesn't
-        // appear in this particular release.
-        val preferredVariant = _state.value.installedApp?.preferredAssetVariant
+        val trackedApp = installedAppOverride
         val variantMatch =
-            AssetVariant.resolvePreferredAsset(installable, preferredVariant)
-        val primary = variantMatch ?: installer.choosePrimaryAsset(installable)
+            AssetVariant.resolvePreferredAsset(
+                assets = installable,
+                pinnedVariant = trackedApp?.preferredAssetVariant,
+                pinnedTokens = AssetVariant.deserializeTokens(trackedApp?.preferredAssetTokens),
+                pinnedGlob = trackedApp?.assetGlobPattern,
+            )
+        val samePositionMatch =
+            if (variantMatch == null) {
+                AssetVariant.resolveBySamePosition(
+                    assets = installable,
+                    originalIndex = trackedApp?.pickedAssetIndex,
+                    siblingCountAtPickTime = trackedApp?.pickedAssetSiblingCount,
+                )
+            } else {
+                null
+            }
+        val primary = variantMatch ?: samePositionMatch ?: installer.choosePrimaryAsset(installable)
         return installable to primary
     }
 
@@ -818,9 +831,13 @@ class DetailsViewModel(
 
         if (installedApp != null && selectedRelease != null && installedApp.isUpdateAvailable) {
             val latestAsset =
-                _state.value.installableAssets.firstOrNull {
-                    it.name == installedApp.latestAssetName
-                } ?: _state.value.primaryAsset
+                _state.value.primaryAsset
+                    ?: _state.value.installableAssets.firstOrNull {
+                        it.name == installedApp.latestAssetName
+                    }
+                    ?: _state.value.installableAssets.firstOrNull {
+                        it.name == installedApp.installedAssetName
+                    }
 
             if (latestAsset != null) {
                 installAsset(
@@ -1952,7 +1969,7 @@ class DetailsViewModel(
                     allReleases.firstOrNull { !it.isPrerelease }
                         ?: allReleases.firstOrNull()
 
-                val (installable, primary) = recomputeAssetsForRelease(selectedRelease)
+                val (installable, primary) = recomputeAssetsForRelease(selectedRelease, installedApp)
 
                 val isObtainiumAvailable = installer.isObtainiumInstalled()
                 val isAppManagerAvailable = installer.isAppManagerInstalled()

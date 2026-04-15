@@ -1631,6 +1631,13 @@ class AppsViewModel(
     private fun validateWithAsset(asset: GithubAssetUi) {
         val selectedApp = _state.value.selectedDeviceApp ?: return
         val repoInfo = _state.value.fetchedRepoInfo ?: return
+        val siblingCount = _state.value.linkInstallableAssets.size
+        val pickedIndex =
+            _state.value.linkInstallableAssets
+                .indexOfFirst { it.id == asset.id }
+                .takeIf { it >= 0 }
+        val assetFilterRegex = _state.value.linkAssetFilter.takeIf { it.isNotBlank() }
+        val fallbackToOlder = _state.value.linkFallbackToOlder
 
         viewModelScope.launch {
             _state.update {
@@ -1671,13 +1678,14 @@ class AppsViewModel(
                 if (apkInfo == null) {
                     logger.debug("Could not extract APK info for validation, linking anyway")
                     appsRepository.linkAppToRepo(
-                    deviceApp = selectedApp.toDomain(),
-                    repoInfo = repoInfo.toDomain(),
-                    assetFilterRegex = _state.value.linkAssetFilter.takeIf { it.isNotBlank() },
-                    fallbackToOlderReleases = _state.value.linkFallbackToOlder,
-                    pickedAssetName = asset.name,
-                    pickedAssetSiblingCount = _state.value.linkInstallableAssets.size,
-                )
+                        deviceApp = selectedApp.toDomain(),
+                        repoInfo = repoInfo.toDomain(),
+                        assetFilterRegex = assetFilterRegex,
+                        fallbackToOlderReleases = fallbackToOlder,
+                        pickedAssetName = asset.name,
+                        pickedAssetSiblingCount = siblingCount,
+                        pickedAssetIndex = pickedIndex,
+                    )
                     _state.update {
                         it.copy(
                             linkDownloadProgress = null,
@@ -1732,10 +1740,11 @@ class AppsViewModel(
                 appsRepository.linkAppToRepo(
                     deviceApp = selectedApp.toDomain(),
                     repoInfo = repoInfo.toDomain(),
-                    assetFilterRegex = _state.value.linkAssetFilter.takeIf { it.isNotBlank() },
-                    fallbackToOlderReleases = _state.value.linkFallbackToOlder,
+                    assetFilterRegex = assetFilterRegex,
+                    fallbackToOlderReleases = fallbackToOlder,
                     pickedAssetName = asset.name,
-                    pickedAssetSiblingCount = _state.value.linkInstallableAssets.size,
+                    pickedAssetSiblingCount = siblingCount,
+                    pickedAssetIndex = pickedIndex,
                 )
                 _state.update {
                     it.copy(
