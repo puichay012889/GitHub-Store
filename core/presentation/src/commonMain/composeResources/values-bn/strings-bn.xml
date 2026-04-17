@@ -191,6 +191,9 @@
     <string name="forks">ফর্ক</string>
     <string name="stars">স্টার</string>
     <string name="issues">ইস্যু</string>
+    <string name="downloads">ডাউনলোড</string>
+    <string name="license">লাইসেন্স</string>
+    <string name="license_none">নেই</string>
 
     <!-- Misc -->
     <string name="by_author">%1$s দ্বারা</string>

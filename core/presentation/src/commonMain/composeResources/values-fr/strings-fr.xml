@@ -141,6 +141,9 @@
     <string name="forks">Forks</string>
     <string name="stars">Étoiles</string>
     <string name="issues">Tickets</string>
+    <string name="downloads">Téléchargements</string>
+    <string name="license">Licence</string>
+    <string name="license_none">Aucune</string>
 
     <string name="by_author">par %1$s</string>
     <string name="installed_version">• Installé : %1$s</string>

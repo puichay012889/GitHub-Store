@@ -26,6 +26,7 @@ fun BackendRepoResponse.toSummary(): GithubRepoSummary =
         releasesUrl = releasesUrl ?: "https://api.github.com/repos/$fullName/releases{/id}",
         updatedAt = latestReleaseDate ?: updatedAt ?: "",
         availablePlatforms = buildAvailablePlatforms(),
+        downloadCount = downloadCount,
     )
 
 private fun BackendRepoResponse.buildAvailablePlatforms(): List<DiscoveryPlatform> =

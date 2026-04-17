@@ -189,6 +189,9 @@
     <string name="forks">포크</string>
     <string name="stars">별</string>
     <string name="issues">이슈</string>
+    <string name="downloads">다운로드</string>
+    <string name="license">라이선스</string>
+    <string name="license_none">없음</string>
 
     <!-- Misc -->
     <string name="by_author">%1$s 작성</string>

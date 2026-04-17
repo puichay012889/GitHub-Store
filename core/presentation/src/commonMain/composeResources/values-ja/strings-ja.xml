@@ -142,6 +142,9 @@
     <string name="forks">フォーク</string>
     <string name="stars">スター</string>
     <string name="issues">課題</string>
+    <string name="downloads">ダウンロード</string>
+    <string name="license">ライセンス</string>
+    <string name="license_none">なし</string>
 
     <string name="by_author">%1$s 作</string>
     <string name="installed_version">• インストール済み: %1$s</string>

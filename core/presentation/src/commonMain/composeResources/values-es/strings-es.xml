@@ -141,6 +141,9 @@
     <string name="forks">Bifurcaciones</string>
     <string name="stars">Estrellas</string>
     <string name="issues">Problemas</string>
+    <string name="downloads">Descargas</string>
+    <string name="license">Licencia</string>
+    <string name="license_none">Ninguna</string>
 
     <string name="by_author">por %1$s</string>
     <string name="installed_version">• Instalado: %1$s</string>

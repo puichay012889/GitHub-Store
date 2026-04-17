@@ -7,4 +7,6 @@ data class RepoStats(
     val stars: Int,
     val forks: Int,
     val openIssues: Int,
+    val license: String? = null,
+    val totalDownloads: Long = 0,
 )

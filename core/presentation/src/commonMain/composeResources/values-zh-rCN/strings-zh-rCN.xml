@@ -143,6 +143,9 @@
     <string name="forks">分支</string>
     <string name="stars">星标</string>
     <string name="issues">问题</string>
+    <string name="downloads">下载量</string>
+    <string name="license">许可证</string>
+    <string name="license_none">无</string>
 
     <string name="by_author">由 %1$s</string>
     <string name="installed_version">• 已安装：%1$s</string>

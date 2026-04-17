@@ -17,7 +17,10 @@ import zed.rainxch.core.data.dto.RepoByIdNetwork
 import zed.rainxch.core.data.dto.RepoInfoNetwork
 import zed.rainxch.core.data.dto.UserProfileNetwork
 import zed.rainxch.details.data.dto.AttestationsResponse
+import zed.rainxch.core.data.dto.BackendRepoResponse
 import zed.rainxch.core.data.mappers.toDomain
+import zed.rainxch.core.data.mappers.toSummary
+import zed.rainxch.core.data.network.BackendApiClient
 import zed.rainxch.core.data.network.executeRequest
 import zed.rainxch.core.data.services.LocalizationManager
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
@@ -32,6 +35,7 @@ import zed.rainxch.details.domain.repository.DetailsRepository
 
 class DetailsRepositoryImpl(
     private val httpClient: HttpClient,
+    private val backendApiClient: BackendApiClient,
     private val localizationManager: LocalizationManager,
     private val logger: GitHubStoreLogger,
     private val cacheManager: CacheManager,
@@ -44,6 +48,8 @@ class DetailsRepositoryImpl(
     )
 
     private val readmeHelper = ReadmeLocalizationHelper(localizationManager)
+
+    private fun BackendRepoResponse.toBackendSummary(): GithubRepoSummary = toSummary()
 
     private fun RepoByIdNetwork.toGithubRepoSummary(): GithubRepoSummary =
         GithubRepoSummary(
@@ -107,7 +113,17 @@ class DetailsRepositoryImpl(
             return cached
         }
 
+        // Try backend first
+        backendApiClient.getRepo(owner, name).getOrNull()?.let { backendRepo ->
+            logger.debug("Backend hit for repo $owner/$name")
+            val result = backendRepo.toBackendSummary()
+            cacheManager.put(cacheKey, result, REPO_DETAILS)
+            return result
+        }
+
+        // Fallback to GitHub API
         return try {
+            logger.debug("Backend miss for $owner/$name, falling back to GitHub API")
             val result =
                 httpClient
                     .executeRequest<RepoByIdNetwork> {
@@ -308,7 +324,23 @@ class DetailsRepositoryImpl(
             return cached
         }
 
+        // Try backend first — avoids GitHub API for Chinese users
+        backendApiClient.getRepo(owner, repo).getOrNull()?.let { backendRepo ->
+            logger.debug("Backend hit for repo stats $owner/$repo")
+            val result = RepoStats(
+                stars = backendRepo.stargazersCount,
+                forks = backendRepo.forksCount,
+                openIssues = 0,
+                license = null,
+                totalDownloads = backendRepo.downloadCount,
+            )
+            cacheManager.put(cacheKey, result, REPO_STATS)
+            return result
+        }
+
+        // Fallback to GitHub API
         return try {
+            logger.debug("Backend miss for stats $owner/$repo, falling back to GitHub API")
             val info =
                 httpClient
                     .executeRequest<RepoInfoNetwork> {
@@ -322,6 +354,8 @@ class DetailsRepositoryImpl(
                     stars = info.stars,
                     forks = info.forks,
                     openIssues = info.openIssues,
+                    license = info.license?.spdxId ?: info.license?.name,
+                    totalDownloads = 0,
                 )
 
             cacheManager.put(cacheKey, result, REPO_STATS)

@@ -32,4 +32,5 @@ fun BackendRepoResponse.toCachedGithubRepoSummary(): CachedGithubRepoSummary =
             if (hasInstallersMacos) add(DiscoveryPlatform.Macos)
             if (hasInstallersLinux) add(DiscoveryPlatform.Linux)
         },
+        downloadCount = downloadCount,
     )

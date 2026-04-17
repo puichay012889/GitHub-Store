@@ -191,6 +191,9 @@
     <string name="forks">Forks</string>
     <string name="stars">Stelle</string>
     <string name="issues">Problemi</string>
+    <string name="downloads">Download</string>
+    <string name="license">Licenza</string>
+    <string name="license_none">Nessuna</string>
 
     <!-- Misc -->
     <string name="by_author">per %1$s</string>

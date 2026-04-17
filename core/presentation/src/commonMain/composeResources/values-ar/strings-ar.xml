@@ -232,6 +232,9 @@
     <string name="forks">التفرعات</string>
     <string name="stars">النجوم</string>
     <string name="issues">المشكلات</string>
+    <string name="downloads">التنزيلات</string>
+    <string name="license">الترخيص</string>
+    <string name="license_none">لا يوجد</string>
 
     <!-- Misc -->
     <string name="by_author">بواسطة %1$s</string>

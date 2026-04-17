@@ -28,6 +28,7 @@ data class BackendRepoResponse(
     val hasInstallersWindows: Boolean = false,
     val hasInstallersMacos: Boolean = false,
     val hasInstallersLinux: Boolean = false,
+    val downloadCount: Long = 0,
 )
 
 @Serializable

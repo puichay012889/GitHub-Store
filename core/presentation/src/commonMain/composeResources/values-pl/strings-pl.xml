@@ -160,6 +160,9 @@
     <string name="forks">Forki</string>
     <string name="stars">Gwiazdki</string>
     <string name="issues">Zgłoszenia</string>
+    <string name="downloads">Pobrania</string>
+    <string name="license">Licencja</string>
+    <string name="license_none">Brak</string>
 
     <string name="by_author">autor: %1$s</string>
     <string name="installed_version">• Zainstalowana: %1$s</string>

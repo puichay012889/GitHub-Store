@@ -18,4 +18,5 @@ fun AssetNetwork.toDomain(): GithubAsset =
                 avatarUrl = uploader.avatarUrl,
                 htmlUrl = uploader.htmlUrl,
             ),
+        downloadCount = downloadCount,
     )

@@ -240,6 +240,9 @@
     <string name="forks">Forks</string>
     <string name="stars">Stars</string>
     <string name="issues">Issues</string>
+    <string name="downloads">Downloads</string>
+    <string name="license">License</string>
+    <string name="license_none">None</string>
 
     <!-- Misc -->
     <string name="by_author">by %1$s</string>

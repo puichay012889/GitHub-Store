@@ -191,6 +191,9 @@
     <string name="forks">फोर्क्स</string>
     <string name="stars">स्टार्स</string>
     <string name="issues">इश्यूज़</string>
+    <string name="downloads">डाउनलोड</string>
+    <string name="license">लाइसेंस</string>
+    <string name="license_none">कोई नहीं</string>
 
     <!-- Misc -->
     <string name="by_author">द्वारा %1$s</string>

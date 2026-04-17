@@ -190,6 +190,9 @@
     <string name="forks">Forklar</string>
     <string name="stars">Yıldızlar</string>
     <string name="issues">Sorunlar</string>
+    <string name="downloads">İndirmeler</string>
+    <string name="license">Lisans</string>
+    <string name="license_none">Yok</string>
 
     <!-- Misc -->
     <string name="by_author">%1$s</string>

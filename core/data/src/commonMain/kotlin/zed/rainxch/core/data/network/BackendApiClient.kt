@@ -73,6 +73,16 @@ class BackendApiClient {
             }
         }
 
+    suspend fun getRepo(owner: String, name: String): Result<BackendRepoResponse> =
+        safeCall {
+            val response = httpClient.get("repo/$owner/$name")
+            if (response.status.isSuccess()) {
+                Result.success(response.body())
+            } else {
+                Result.failure(BackendException("HTTP ${response.status.value}"))
+            }
+        }
+
     private inline fun <T> safeCall(block: () -> Result<T>): Result<T> =
         try {
             block()

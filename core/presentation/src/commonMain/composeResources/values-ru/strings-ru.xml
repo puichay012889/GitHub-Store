@@ -156,6 +156,9 @@
     <string name="forks">Форки</string>
     <string name="stars">Звёзды</string>
     <string name="issues">Проблемы</string>
+    <string name="downloads">Загрузки</string>
+    <string name="license">Лицензия</string>
+    <string name="license_none">Нет</string>
 
     <string name="by_author">от %1$s</string>
     <string name="installed_version">• Установлено: %1$s</string>

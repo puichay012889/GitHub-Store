@@ -19,4 +19,5 @@ data class GithubRepoSummary(
     val updatedAt: String,
     val isFork: Boolean = false,
     val availablePlatforms: List<DiscoveryPlatform> = emptyList(),
+    val downloadCount: Long = 0,
 )

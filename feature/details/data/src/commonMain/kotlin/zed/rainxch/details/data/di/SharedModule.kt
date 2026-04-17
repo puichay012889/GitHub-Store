@@ -16,6 +16,7 @@ val detailsModule =
             DetailsRepositoryImpl(
                 logger = get(),
                 httpClient = get(),
+                backendApiClient = get(),
                 localizationManager = get(),
                 cacheManager = get(),
             )
