@@ -24,4 +24,8 @@ sealed interface TweaksEvent {
     data object OnSeenHistoryCleared : TweaksEvent
 
     data object OnAnalyticsIdReset : TweaksEvent
+
+    data object OnTranslationProviderSaved : TweaksEvent
+
+    data object OnYoudaoCredentialsSaved : TweaksEvent
 }

@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import zed.rainxch.core.data.local.db.dao.InstalledAppDao
+import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
 import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.RateLimitException
@@ -29,12 +30,14 @@ import zed.rainxch.devprofile.domain.model.DeveloperRepository
 import zed.rainxch.devprofile.domain.repository.DeveloperProfileRepository
 
 class DeveloperProfileRepositoryImpl(
-    private val httpClient: HttpClient,
+    private val clientProvider: GitHubClientProvider,
     private val platform: Platform,
     private val installedAppsDao: InstalledAppDao,
     private val favouritesRepository: FavouritesRepository,
     private val logger: GitHubStoreLogger,
 ) : DeveloperProfileRepository {
+    private val httpClient: HttpClient get() = clientProvider.client
+
     override suspend fun getDeveloperProfile(username: String): Result<DeveloperProfile> {
         return withContext(Dispatchers.IO) {
             try {

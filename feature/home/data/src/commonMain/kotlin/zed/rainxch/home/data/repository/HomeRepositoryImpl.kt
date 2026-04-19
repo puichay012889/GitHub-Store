@@ -28,6 +28,7 @@ import zed.rainxch.core.data.cache.CacheManager.CacheTtl.HOME_REPOS
 import zed.rainxch.core.data.dto.GithubRepoNetworkModel
 import zed.rainxch.core.data.dto.GithubRepoSearchResponse
 import zed.rainxch.core.data.mappers.toSummary
+import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.data.network.executeRequest
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
 import zed.rainxch.core.domain.model.DiscoveryPlatform
@@ -43,12 +44,14 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 
 class HomeRepositoryImpl(
-    private val httpClient: HttpClient,
+    private val clientProvider: GitHubClientProvider,
     private val devicePlatform: Platform,
     private val cachedDataSource: CachedRepositoriesDataSource,
     private val logger: GitHubStoreLogger,
     private val cacheManager: CacheManager,
 ) : HomeRepository {
+    private val httpClient: HttpClient get() = clientProvider.client
+
     private fun cacheKey(
         category: String,
         requestedPlatform: DiscoveryPlatform,

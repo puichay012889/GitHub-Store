@@ -14,6 +14,7 @@ import zed.rainxch.core.data.network.ProxyManager
 import zed.rainxch.core.data.network.resolveAndroidSystemProxy
 import zed.rainxch.core.domain.model.DownloadProgress
 import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.model.ProxyScope
 import zed.rainxch.core.domain.network.Downloader
 import java.io.File
 import java.net.Authenticator
@@ -26,7 +27,6 @@ import java.util.concurrent.TimeUnit
 
 class AndroidDownloader(
     private val files: FileLocationsProvider,
-    private val proxyManager: ProxyManager = ProxyManager,
 ) : Downloader {
     private val activeDownloads = ConcurrentHashMap<String, Call>()
     private val activeFileNames = ConcurrentHashMap<String, String>()
@@ -40,7 +40,7 @@ class AndroidDownloader(
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .apply {
-                when (val config = proxyManager.currentProxyConfig.value) {
+                when (val config = ProxyManager.currentConfig(ProxyScope.DOWNLOAD)) {
                     is ProxyConfig.None -> {
                         proxy(Proxy.NO_PROXY)
                     }

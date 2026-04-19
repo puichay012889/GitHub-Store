@@ -13,6 +13,7 @@ import zed.rainxch.core.data.cache.CacheManager
 import zed.rainxch.core.data.cache.CacheManager.CacheTtl.USER_PROFILE
 import zed.rainxch.core.data.data_source.TokenStore
 import zed.rainxch.core.data.dto.UserProfileNetwork
+import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.data.network.executeRequest
 import zed.rainxch.core.data.services.FileLocationsProvider
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
@@ -25,11 +26,13 @@ import zed.rainxch.profile.domain.repository.ProfileRepository
 class ProfileRepositoryImpl(
     private val authenticationState: AuthenticationState,
     private val tokenStore: TokenStore,
-    private val httpClient: HttpClient,
+    private val clientProvider: GitHubClientProvider,
     private val cacheManager: CacheManager,
     private val logger: GitHubStoreLogger,
     private val fileLocationsProvider: FileLocationsProvider,
 ) : ProfileRepository {
+    private val httpClient: HttpClient get() = clientProvider.client
+
     companion object {
         private const val CACHE_KEY = "profile:me"
     }

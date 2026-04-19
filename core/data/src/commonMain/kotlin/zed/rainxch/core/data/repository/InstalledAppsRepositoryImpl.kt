@@ -19,6 +19,7 @@ import zed.rainxch.core.data.local.db.dao.UpdateHistoryDao
 import zed.rainxch.core.data.local.db.entities.UpdateHistoryEntity
 import zed.rainxch.core.data.mappers.toDomain
 import zed.rainxch.core.data.mappers.toEntity
+import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.data.network.executeRequest
 import zed.rainxch.core.domain.model.GithubAsset
 import zed.rainxch.core.domain.model.GithubRelease
@@ -35,8 +36,14 @@ class InstalledAppsRepositoryImpl(
     private val installedAppsDao: InstalledAppDao,
     private val historyDao: UpdateHistoryDao,
     private val installer: Installer,
-    private val httpClient: HttpClient,
+    private val clientProvider: GitHubClientProvider,
 ) : InstalledAppsRepository {
+    // Reads the current Ktor client at every call site so any proxy
+    // change (ProxyManager rebuilds the client via [clientProvider])
+    // is picked up immediately on the next request without requiring
+    // the repository itself to be reconstructed.
+    private val httpClient: HttpClient get() = clientProvider.client
+
     private companion object {
         /**
          * How many releases the update checker fetches in one request.

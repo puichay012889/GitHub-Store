@@ -426,6 +426,13 @@
     <string name="proxy_test_error_auth_required">প্রক্সি প্রমাণীকরণ প্রয়োজন।</string>
     <string name="proxy_test_error_status">অপ্রত্যাশিত প্রতিক্রিয়া: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">সংযোগ পরীক্ষা ব্যর্থ</string>
+    <string name="proxy_scope_intro">প্রতিটি বিভাগ তার নিজস্ব প্রক্সি ব্যবহার করতে পারে। সেগুলি স্বাধীনভাবে কনফিগার করুন।</string>
+    <string name="proxy_scope_discovery_title">আবিষ্কার (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">হোম, অনুসন্ধান, রেপো বিবরণ এবং আপডেট চেক</string>
+    <string name="proxy_scope_download_title">ডাউনলোড</string>
+    <string name="proxy_scope_download_description">APK ডাউনলোড এবং স্বয়ংক্রিয় আপডেট</string>
+    <string name="proxy_scope_translation_title">অনুবাদ</string>
+    <string name="proxy_scope_translation_description">README অনুবাদ পরিষেবা</string>
 
 
     <!-- Track app feature -->
@@ -621,7 +628,7 @@
     <string name="seen_badge">দেখা হয়েছে</string>
     <string name="privacy_section">গোপনীয়তা</string>
     <string name="telemetry_title">অনুসন্ধান উন্নত করতে সহায়তা করুন</string>
-    <string name="telemetry_description">সুপারিশ উন্নত করতে বেনামী ব্যবহার ডেটা শেয়ার করুন (অনুসন্ধান, ইনস্টল)। কোনও ব্যক্তিগত তথ্য সংগ্রহ করা হয় না।</string>
+    <string name="telemetry_description">পুনরায় সেট করা যায় এমন একটি বিশ্লেষণ আইডির সাথে যুক্ত ব্যবহার ডেটা (অনুসন্ধান, ইনস্টল, ইন্টারঅ্যাকশন) শেয়ার করুন। অ্যাকাউন্ট বিবরণ শেয়ার করা হয় না।</string>
     <string name="reset_analytics_id_title">বিশ্লেষণ আইডি রিসেট করুন</string>
     <string name="reset_analytics_id_description">একটি নতুন বেনামী আইডি তৈরি করুন, অতীতের টেলিমেট্রির সাথে সংযোগ বিচ্ছিন্ন করে।</string>
     <string name="analytics_id_reset">বিশ্লেষণ আইডি রিসেট করা হয়েছে</string>
@@ -696,4 +703,18 @@
     <string name="install">ইনস্টল</string>
     <string name="ready_to_install">ইনস্টলের জন্য প্রস্তুত</string>
     <string name="install_ready">ইনস্টল (প্রস্তুত)</string>
+
+    <!-- Translation provider selection -->
+    <string name="section_translation">অনুবাদ</string>
+    <string name="translation_intro">README অনুবাদের জন্য ব্যবহৃত পরিষেবা নির্বাচন করুন।</string>
+    <string name="translation_provider_title">অনুবাদ পরিষেবা</string>
+    <string name="translation_provider_description">Google বিশ্বব্যাপী কনফিগারেশন ছাড়াই কাজ করে। Youdao মূল ভূখণ্ডের চীন থেকে কাজ করে কিন্তু Youdao ডেভেলপার পোর্টাল থেকে API শংসাপত্র প্রয়োজন।</string>
+    <string name="translation_provider_google">Google</string>
+    <string name="translation_provider_youdao">Youdao</string>
+    <string name="translation_provider_saved">অনুবাদ পরিষেবা আপডেট করা হয়েছে</string>
+    <string name="translation_youdao_help">App Key এবং App Secret পেতে ai.youdao.com এ সাইন আপ করুন। সাধারণ ব্যবহারের জন্য বিনামূল্যের স্তর যথেষ্ট।</string>
+    <string name="translation_youdao_app_key">App Key</string>
+    <string name="translation_youdao_app_secret">App Secret</string>
+    <string name="translation_youdao_save">শংসাপত্র সংরক্ষণ করুন</string>
+    <string name="translation_youdao_saved">Youdao শংসাপত্র সংরক্ষিত হয়েছে</string>
 </resources>

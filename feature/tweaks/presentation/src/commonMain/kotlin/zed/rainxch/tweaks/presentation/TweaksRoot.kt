@@ -33,13 +33,7 @@ import zed.rainxch.core.presentation.locals.LocalBottomNavigationHeight
 import zed.rainxch.core.presentation.locals.LocalBottomNavigationLiquid
 import zed.rainxch.core.presentation.theme.GithubStoreTheme
 import zed.rainxch.core.presentation.utils.ObserveAsEvents
-import zed.rainxch.githubstore.core.presentation.res.Res
-import zed.rainxch.githubstore.core.presentation.res.downloads_cleared
-import zed.rainxch.githubstore.core.presentation.res.proxy_saved
-import zed.rainxch.githubstore.core.presentation.res.proxy_test_success
-import zed.rainxch.githubstore.core.presentation.res.analytics_id_reset
-import zed.rainxch.githubstore.core.presentation.res.seen_history_cleared
-import zed.rainxch.githubstore.core.presentation.res.tweaks_title
+import zed.rainxch.githubstore.core.presentation.res.*
 import zed.rainxch.tweaks.presentation.components.ClearDownloadsDialog
 import zed.rainxch.tweaks.presentation.components.sections.about
 import zed.rainxch.tweaks.presentation.components.sections.othersSection
@@ -114,6 +108,18 @@ fun TweaksRoot(viewModel: TweaksViewModel = koinViewModel()) {
             TweaksEvent.OnAnalyticsIdReset -> {
                 coroutineScope.launch {
                     snackbarState.showSnackbar(getString(Res.string.analytics_id_reset))
+                }
+            }
+
+            TweaksEvent.OnTranslationProviderSaved -> {
+                coroutineScope.launch {
+                    snackbarState.showSnackbar(getString(Res.string.translation_provider_saved))
+                }
+            }
+
+            TweaksEvent.OnYoudaoCredentialsSaved -> {
+                coroutineScope.launch {
+                    snackbarState.showSnackbar(getString(Res.string.translation_youdao_saved))
                 }
             }
         }

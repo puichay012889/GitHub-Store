@@ -170,12 +170,12 @@
 
     <string name="log_prepare_appmanager">Préparation pour AppManager</string>
     <string name="log_opened_appmanager">Ouvert dans AppManager</string>
-    <string name="log_permission_blocked">Permission d\'installation bloquée par la politique de l\'appareil</string>
-    <string name="log_opened_external_installer">Ouvert dans l\'installateur externe</string>
-    <string name="install_permission_unavailable">Permission d\'installation indisponible</string>
-    <string name="install_permission_blocked_message">L\'APK a été téléchargé avec succès mais cet appareil n\'autorise pas l\'installation directe. Voulez-vous l\'ouvrir avec un installateur externe ?</string>
+    <string name="log_permission_blocked">Permission d'installation bloquée par la politique de l'appareil</string>
+    <string name="log_opened_external_installer">Ouvert dans l'installateur externe</string>
+    <string name="install_permission_unavailable">Permission d'installation indisponible</string>
+    <string name="install_permission_blocked_message">L'APK a été téléchargé avec succès mais cet appareil n'autorise pas l'installation directe. Voulez-vous l'ouvrir avec un installateur externe ?</string>
     <string name="open_with_external_installer">Ouvrir avec un installateur externe</string>
-    <string name="external_installer_description">Utiliser une application tierce pour installer l\'APK</string>
+    <string name="external_installer_description">Utiliser une application tierce pour installer l'APK</string>
 
     <string name="error_generic">Erreur : %1$s</string>
     <string name="error_asset_not_supported">Type de fichier .%1$s non pris en charge</string>
@@ -324,7 +324,7 @@
     <string name="open_repository">Ouvrir le dépôt</string>
     <string name="open_in_browser">Ouvrir dans le navigateur</string>
     <string name="cancel_download">Annuler le téléchargement</string>
-    <string name="show_install_options">Afficher les options d\'installation</string>
+    <string name="show_install_options">Afficher les options d'installation</string>
 
     <!-- Errors & states -->
     <string name="no_description">Aucune description fournie.</string>
@@ -345,10 +345,10 @@
     <string name="uninstall">Désinstaller</string>
     <string name="open_app">Ouvrir</string>
     <string name="downgrade_requires_uninstall">La rétrogradation nécessite la désinstallation</string>
-    <string name="downgrade_warning_message">L\'installation de la version %1$s nécessite la désinstallation de la version actuelle (%2$s). Les données de l\'application seront perdues.</string>
-    <string name="uninstall_first">Désinstaller d\'abord</string>
+    <string name="downgrade_warning_message">L'installation de la version %1$s nécessite la désinstallation de la version actuelle (%2$s). Les données de l'application seront perdues.</string>
+    <string name="uninstall_first">Désinstaller d'abord</string>
     <string name="install_version">Installer %1$s</string>
-    <string name="failed_to_open_app">Impossible d\'ouvrir %1$s</string>
+    <string name="failed_to_open_app">Impossible d'ouvrir %1$s</string>
     <string name="failed_to_uninstall">Impossible de désinstaller %1$s</string>
 
     <!-- Version picker -->
@@ -357,7 +357,7 @@
     <!-- Apps feature - Last checked -->
     <string name="last_checked">Dernière vérification : %1$s</string>
     <string name="last_checked_never">Jamais vérifié</string>
-    <string name="last_checked_just_now">à l\'instant</string>
+    <string name="last_checked_just_now">à l'instant</string>
     <string name="last_checked_minutes_ago">il y a %1$d min</string>
     <string name="last_checked_hours_ago">il y a %1$d h</string>
     <string name="checking_for_updates">Vérification des mises à jour…</string>
@@ -370,11 +370,11 @@
     <string name="proxy_socks">SOCKS</string>
     <string name="proxy_host">Hôte</string>
     <string name="proxy_port">Port</string>
-    <string name="proxy_username">Nom d\'utilisateur (facultatif)</string>
+    <string name="proxy_username">Nom d'utilisateur (facultatif)</string>
     <string name="proxy_password">Mot de passe (facultatif)</string>
     <string name="proxy_save">Sauvegarder le Proxy</string>
     <string name="proxy_saved">Paramètres du proxy enregistrés</string>
-    <string name="proxy_system_description">Utilise les paramètres proxy de l\'appareil</string>
+    <string name="proxy_system_description">Utilise les paramètres proxy de l'appareil</string>
     <string name="proxy_port_error">Le port doit être entre 1 et 65535</string>
     <string name="proxy_none_description">Connexion directe, pas de proxy</string>
     <string name="failed_to_save_proxy_settings">Échec de l'enregistrement des paramètres du proxy</string>
@@ -385,23 +385,30 @@
     <string name="proxy_test">Tester</string>
     <string name="proxy_test_in_progress">Test en cours…</string>
     <string name="proxy_test_success">Connexion OK (%1$d ms)</string>
-    <string name="proxy_test_error_dns">Impossible de résoudre l\'hôte. Vérifiez l\'adresse du proxy.</string>
+    <string name="proxy_test_error_dns">Impossible de résoudre l'hôte. Vérifiez l'adresse du proxy.</string>
     <string name="proxy_test_error_unreachable">Impossible de joindre le serveur proxy.</string>
     <string name="proxy_test_error_timeout">Délai de connexion dépassé.</string>
     <string name="proxy_test_error_auth_required">Authentification proxy requise.</string>
     <string name="proxy_test_error_status">Réponse inattendue : HTTP %1$d</string>
     <string name="proxy_test_error_unknown">Échec du test de connexion</string>
+    <string name="proxy_scope_intro">Chaque catégorie peut utiliser son propre proxy. Configurez-les indépendamment.</string>
+    <string name="proxy_scope_discovery_title">Découverte (API GitHub)</string>
+    <string name="proxy_scope_discovery_description">Accueil, recherche, détails du dépôt et vérifications de mise à jour</string>
+    <string name="proxy_scope_download_title">Téléchargements</string>
+    <string name="proxy_scope_download_description">Téléchargements APK et mises à jour automatiques</string>
+    <string name="proxy_scope_translation_title">Traduction</string>
+    <string name="proxy_scope_translation_description">Service de traduction du README</string>
 
 
     <!-- Track app feature -->
     <string name="track_this_app">Suivre cette app</string>
     <string name="app_tracked_successfully">App ajoutée à la liste de suivi</string>
-    <string name="failed_to_track_app">Échec du suivi de l\'app : %1$s</string>
-    <string name="already_tracked">L\'app est déjà suivie</string>
+    <string name="failed_to_track_app">Échec du suivi de l'app : %1$s</string>
+    <string name="already_tracked">L'app est déjà suivie</string>
 
     <!-- Profile section -->
     <string name="profile_sign_in_title">Se connecter à GitHub</string>
-    <string name="profile_sign_in_description">Débloquez l\'expérience complète. Gérez vos apps, synchronisez vos préférences et naviguez plus vite.</string>
+    <string name="profile_sign_in_description">Débloquez l'expérience complète. Gérez vos apps, synchronisez vos préférences et naviguez plus vite.</string>
     <string name="profile_repos">Dépôts</string>
     <string name="profile_login">Connexion</string>
     <string name="profile_stars_description">Vos dépôts étoilés sur GitHub</string>
@@ -410,15 +417,15 @@
     <!-- Session expired dialog -->
     <string name="session_expired_title">Session expirée</string>
     <string name="session_expired_message">Votre session GitHub a expiré ou le jeton a été révoqué. Veuillez vous reconnecter pour continuer à utiliser les fonctionnalités authentifiées.</string>
-    <string name="session_expired_hint">Vous pouvez toujours naviguer en tant qu\'invité avec des requêtes API limitées.</string>
+    <string name="session_expired_hint">Vous pouvez toujours naviguer en tant qu'invité avec des requêtes API limitées.</string>
     <string name="sign_in_again">Se reconnecter</string>
-    <string name="continue_as_guest">Continuer en tant qu\'invité</string>
-    <string name="logout_revocation_note">Cela effacera votre session locale et les données en cache. Pour révoquer complètement l\'accès, visitez GitHub Settings > Applications.</string>
+    <string name="continue_as_guest">Continuer en tant qu'invité</string>
+    <string name="logout_revocation_note">Cela effacera votre session locale et les données en cache. Pour révoquer complètement l'accès, visitez GitHub Settings > Applications.</string>
     <string name="auth_code_expires_in">Le code expire dans %1$s</string>
-    <string name="auth_error_code_expired">Le code de l\'appareil a expiré.</string>
+    <string name="auth_error_code_expired">Le code de l'appareil a expiré.</string>
     <string name="auth_hint_try_again">Veuillez réessayer de vous connecter pour obtenir un nouveau code.</string>
     <string name="auth_hint_check_connection">Vérifiez votre connexion internet et réessayez.</string>
-    <string name="auth_hint_denied">Vous avez refusé la demande d\'autorisation. Réessayez si c\'était involontaire.</string>
+    <string name="auth_hint_denied">Vous avez refusé la demande d'autorisation. Réessayez si c'était involontaire.</string>
     <string name="auth_check_status">J’ai déjà autorisé</string>
     <string name="auth_polling_status">Vérification…</string>
     <string name="auth_rate_limited">Limite atteinte — nouvelle tentative dans %1$d s</string>
@@ -434,7 +441,7 @@
     <!-- Translation feature -->
     <string name="translate">Traduire</string>
     <string name="translating">Traduction…</string>
-    <string name="show_original">Afficher l\'original</string>
+    <string name="show_original">Afficher l'original</string>
     <string name="translated_to">Traduit en %1$s</string>
     <string name="translate_to">Traduire en…</string>
     <string name="search_language">Rechercher une langue</string>
@@ -444,9 +451,9 @@
     <string name="open_github_link">Ouvrir le lien GitHub</string>
     <string name="clipboard_link_detected">Lien GitHub détecté dans le presse-papiers</string>
     <string name="auto_detect_clipboard_links">Détecter les liens du presse-papiers</string>
-    <string name="auto_detect_clipboard_description">Détecter automatiquement les liens GitHub du presse-papiers lors de l\'ouverture de la recherche</string>
+    <string name="auto_detect_clipboard_description">Détecter automatiquement les liens GitHub du presse-papiers lors de l'ouverture de la recherche</string>
     <string name="detected_links">Liens détectés</string>
-    <string name="open_in_app">Ouvrir dans l\'app</string>
+    <string name="open_in_app">Ouvrir dans l'app</string>
     <string name="no_github_link_in_clipboard">Aucun lien GitHub trouvé dans le presse-papiers</string>
 
     <string name="storage">Stockage</string>
@@ -493,17 +500,17 @@
     <!-- Installation method settings -->
     <string name="section_installation">Installation</string>
     <string name="installer_type_default">Par défaut</string>
-    <string name="installer_type_default_description">Boîte de dialogue d\'installation système standard</string>
+    <string name="installer_type_default_description">Boîte de dialogue d'installation système standard</string>
     <string name="installer_type_shizuku">Shizuku</string>
     <string name="installer_type_shizuku_description">Installation silencieuse sans confirmation</string>
-    <string name="shizuku_status_not_installed">Shizuku n\'est pas installé</string>
-    <string name="shizuku_status_not_running">Shizuku n\'est pas en cours d\'exécution</string>
+    <string name="shizuku_status_not_installed">Shizuku n'est pas installé</string>
+    <string name="shizuku_status_not_running">Shizuku n'est pas en cours d'exécution</string>
     <string name="shizuku_status_permission_needed">Autorisation requise</string>
     <string name="shizuku_status_ready">Prêt</string>
-    <string name="shizuku_grant_permission">Accorder l\'autorisation</string>
-    <string name="shizuku_install_hint">Installez Shizuku pour activer l\'installation silencieuse</string>
-    <string name="shizuku_start_hint">Démarrez Shizuku pour activer l\'installation silencieuse</string>
-    <string name="shizuku_install_failed_fallback">L\'installation via Shizuku a échoué, utilisation de l\'installateur standard</string>
+    <string name="shizuku_grant_permission">Accorder l'autorisation</string>
+    <string name="shizuku_install_hint">Installez Shizuku pour activer l'installation silencieuse</string>
+    <string name="shizuku_start_hint">Démarrez Shizuku pour activer l'installation silencieuse</string>
+    <string name="shizuku_install_failed_fallback">L'installation via Shizuku a échoué, utilisation de l'installateur standard</string>
 
     <string name="auto_update_title">Mise à jour automatique</string>
     <string name="auto_update_description">Télécharger et installer automatiquement les mises à jour en arrière-plan via Shizuku</string>
@@ -517,7 +524,7 @@
     <string name="interval_24h">24h</string>
 
     <string name="add_by_link">Ajouter par lien</string>
-    <string name="link_app_title">Lier l\'app au dépôt</string>
+    <string name="link_app_title">Lier l'app au dépôt</string>
     <string name="pick_installed_app">Choisissez une app installée à lier à un dépôt GitHub</string>
     <string name="search_apps_hint">Rechercher des apps…</string>
     <string name="enter_repo_url">URL du dépôt GitHub</string>
@@ -525,12 +532,12 @@
     <string name="validating_repo">Validation…</string>
     <string name="link_and_track">Lier et suivre</string>
     <string name="checking_release">Vérification de la dernière version…</string>
-    <string name="downloading_for_verification">Téléchargement de l\'APK pour vérification…</string>
+    <string name="downloading_for_verification">Téléchargement de l'APK pour vérification…</string>
     <string name="verifying_signing_key">Vérification de la clé de signature…</string>
-    <string name="package_name_mismatch">Nom de paquet différent : l\'APK est %1$s, mais l\'app sélectionnée est %2$s</string>
-    <string name="signing_key_mismatch_link">Clé de signature différente : l\'APK de ce dépôt a été signé par un autre développeur</string>
-    <string name="select_asset_title">Sélectionner l\'installateur</string>
-    <string name="select_asset_description">Choisissez l\'APK à vérifier avec votre app installée</string>
+    <string name="package_name_mismatch">Nom de paquet différent : l'APK est %1$s, mais l'app sélectionnée est %2$s</string>
+    <string name="signing_key_mismatch_link">Clé de signature différente : l'APK de ce dépôt a été signé par un autre développeur</string>
+    <string name="select_asset_title">Sélectionner l'installateur</string>
+    <string name="select_asset_description">Choisissez l'APK à vérifier avec votre app installée</string>
     <string name="download_failed">Échec du téléchargement</string>
     <string name="export_apps">Exporter</string>
     <string name="import_apps">Importer</string>
@@ -539,16 +546,16 @@
     <string name="import_apps_hint">Collez le JSON exporté ici…</string>
     <string name="include_pre_releases_title">Inclure les pré-versions</string>
     <string name="include_pre_releases_description">Suivre les versions pré-release lors de la vérification des mises à jour. Désactivé, seules les versions stables sont prises en compte.</string>
-    <string name="confirm_uninstall_title">Désinstaller l\'app ?</string>
-    <string name="confirm_uninstall_message">Êtes-vous sûr de vouloir désinstaller %1$s ? Cette action est irréversible et les données de l\'app pourraient être perdues.</string>
+    <string name="confirm_uninstall_title">Désinstaller l'app ?</string>
+    <string name="confirm_uninstall_message">Êtes-vous sûr de vouloir désinstaller %1$s ? Cette action est irréversible et les données de l'app pourraient être perdues.</string>
     <string name="invalid_github_url">URL GitHub invalide. Utilisez le format : github.com/owner/repo</string>
     <string name="repo_not_found">Dépôt introuvable : %1$s/%2$s</string>
-    <string name="rate_limit_try_again">Limite de l\'API GitHub dépassée. Réessayez plus tard.</string>
+    <string name="rate_limit_try_again">Limite de l'API GitHub dépassée. Réessayez plus tard.</string>
     <string name="failed_to_link">Échec de la liaison : %1$s</string>
     <string name="failed_to_load_apps">Échec du chargement des apps installées</string>
     <string name="app_linked_success">%1$s liée à %2$s/%3$s</string>
-    <string name="export_failed">Échec de l\'exportation : %1$s</string>
-    <string name="import_failed">Échec de l\'importation : %1$s</string>
+    <string name="export_failed">Échec de l'exportation : %1$s</string>
+    <string name="import_failed">Échec de l'importation : %1$s</string>
     <string name="imported_apps_summary">%1$d apps importées</string>
     <string name="imported_skipped">, %1$d ignorées</string>
     <string name="imported_failed">, %1$d échouées</string>
@@ -567,26 +574,26 @@
     <string name="translation_error_retry">Réessayer</string>
     <string name="translated_from">Détection automatique : %1$s</string>
     <string name="select_language">Sélectionner la langue</string>
-    <string name="update_package_mismatch">Incompatibilité de paquet : l\'APK est %1$s, mais l\'application installée est %2$s. Mise à jour bloquée.</string>
+    <string name="update_package_mismatch">Incompatibilité de paquet : l'APK est %1$s, mais l'application installée est %2$s. Mise à jour bloquée.</string>
     <string name="update_signing_key_mismatch">Incompatibilité de clé de signature : la mise à jour a été signée par un développeur différent. Mise à jour bloquée.</string>
     <string name="liquid_glass_option_title">Effet verre liquide</string>
-    <string name="liquid_glass_option_description">Améliorez l\'interface avec une apparence vitreuse et fluide</string>
+    <string name="liquid_glass_option_description">Améliorez l'interface avec une apparence vitreuse et fluide</string>
 
     <string name="scrollbar_option_title">Barre de défilement</string>
     <string name="scrollbar_option_description">Afficher la barre de défilement dans les listes défilantes (bureau)</string>
 
     <string name="hide_seen_title">Masquer les dépôts consultés</string>
     <string name="hide_seen_description">Masquer les dépôts que vous avez déjà consultés des flux de découverte</string>
-    <string name="clear_seen_history">Effacer l\'historique des consultations</string>
-    <string name="clear_seen_history_description">Réinitialiser tous les dépôts consultés pour qu\'ils réapparaissent dans les flux</string>
+    <string name="clear_seen_history">Effacer l'historique des consultations</string>
+    <string name="clear_seen_history_description">Réinitialiser tous les dépôts consultés pour qu'ils réapparaissent dans les flux</string>
     <string name="seen_history_cleared">Historique des consultations effacé</string>
     <string name="seen_badge">Consulté</string>
     <string name="privacy_section">Confidentialité</string>
     <string name="telemetry_title">Aider à améliorer la recherche</string>
-    <string name="telemetry_description">Partager des données d\'utilisation anonymes (recherches, installations) pour améliorer les recommandations. Aucune information personnelle n\'est collectée.</string>
-    <string name="reset_analytics_id_title">Réinitialiser l\'ID d\'analytique</string>
+    <string name="telemetry_description">Partager des données d\'utilisation (recherches, installations, interactions) associées à un identifiant d\'analyse réinitialisable. Aucun détail de compte n\'est partagé.</string>
+    <string name="reset_analytics_id_title">Réinitialiser l'ID d'analytique</string>
     <string name="reset_analytics_id_description">Générer un nouvel ID anonyme, coupant le lien avec la télémétrie passée.</string>
-    <string name="analytics_id_reset">ID d\'analytique réinitialisé</string>
+    <string name="analytics_id_reset">ID d'analytique réinitialisé</string>
 
     <string name="recently_viewed">Récemment consultés</string>
     <string name="profile_recently_viewed_description">Dépôts que vous avez visités</string>
@@ -607,7 +614,7 @@
     <string name="pre_releases">Pré-versions</string>
 
     <!-- Monorepo support -->
-    <string name="asset_filter_label">Filtre d\'assets</string>
+    <string name="asset_filter_label">Filtre d'assets</string>
     <string name="asset_filter_placeholder">ex : ente-auth</string>
     <string name="asset_filter_help">Seuls les assets correspondant à ce motif (regex) seront installés. Utile pour les monorepos contenant plusieurs apps.</string>
     <string name="asset_filter_invalid">Regex invalide</string>
@@ -618,16 +625,16 @@
         <item quantity="other">%1$d sur %2$d assets affichés</item>
     </plurals>
     <string name="fallback_older_releases_title">Recourir aux anciennes versions</string>
-    <string name="fallback_older_releases_description">Parcourir les versions précédentes jusqu\'à en trouver une qui corresponde au filtre. Nécessaire pour les monorepos où la dernière version appartient à une autre app.</string>
+    <string name="fallback_older_releases_description">Parcourir les versions précédentes jusqu'à en trouver une qui corresponde au filtre. Nécessaire pour les monorepos où la dernière version appartient à une autre app.</string>
     <string name="advanced_settings_title">Filtre avancé</string>
     <string name="advanced_settings_description">Configurez comment cette app est identifiée dans le dépôt. Utile lorsque le dépôt contient plusieurs apps.</string>
     <string name="advanced_settings_open">Ouvrir le filtre avancé</string>
     <string name="advanced_save">Enregistrer</string>
     <string name="advanced_preview_title">Aperçu</string>
-    <string name="advanced_preview_refresh">Actualiser l\'aperçu</string>
+    <string name="advanced_preview_refresh">Actualiser l'aperçu</string>
     <string name="advanced_preview_pending">Saisissez un filtre pour prévisualiser les assets correspondants.</string>
-    <string name="advanced_preview_no_match">Aucune version récente ne contient d\'asset correspondant. Activez le repli vers les anciennes versions ou ajustez le regex.</string>
-    <string name="advanced_preview_failed">Impossible de charger l\'aperçu. Vérifiez votre connexion et réessayez.</string>
+    <string name="advanced_preview_no_match">Aucune version récente ne contient d'asset correspondant. Activez le repli vers les anciennes versions ou ajustez le regex.</string>
+    <string name="advanced_preview_failed">Impossible de charger l'aperçu. Vérifiez votre connexion et réessayez.</string>
     <plurals name="advanced_preview_release">
         <item quantity="one">Correspondance dans %1$s · %2$d asset</item>
         <item quantity="other">Correspondance dans %1$s · %2$d assets</item>
@@ -635,11 +642,11 @@
 
     <!-- Preferred-variant feature -->
     <string name="variant_picker_title">Variante préférée</string>
-    <string name="variant_picker_description">Choisissez la variante d\'APK à installer pour les mises à jour. Le choix est mémorisé entre les versions.</string>
+    <string name="variant_picker_description">Choisissez la variante d'APK à installer pour les mises à jour. Le choix est mémorisé entre les versions.</string>
     <string name="variant_picker_no_assets">Aucun asset installable dans la dernière version.</string>
-    <string name="variant_picker_no_pinnable">Cette version n\'a pas de variantes étiquetées par version à épingler. Le sélecteur automatique continuera à choisir le meilleur asset pour votre appareil.</string>
+    <string name="variant_picker_no_pinnable">Cette version n'a pas de variantes étiquetées par version à épingler. Le sélecteur automatique continuera à choisir le meilleur asset pour votre appareil.</string>
     <string name="variant_picker_load_failed">Impossible de charger les variantes. Vérifiez votre connexion et réessayez.</string>
-    <string name="variant_picker_save_failed">Impossible d\'enregistrer votre choix. Réessayez.</string>
+    <string name="variant_picker_save_failed">Impossible d'enregistrer votre choix. Réessayez.</string>
     <string name="variant_picker_stale_title">La variante a changé — choisissez à nouveau</string>
     <string name="variant_picker_stale_was">Avant : %1$s</string>
     <string name="variant_picker_auto_title">Automatique</string>
@@ -651,11 +658,25 @@
     <string name="variant_picker_pinned_badge">Épinglée</string>
     <string name="variant_picker_open">Choisir la variante</string>
     <string name="variant_picker_open_filter">Ajuster le filtre</string>
-    <string name="variant_first_pin_toast">Les futures mises à jour préféreront la variante %1$s. Modifiable à tout moment dans les paramètres de l\'application.</string>
-    <string name="variant_first_pin_toast_generic">Les futures mises à jour préféreront cette variante. Modifiable à tout moment dans les paramètres de l\'application.</string>
+    <string name="variant_first_pin_toast">Les futures mises à jour préféreront la variante %1$s. Modifiable à tout moment dans les paramètres de l'application.</string>
+    <string name="variant_first_pin_toast_generic">Les futures mises à jour préféreront cette variante. Modifiable à tout moment dans les paramètres de l'application.</string>
     <string name="variant_unpinned_toast">Variante désépinglée. Les mises à jour utiliseront le sélecteur automatique.</string>
-    <string name="advanced_filter_variant_relation">Le filtre décide quels fichiers sont pris en compte. L\'épingle de variante décide lequel sera installé.</string>
+    <string name="advanced_filter_variant_relation">Le filtre décide quels fichiers sont pris en compte. L'épingle de variante décide lequel sera installé.</string>
     <string name="install">Installer</string>
     <string name="ready_to_install">Prêt à installer</string>
     <string name="install_ready">Installer (prêt)</string>
+
+    <!-- Translation provider selection -->
+    <string name="section_translation">Traduction</string>
+    <string name="translation_intro">Choisissez le service utilisé pour traduire les README.</string>
+    <string name="translation_provider_title">Service de traduction</string>
+    <string name="translation_provider_description">Google fonctionne partout sans configuration. Youdao fonctionne depuis la Chine continentale mais nécessite des identifiants API du portail développeur de Youdao.</string>
+    <string name="translation_provider_google">Google</string>
+    <string name="translation_provider_youdao">Youdao</string>
+    <string name="translation_provider_saved">Service de traduction mis à jour</string>
+    <string name="translation_youdao_help">Inscrivez-vous sur ai.youdao.com pour obtenir votre App Key et App Secret. Le niveau gratuit est suffisant pour un usage occasionnel.</string>
+    <string name="translation_youdao_app_key">App Key</string>
+    <string name="translation_youdao_app_secret">App Secret</string>
+    <string name="translation_youdao_save">Enregistrer les identifiants</string>
+    <string name="translation_youdao_saved">Identifiants Youdao enregistrés</string>
 </resources>

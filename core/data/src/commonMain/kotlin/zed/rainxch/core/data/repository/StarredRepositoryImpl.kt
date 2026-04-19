@@ -25,6 +25,7 @@ import zed.rainxch.core.data.local.db.dao.InstalledAppDao
 import zed.rainxch.core.data.local.db.dao.StarredRepoDao
 import zed.rainxch.core.data.mappers.toDomain
 import zed.rainxch.core.data.mappers.toEntity
+import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.RateLimitException
 import zed.rainxch.core.domain.repository.StarredRepository
@@ -37,8 +38,10 @@ class StarredRepositoryImpl(
     private val starredRepoDao: StarredRepoDao,
     private val installedAppsDao: InstalledAppDao,
     private val platform: Platform,
-    private val httpClient: HttpClient,
+    private val clientProvider: GitHubClientProvider,
 ) : StarredRepository {
+    private val httpClient: HttpClient get() = clientProvider.client
+
     companion object {
         private const val SYNC_THRESHOLD_MS = 24 * 60 * 60 * 1000L // 24 hours
     }

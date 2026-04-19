@@ -389,6 +389,13 @@
     <string name="proxy_test_error_auth_required">Wymagane uwierzytelnienie proxy.</string>
     <string name="proxy_test_error_status">Nieoczekiwana odpowiedź: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">Test połączenia nie powiódł się</string>
+    <string name="proxy_scope_intro">Każda kategoria może używać własnego proxy. Skonfiguruj je niezależnie.</string>
+    <string name="proxy_scope_discovery_title">Odkrywanie (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">Strona główna, wyszukiwanie, szczegóły repo i sprawdzanie aktualizacji</string>
+    <string name="proxy_scope_download_title">Pobieranie</string>
+    <string name="proxy_scope_download_description">Pobieranie APK i automatyczne aktualizacje</string>
+    <string name="proxy_scope_translation_title">Tłumaczenie</string>
+    <string name="proxy_scope_translation_description">Usługa tłumaczenia README</string>
 
 
     <!-- Track app feature -->
@@ -585,7 +592,7 @@
     <string name="seen_badge">Przeglądane</string>
     <string name="privacy_section">Prywatność</string>
     <string name="telemetry_title">Pomóż ulepszyć wyszukiwanie</string>
-    <string name="telemetry_description">Udostępniaj anonimowe dane o użyciu (wyszukiwania, instalacje), aby poprawić rekomendacje. Żadne dane osobowe nie są zbierane.</string>
+    <string name="telemetry_description">Udostępniaj dane o użyciu (wyszukiwania, instalacje, interakcje) powiązane z resetowalnym identyfikatorem analitycznym. Żadne dane konta nie są udostępniane.</string>
     <string name="reset_analytics_id_title">Zresetuj ID analityki</string>
     <string name="reset_analytics_id_description">Wygeneruj nowy anonimowy ID, zrywając powiązanie z poprzednią telemetrią.</string>
     <string name="analytics_id_reset">ID analityki zresetowany</string>
@@ -664,4 +671,18 @@
     <string name="install">Zainstaluj</string>
     <string name="ready_to_install">Gotowe do instalacji</string>
     <string name="install_ready">Zainstaluj (gotowe)</string>
+
+    <!-- Translation provider selection -->
+    <string name="section_translation">Tłumaczenie</string>
+    <string name="translation_intro">Wybierz usługę używaną do tłumaczenia plików README.</string>
+    <string name="translation_provider_title">Usługa tłumaczenia</string>
+    <string name="translation_provider_description">Google działa globalnie bez konfiguracji. Youdao działa z Chin kontynentalnych, ale wymaga poświadczeń API z portalu deweloperskiego Youdao.</string>
+    <string name="translation_provider_google">Google</string>
+    <string name="translation_provider_youdao">Youdao</string>
+    <string name="translation_provider_saved">Usługa tłumaczenia zaktualizowana</string>
+    <string name="translation_youdao_help">Zarejestruj się na ai.youdao.com, aby uzyskać App Key i App Secret. Darmowy plan wystarcza do zwykłego użytku.</string>
+    <string name="translation_youdao_app_key">App Key</string>
+    <string name="translation_youdao_app_secret">App Secret</string>
+    <string name="translation_youdao_save">Zapisz poświadczenia</string>
+    <string name="translation_youdao_saved">Poświadczenia Youdao zapisane</string>
 </resources>

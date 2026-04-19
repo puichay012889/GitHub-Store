@@ -24,6 +24,7 @@ import zed.rainxch.core.data.dto.GithubRepoNetworkModel
 import zed.rainxch.core.data.dto.GithubRepoSearchResponse
 import zed.rainxch.core.data.mappers.toSummary
 import zed.rainxch.core.data.network.BackendApiClient
+import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.data.network.executeRequest
 import zed.rainxch.core.domain.model.DiscoveryPlatform
 import zed.rainxch.core.domain.model.GithubRepoSummary
@@ -38,10 +39,11 @@ import zed.rainxch.search.data.dto.GithubReleaseNetworkModel
 import zed.rainxch.search.data.utils.LruCache
 
 class SearchRepositoryImpl(
-    private val httpClient: HttpClient,
+    private val clientProvider: GitHubClientProvider,
     private val backendApiClient: BackendApiClient,
     private val cacheManager: CacheManager,
 ) : SearchRepository {
+    private val httpClient: HttpClient get() = clientProvider.client
     private val releaseCheckCache = LruCache<String, GithubRepoSummary>(maxSize = 500)
     private val cacheMutex = Mutex()
 

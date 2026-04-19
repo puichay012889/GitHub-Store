@@ -1,9 +1,11 @@
 package zed.rainxch.core.data.di
 
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -24,8 +26,9 @@ import zed.rainxch.core.data.logging.KermitLogger
 import zed.rainxch.core.data.network.BackendApiClient
 import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.data.network.ProxyManager
+import zed.rainxch.core.data.network.ProxyManagerSeeding
 import zed.rainxch.core.data.network.ProxyTesterImpl
-import zed.rainxch.core.data.network.createGitHubHttpClient
+import zed.rainxch.core.data.network.TranslationClientProvider
 import zed.rainxch.core.data.repository.AuthenticationStateImpl
 import zed.rainxch.core.data.repository.FavouritesRepositoryImpl
 import zed.rainxch.core.data.repository.InstalledAppsRepositoryImpl
@@ -41,6 +44,7 @@ import zed.rainxch.core.domain.getPlatform
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
 import zed.rainxch.core.domain.model.Platform
 import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.model.ProxyScope
 import zed.rainxch.core.domain.network.ProxyTester
 import zed.rainxch.core.domain.system.DownloadOrchestrator
 import zed.rainxch.core.domain.repository.AuthenticationState
@@ -89,7 +93,7 @@ val coreModule =
                 installedAppsDao = get(),
                 historyDao = get(),
                 installer = get(),
-                httpClient = get(),
+                clientProvider = get(),
             )
         }
 
@@ -98,7 +102,7 @@ val coreModule =
                 installedAppsDao = get(),
                 starredRepoDao = get(),
                 platform = get(),
-                httpClient = get(),
+                clientProvider = get(),
             )
         }
 
@@ -123,6 +127,7 @@ val coreModule =
         single<ProxyRepository> {
             ProxyRepositoryImpl(
                 preferences = get(),
+                logger = get(),
             )
         }
 
@@ -144,8 +149,24 @@ val coreModule =
         }
 
         single<BackendApiClient> {
-            BackendApiClient()
+            // Request the seeding sentinel so Koin guarantees ProxyManager
+            // has the user's persisted config loaded before we snapshot
+            // the discovery flow for the initial client build.
+            get<ProxyManagerSeeding>()
+            BackendApiClient(
+                proxyConfigFlow = ProxyManager.configFlow(ProxyScope.DISCOVERY),
+            )
         }
+        // NOTE: the reviewer asked for a Koin onClose hook to call
+        // BackendApiClient.close()/GitHubClientProvider.close()/
+        // TranslationClientProvider.close() at Koin shutdown. Koin 4.x
+        // (4.1.1 on this project) doesn't expose that hook at the
+        // module DSL level — it existed in 3.x and was removed — and
+        // there's no clean replacement short of wrapping each provider
+        // in a Koin scope. On Android/Desktop the process exit
+        // releases these resources anyway, so we intentionally leave
+        // the hooks off rather than fake them with an API that doesn't
+        // fit. Revisit if we upgrade Koin or adopt scope-based DI.
 
         single<DeviceIdentityRepository> {
             DeviceIdentityRepositoryImpl(
@@ -180,58 +201,53 @@ val coreModule =
 
 val networkModule =
     module {
-        single<GitHubClientProvider> {
-            val config =
-                runBlocking {
-                    runCatching {
-                        withTimeout(1_500L) {
-                            get<ProxyRepository>().getProxyConfig().first()
+        // Seed [ProxyManager] from persisted per-scope configs *before*
+        // any HTTP client is constructed. Registered as its own
+        // [ProxyManagerSeeding] sentinel so client providers can depend
+        // on it explicitly — without this the seeding would live inside
+        // one provider's factory and silently race with others.
+        //
+        // Reads run in parallel under a single 1.5s budget (was 1.5s × 3
+        // sequential). On timeout / DataStore failure we fall back to the
+        // in-memory defaults — we'd rather the app network with the
+        // System proxy than stall at launch on a slow disk.
+        single<ProxyManagerSeeding>(createdAtStart = true) {
+            val repository = get<ProxyRepository>()
+            runBlocking {
+                runCatching {
+                    withTimeout(1_500L) {
+                        coroutineScope {
+                            ProxyScope.entries
+                                .map { scope ->
+                                    async {
+                                        scope to repository.getProxyConfig(scope).first()
+                                    }
+                                }.awaitAll()
                         }
-                    }.getOrDefault(ProxyConfig.System)
-                }
-
-            when (config) {
-                is ProxyConfig.None -> {
-                    ProxyManager.setNoProxy()
-                }
-
-                is ProxyConfig.System -> {
-                    ProxyManager.setSystemProxy()
-                }
-
-                is ProxyConfig.Http -> {
-                    ProxyManager.setHttpProxy(
-                        host = config.host,
-                        port = config.port,
-                        username = config.username,
-                        password = config.password,
-                    )
-                }
-
-                is ProxyConfig.Socks -> {
-                    ProxyManager.setSocksProxy(
-                        host = config.host,
-                        port = config.port,
-                        username = config.username,
-                        password = config.password,
-                    )
+                    }
+                }.onSuccess { results ->
+                    results.forEach { (scope, config) ->
+                        ProxyManager.setConfig(scope, config)
+                    }
                 }
             }
+            ProxyManagerSeeding()
+        }
 
+        single<GitHubClientProvider>(createdAtStart = true) {
+            get<ProxyManagerSeeding>()
             GitHubClientProvider(
                 tokenStore = get(),
                 rateLimitRepository = get(),
                 authenticationState = get(),
-                proxyConfigFlow = ProxyManager.currentProxyConfig,
+                proxyConfigFlow = ProxyManager.configFlow(ProxyScope.DISCOVERY),
             )
         }
 
-        single<HttpClient> {
-            createGitHubHttpClient(
-                tokenStore = get(),
-                rateLimitRepository = get(),
-                authenticationState = get(),
-                scope = get(),
+        single<TranslationClientProvider>(createdAtStart = true) {
+            get<ProxyManagerSeeding>()
+            TranslationClientProvider(
+                proxyConfigFlow = ProxyManager.configFlow(ProxyScope.TRANSLATION),
             )
         }
 

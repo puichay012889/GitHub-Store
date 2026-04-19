@@ -5,6 +5,7 @@ import zed.rainxch.core.domain.model.AppTheme
 import zed.rainxch.core.domain.model.DiscoveryPlatform
 import zed.rainxch.core.domain.model.FontTheme
 import zed.rainxch.core.domain.model.InstallerType
+import zed.rainxch.core.domain.model.TranslationProvider
 
 interface TweaksRepository {
     fun getThemeColor(): Flow<AppTheme>
@@ -62,4 +63,16 @@ interface TweaksRepository {
     fun getTelemetryEnabled(): Flow<Boolean>
 
     suspend fun setTelemetryEnabled(enabled: Boolean)
+
+    fun getTranslationProvider(): Flow<TranslationProvider>
+
+    suspend fun setTranslationProvider(provider: TranslationProvider)
+
+    fun getYoudaoAppKey(): Flow<String>
+
+    suspend fun setYoudaoAppKey(appKey: String)
+
+    fun getYoudaoAppSecret(): Flow<String>
+
+    suspend fun setYoudaoAppSecret(appSecret: String)
 }

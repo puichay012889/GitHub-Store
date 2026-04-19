@@ -27,6 +27,15 @@ fun LazyListScope.settings(
     )
 
     item {
+        Spacer(Modifier.height(32.dp))
+    }
+
+    translationSection(
+        state = state,
+        onAction = onAction,
+    )
+
+    item {
         Spacer(Modifier.height(12.dp))
     }
 

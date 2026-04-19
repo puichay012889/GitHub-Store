@@ -3,8 +3,10 @@ package zed.rainxch.tweaks.presentation
 import zed.rainxch.core.domain.model.AppTheme
 import zed.rainxch.core.domain.model.FontTheme
 import zed.rainxch.core.domain.model.InstallerType
+import zed.rainxch.core.domain.model.ProxyScope
 import zed.rainxch.core.domain.model.ShizukuAvailability
-import zed.rainxch.tweaks.presentation.model.ProxyType
+import zed.rainxch.core.domain.model.TranslationProvider
+import zed.rainxch.tweaks.presentation.model.ProxyScopeFormState
 
 data class TweaksState(
     val selectedThemeColor: AppTheme = AppTheme.OCEAN,
@@ -12,13 +14,8 @@ data class TweaksState(
     val isAmoledThemeEnabled: Boolean = false,
     val isDarkTheme: Boolean? = null,
     val versionName: String = "",
-    val proxyType: ProxyType = ProxyType.NONE,
-    val proxyHost: String = "",
-    val proxyPort: String = "",
-    val proxyUsername: String = "",
-    val proxyPassword: String = "",
-    val isProxyPasswordVisible: Boolean = false,
-    val isProxyTestInProgress: Boolean = false,
+    val proxyForms: Map<ProxyScope, ProxyScopeFormState> =
+        ProxyScope.entries.associateWith { ProxyScopeFormState() },
     val autoDetectClipboardLinks: Boolean = true,
     val cacheSize: String = "",
     val isClearDownloadsDialogVisible: Boolean = false,
@@ -31,4 +28,31 @@ data class TweaksState(
     val isHideSeenEnabled: Boolean = false,
     val isScrollbarEnabled: Boolean = false,
     val isTelemetryEnabled: Boolean = false,
-)
+    val translationProvider: TranslationProvider = TranslationProvider.Default,
+    /**
+     * Transient UI-only selection used when the user picks a provider
+     * that needs more configuration before it can be activated (e.g.
+     * Youdao with missing credentials). Rendered as the "selected
+     * chip" when non-null; persisted [translationProvider] is the
+     * source of truth for what the app actually uses for translation.
+     * Cleared once the pending selection is either committed
+     * (credentials saved) or abandoned (another provider picked).
+     */
+    val draftTranslationProvider: TranslationProvider? = null,
+    val youdaoAppKey: String = "",
+    val youdaoAppSecret: String = "",
+    val isYoudaoAppSecretVisible: Boolean = false,
+) {
+    /** Effective provider to render as "selected" in the UI — draft
+     *  overrides persisted when a pending selection is in flight. */
+    val displayedTranslationProvider: TranslationProvider
+        get() = draftTranslationProvider ?: translationProvider
+
+    /** Convenience accessor — returns a fresh default if the map is
+     *  missing an entry for [scope]. The constructor seeds all scopes,
+     *  but `copy(proxyForms = …)` call sites could in theory produce an
+     *  incomplete map; the safe default keeps the UI from crashing in
+     *  that case. */
+    fun formFor(scope: ProxyScope): ProxyScopeFormState =
+        proxyForms[scope] ?: ProxyScopeFormState()
+}

@@ -4,34 +4,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.model.ProxyScope
 
+/**
+ * Live in-memory cache of the three per-scope proxy configurations.
+ * Writers (the repository) push updates via [setConfig]; consumers
+ * subscribe to [configFlow] so they rebuild their HTTP clients when
+ * the user flips a setting mid-session.
+ */
 object ProxyManager {
-    private val _proxyConfig = MutableStateFlow<ProxyConfig>(ProxyConfig.System)
-    val currentProxyConfig: StateFlow<ProxyConfig> = _proxyConfig.asStateFlow()
+    private val flows: Map<ProxyScope, MutableStateFlow<ProxyConfig>> =
+        ProxyScope.entries.associateWith { MutableStateFlow<ProxyConfig>(ProxyConfig.System) }
 
-    fun setNoProxy() {
-        _proxyConfig.value = ProxyConfig.None
-    }
+    fun configFlow(scope: ProxyScope): StateFlow<ProxyConfig> =
+        flows.getValue(scope).asStateFlow()
 
-    fun setSystemProxy() {
-        _proxyConfig.value = ProxyConfig.System
-    }
+    fun currentConfig(scope: ProxyScope): ProxyConfig =
+        flows.getValue(scope).value
 
-    fun setHttpProxy(
-        host: String,
-        port: Int,
-        username: String? = null,
-        password: String? = null,
+    fun setConfig(
+        scope: ProxyScope,
+        config: ProxyConfig,
     ) {
-        _proxyConfig.value = ProxyConfig.Http(host, port, username, password)
-    }
-
-    fun setSocksProxy(
-        host: String,
-        port: Int,
-        username: String? = null,
-        password: String? = null,
-    ) {
-        _proxyConfig.value = ProxyConfig.Socks(host, port, username, password)
+        flows.getValue(scope).value = config
     }
 }

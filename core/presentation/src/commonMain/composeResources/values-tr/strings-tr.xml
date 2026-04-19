@@ -193,10 +193,10 @@
     <string name="downloads">İndirmeler</string>
     <string name="license">Lisans</string>
     <string name="license_none">—</string>
-    <string name="fetch_more_from_github">GitHub\'tan daha fazla getir</string>
-    <string name="fetching_from_github">GitHub\'tan getiriliyor…</string>
-    <string name="no_more_github_results">GitHub\'ta başka sonuç yok</string>
-    <string name="explore_error">GitHub\'tan getirilemedi. Tekrar deneyin.</string>
+    <string name="fetch_more_from_github">GitHub'tan daha fazla getir</string>
+    <string name="fetching_from_github">GitHub'tan getiriliyor…</string>
+    <string name="no_more_github_results">GitHub'ta başka sonuç yok</string>
+    <string name="explore_error">GitHub'tan getirilemedi. Tekrar deneyin.</string>
 
     <!-- Misc -->
     <string name="by_author">%1$s</string>
@@ -221,13 +221,13 @@
 
     <!-- External tools -->
     <string name="log_prepare_appmanager">AppManager için hazırlanıyor</string>
-    <string name="log_opened_appmanager">AppManager\'da açıldı</string>
+    <string name="log_opened_appmanager">AppManager'da açıldı</string>
     <string name="log_permission_blocked">Yükleme izni cihaz politikası tarafından engellendi</string>
     <string name="log_opened_external_installer">Harici yükleyicide açıldı</string>
     <string name="install_permission_unavailable">Yükleme izni kullanılamıyor</string>
     <string name="install_permission_blocked_message">APK başarıyla indirildi ancak bu cihaz doğrudan yüklemeye izin vermiyor. Harici bir yükleyici ile açmak ister misiniz?</string>
     <string name="open_with_external_installer">Harici yükleyici ile aç</string>
-    <string name="external_installer_description">APK\'yı yüklemek için üçüncü taraf bir uygulama kullanın</string>
+    <string name="external_installer_description">APK'yı yüklemek için üçüncü taraf bir uygulama kullanın</string>
 
     <!-- Errors -->
     <string name="error_generic">Hata: %1$s</string>
@@ -423,6 +423,13 @@
     <string name="proxy_test_error_auth_required">Proxy kimlik doğrulaması gerekiyor.</string>
     <string name="proxy_test_error_status">Beklenmeyen yanıt: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">Bağlantı testi başarısız</string>
+    <string name="proxy_scope_intro">Her kategori kendi proxy'sini kullanabilir. Bunları bağımsız olarak yapılandırın.</string>
+    <string name="proxy_scope_discovery_title">Keşif (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">Ana sayfa, arama, depo ayrıntıları ve güncelleme denetimleri</string>
+    <string name="proxy_scope_download_title">İndirmeler</string>
+    <string name="proxy_scope_download_description">APK indirmeleri ve otomatik güncellemeler</string>
+    <string name="proxy_scope_translation_title">Çeviri</string>
+    <string name="proxy_scope_translation_description">README çeviri hizmeti</string>
 
 
     <!-- Track app feature -->
@@ -537,8 +544,8 @@
     <string name="shizuku_status_permission_needed">İzin gerekli</string>
     <string name="shizuku_status_ready">Hazır</string>
     <string name="shizuku_grant_permission">İzin ver</string>
-    <string name="shizuku_install_hint">Sessiz kurulumu etkinleştirmek için Shizuku\'yu yükleyin</string>
-    <string name="shizuku_start_hint">Sessiz kurulumu etkinleştirmek için Shizuku\'yu başlatın</string>
+    <string name="shizuku_install_hint">Sessiz kurulumu etkinleştirmek için Shizuku'yu yükleyin</string>
+    <string name="shizuku_start_hint">Sessiz kurulumu etkinleştirmek için Shizuku'yu başlatın</string>
     <string name="shizuku_install_failed_fallback">Shizuku kurulumu başarısız, standart yükleyici kullanılıyor</string>
 
     <string name="auto_update_title">Uygulamaları otomatik güncelle</string>
@@ -556,7 +563,7 @@
     <string name="link_app_title">Uygulamayı depoya bağla</string>
     <string name="pick_installed_app">GitHub deposuna bağlamak için yüklü bir uygulama seçin</string>
     <string name="search_apps_hint">Uygulama ara…</string>
-    <string name="enter_repo_url">GitHub depo URL\'si</string>
+    <string name="enter_repo_url">GitHub depo URL'si</string>
     <string name="repo_url_hint">github.com/owner/repo</string>
     <string name="validating_repo">Doğrulanıyor…</string>
     <string name="link_and_track">Bağla ve takip et</string>
@@ -571,13 +578,13 @@
     <string name="export_apps">Dışa aktar</string>
     <string name="import_apps">İçe aktar</string>
     <string name="import_apps_title">Uygulamaları içe aktar</string>
-    <string name="import_apps_description">Takip edilen uygulamaları geri yüklemek için dışa aktarılan JSON\'u yapıştırın</string>
-    <string name="import_apps_hint">Dışa aktarılan JSON\'u buraya yapıştırın…</string>
+    <string name="import_apps_description">Takip edilen uygulamaları geri yüklemek için dışa aktarılan JSON'u yapıştırın</string>
+    <string name="import_apps_hint">Dışa aktarılan JSON'u buraya yapıştırın…</string>
     <string name="include_pre_releases_title">Ön sürümleri dahil et</string>
     <string name="include_pre_releases_description">Güncelleme kontrolünde ön sürümleri takip edin. Devre dışı bırakıldığında, yalnızca kararlı sürümler dikkate alınır.</string>
     <string name="confirm_uninstall_title">Uygulama kaldırılsın mı?</string>
     <string name="confirm_uninstall_message">%1$s uygulamasını kaldırmak istediğinizden emin misiniz? Bu işlem geri alınamaz ve uygulama verileri kaybolabilir.</string>
-    <string name="invalid_github_url">Geçersiz GitHub URL\'si. Biçim: github.com/owner/repo</string>
+    <string name="invalid_github_url">Geçersiz GitHub URL'si. Biçim: github.com/owner/repo</string>
     <string name="repo_not_found">Depo bulunamadı: %1$s/%2$s</string>
     <string name="rate_limit_try_again">GitHub API istek sınırı aşıldı. Daha sonra tekrar deneyin.</string>
     <string name="failed_to_link">Bağlama başarısız: %1$s</string>
@@ -619,7 +626,7 @@
     <string name="seen_badge">Görüntülendi</string>
     <string name="privacy_section">Gizlilik</string>
     <string name="telemetry_title">Aramayı iyileştirmeye yardım et</string>
-    <string name="telemetry_description">Önerileri iyileştirmek için anonim kullanım verilerini (aramalar, yüklemeler) paylaş. Kişisel bilgi toplanmaz.</string>
+    <string name="telemetry_description">Sıfırlanabilir bir analiz kimliğiyle ilişkilendirilmiş kullanım verilerini (aramalar, yüklemeler, etkileşimler) paylaş. Hesap ayrıntıları paylaşılmaz.</string>
     <string name="reset_analytics_id_title">Analitik kimliğini sıfırla</string>
     <string name="reset_analytics_id_description">Yeni anonim kimlik oluştur, geçmiş telemetri ile bağı kopar.</string>
     <string name="analytics_id_reset">Analitik kimliği sıfırlandı</string>
@@ -662,7 +669,7 @@
     <string name="advanced_preview_title">Önizleme</string>
     <string name="advanced_preview_refresh">Önizlemeyi yenile</string>
     <string name="advanced_preview_pending">Eşleşen varlıkları önizlemek için bir filtre yazın.</string>
-    <string name="advanced_preview_no_match">Son sürümlerde eşleşen varlık yok. Eski sürümlere geri dönmeyi etkinleştirin veya regex\'i ayarlayın.</string>
+    <string name="advanced_preview_no_match">Son sürümlerde eşleşen varlık yok. Eski sürümlere geri dönmeyi etkinleştirin veya regex'i ayarlayın.</string>
     <string name="advanced_preview_failed">Önizleme yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin.</string>
     <plurals name="advanced_preview_release">
         <item quantity="one">%1$s sürümünde eşleşti · %2$d varlık</item>
@@ -681,7 +688,7 @@
     <string name="variant_picker_auto_title">Otomatik</string>
     <string name="variant_picker_auto_subtitle">Cihazınız için en iyi varyantı GitHub Store seçsin</string>
     <string name="variant_picker_pinned">Sabitlendi: %1$s</string>
-    <string name="variant_stale_hint">Varyant değişti — tekrar seçmek için Güncelle\'ye dokunun</string>
+    <string name="variant_stale_hint">Varyant değişti — tekrar seçmek için Güncelle'ye dokunun</string>
     <string name="variant_label_inline">Varyant: %1$s</string>
     <string name="variant_picker_unpin">Sabitlemeyi kaldır</string>
     <string name="variant_picker_pinned_badge">Sabitlendi</string>
@@ -694,4 +701,18 @@
     <string name="install">Yükle</string>
     <string name="ready_to_install">Yüklemeye hazır</string>
     <string name="install_ready">Yükle (hazır)</string>
+
+    <!-- Translation provider selection -->
+    <string name="section_translation">Çeviri</string>
+    <string name="translation_intro">README çevirisi için kullanılacak hizmeti seçin.</string>
+    <string name="translation_provider_title">Çeviri Hizmeti</string>
+    <string name="translation_provider_description">Google yapılandırma gerektirmeden her yerde çalışır. Youdao Çin anakarasından çalışır ancak Youdao geliştirici portalından API kimlik bilgileri gerekir.</string>
+    <string name="translation_provider_google">Google</string>
+    <string name="translation_provider_youdao">Youdao</string>
+    <string name="translation_provider_saved">Çeviri hizmeti güncellendi</string>
+    <string name="translation_youdao_help">App Key ve App Secret almak için ai.youdao.com'a kaydolun. Ücretsiz katman olağan kullanım için yeterlidir.</string>
+    <string name="translation_youdao_app_key">App Key</string>
+    <string name="translation_youdao_app_secret">App Secret</string>
+    <string name="translation_youdao_save">Kimlik bilgilerini kaydet</string>
+    <string name="translation_youdao_saved">Youdao kimlik bilgileri kaydedildi</string>
 </resources>

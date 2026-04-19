@@ -12,6 +12,7 @@ import zed.rainxch.core.domain.model.AppTheme
 import zed.rainxch.core.domain.model.DiscoveryPlatform
 import zed.rainxch.core.domain.model.FontTheme
 import zed.rainxch.core.domain.model.InstallerType
+import zed.rainxch.core.domain.model.TranslationProvider
 import zed.rainxch.core.domain.repository.TweaksRepository
 
 class TweaksRepositoryImpl(
@@ -179,6 +180,37 @@ class TweaksRepositoryImpl(
         }
     }
 
+    override fun getTranslationProvider(): Flow<TranslationProvider> =
+        preferences.data.map { prefs ->
+            TranslationProvider.fromName(prefs[TRANSLATION_PROVIDER_KEY])
+        }
+
+    override suspend fun setTranslationProvider(provider: TranslationProvider) {
+        preferences.edit { prefs ->
+            prefs[TRANSLATION_PROVIDER_KEY] = provider.name
+        }
+    }
+
+    override fun getYoudaoAppKey(): Flow<String> =
+        preferences.data.map { prefs -> prefs[YOUDAO_APP_KEY] ?: "" }
+
+    override suspend fun setYoudaoAppKey(appKey: String) {
+        preferences.edit { prefs ->
+            val trimmed = appKey.trim()
+            if (trimmed.isEmpty()) prefs.remove(YOUDAO_APP_KEY) else prefs[YOUDAO_APP_KEY] = trimmed
+        }
+    }
+
+    override fun getYoudaoAppSecret(): Flow<String> =
+        preferences.data.map { prefs -> prefs[YOUDAO_APP_SECRET] ?: "" }
+
+    override suspend fun setYoudaoAppSecret(appSecret: String) {
+        preferences.edit { prefs ->
+            val trimmed = appSecret.trim()
+            if (trimmed.isEmpty()) prefs.remove(YOUDAO_APP_SECRET) else prefs[YOUDAO_APP_SECRET] = trimmed
+        }
+    }
+
     companion object {
         private const val DEFAULT_UPDATE_CHECK_INTERVAL_HOURS = 6L
 
@@ -196,5 +228,8 @@ class TweaksRepositoryImpl(
         private val HIDE_SEEN_ENABLED_KEY = booleanPreferencesKey("hide_seen_enabled")
         private val SCROLLBAR_ENABLED_KEY = booleanPreferencesKey("scrollbar_enabled")
         private val TELEMETRY_ENABLED_KEY = booleanPreferencesKey("telemetry_enabled")
+        private val TRANSLATION_PROVIDER_KEY = stringPreferencesKey("translation_provider")
+        private val YOUDAO_APP_KEY = stringPreferencesKey("youdao_app_key")
+        private val YOUDAO_APP_SECRET = stringPreferencesKey("youdao_app_secret")
     }
 }

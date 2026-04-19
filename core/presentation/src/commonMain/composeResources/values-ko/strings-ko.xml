@@ -424,6 +424,13 @@
     <string name="proxy_test_error_auth_required">프록시 인증이 필요합니다.</string>
     <string name="proxy_test_error_status">예기치 않은 응답: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">연결 테스트 실패</string>
+    <string name="proxy_scope_intro">각 카테고리는 자체 프록시를 사용할 수 있습니다. 독립적으로 구성하십시오.</string>
+    <string name="proxy_scope_discovery_title">탐색 (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">홈, 검색, 저장소 상세, 업데이트 확인</string>
+    <string name="proxy_scope_download_title">다운로드</string>
+    <string name="proxy_scope_download_description">APK 다운로드 및 자동 업데이트</string>
+    <string name="proxy_scope_translation_title">번역</string>
+    <string name="proxy_scope_translation_description">README 번역 서비스</string>
 
 
     <!-- Track app feature -->
@@ -619,7 +626,7 @@
     <string name="seen_badge">확인함</string>
     <string name="privacy_section">개인 정보 보호</string>
     <string name="telemetry_title">검색 개선에 도움 주기</string>
-    <string name="telemetry_description">추천을 개선하기 위해 익명의 사용 데이터(검색, 설치)를 공유합니다. 개인 정보는 수집되지 않습니다.</string>
+    <string name="telemetry_description">재설정 가능한 분석 ID에 연결된 사용 데이터(검색, 설치, 상호작용)를 공유합니다. 계정 정보는 공유되지 않습니다.</string>
     <string name="reset_analytics_id_title">분석 ID 재설정</string>
     <string name="reset_analytics_id_description">새 익명 ID를 생성하여 과거 원격 측정과의 연결을 끊습니다.</string>
     <string name="analytics_id_reset">분석 ID가 재설정되었습니다</string>
@@ -692,4 +699,18 @@
     <string name="install">설치</string>
     <string name="ready_to_install">설치 준비 완료</string>
     <string name="install_ready">설치 (준비됨)</string>
+
+    <!-- Translation provider selection -->
+    <string name="section_translation">번역</string>
+    <string name="translation_intro">README 번역에 사용할 서비스를 선택하세요.</string>
+    <string name="translation_provider_title">번역 서비스</string>
+    <string name="translation_provider_description">Google은 전 세계적으로 설정 없이 작동합니다. Youdao는 중국 본토에서 작동하지만 Youdao 개발자 포털의 API 자격 증명이 필요합니다.</string>
+    <string name="translation_provider_google">Google</string>
+    <string name="translation_provider_youdao">Youdao</string>
+    <string name="translation_provider_saved">번역 서비스가 업데이트되었습니다</string>
+    <string name="translation_youdao_help">ai.youdao.com에 가입하여 App Key와 App Secret을 받으세요. 무료 요금제로 일반 사용에는 충분합니다.</string>
+    <string name="translation_youdao_app_key">App Key</string>
+    <string name="translation_youdao_app_secret">App Secret</string>
+    <string name="translation_youdao_save">자격 증명 저장</string>
+    <string name="translation_youdao_saved">Youdao 자격 증명이 저장되었습니다</string>
 </resources>

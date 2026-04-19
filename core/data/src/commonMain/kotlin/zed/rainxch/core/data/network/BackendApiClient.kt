@@ -16,27 +16,70 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import zed.rainxch.core.data.dto.BackendExploreResponse
 import zed.rainxch.core.data.dto.BackendRepoResponse
 import zed.rainxch.core.data.dto.BackendSearchResponse
 import zed.rainxch.core.data.dto.EventRequest
+import zed.rainxch.core.domain.model.ProxyConfig
 import kotlin.coroutines.cancellation.CancellationException
 
-class BackendApiClient {
+/**
+ * Client for GitHub Store's own backend (trending/popular/search).
+ * Treated as *discovery* traffic — routes through the discovery-scope
+ * proxy so users configuring a proxy for GitHub browsing also have
+ * their backend discovery requests proxied consistently.
+ */
+class BackendApiClient(
+    proxyConfigFlow: StateFlow<ProxyConfig>,
+) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val mutex = Mutex()
 
-    private val httpClient = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
+    @Volatile
+    private var httpClient: HttpClient = buildClient(proxyConfigFlow.value)
+
+    init {
+        proxyConfigFlow
+            .drop(1)
+            .distinctUntilChanged()
+            .onEach { config ->
+                mutex.withLock {
+                    httpClient.close()
+                    httpClient = buildClient(config)
+                }
+            }.launchIn(scope)
+    }
+
+    private fun buildClient(proxyConfig: ProxyConfig): HttpClient =
+        createPlatformHttpClient(proxyConfig).config {
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 5_000
+                connectTimeoutMillis = 3_000
+                socketTimeoutMillis = 5_000
+            }
+            defaultRequest {
+                url(BASE_URL)
+            }
+            expectSuccess = false
         }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 5_000
-            connectTimeoutMillis = 3_000
-            socketTimeoutMillis = 5_000
-        }
-        defaultRequest {
-            url(BASE_URL)
-        }
-        expectSuccess = false
+
+    fun close() {
+        httpClient.close()
+        scope.cancel()
     }
 
     suspend fun getCategory(category: String, platform: String): Result<List<BackendRepoResponse>> =

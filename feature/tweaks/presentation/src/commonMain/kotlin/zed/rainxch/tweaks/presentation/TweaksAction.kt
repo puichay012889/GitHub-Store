@@ -3,6 +3,8 @@ package zed.rainxch.tweaks.presentation
 import zed.rainxch.core.domain.model.AppTheme
 import zed.rainxch.core.domain.model.FontTheme
 import zed.rainxch.core.domain.model.InstallerType
+import zed.rainxch.core.domain.model.ProxyScope
+import zed.rainxch.core.domain.model.TranslationProvider
 import zed.rainxch.tweaks.presentation.model.ProxyType
 
 sealed interface TweaksAction {
@@ -33,30 +35,41 @@ sealed interface TweaksAction {
     ) : TweaksAction
 
     data class OnProxyTypeSelected(
+        val scope: ProxyScope,
         val type: ProxyType,
     ) : TweaksAction
 
     data class OnProxyHostChanged(
+        val scope: ProxyScope,
         val host: String,
     ) : TweaksAction
 
     data class OnProxyPortChanged(
+        val scope: ProxyScope,
         val port: String,
     ) : TweaksAction
 
     data class OnProxyUsernameChanged(
+        val scope: ProxyScope,
         val username: String,
     ) : TweaksAction
 
     data class OnProxyPasswordChanged(
+        val scope: ProxyScope,
         val password: String,
     ) : TweaksAction
 
-    data object OnProxyPasswordVisibilityToggle : TweaksAction
+    data class OnProxyPasswordVisibilityToggle(
+        val scope: ProxyScope,
+    ) : TweaksAction
 
-    data object OnProxySave : TweaksAction
+    data class OnProxySave(
+        val scope: ProxyScope,
+    ) : TweaksAction
 
-    data object OnProxyTest : TweaksAction
+    data class OnProxyTest(
+        val scope: ProxyScope,
+    ) : TweaksAction
 
     data class OnInstallerTypeSelected(
         val type: InstallerType,
@@ -101,4 +114,20 @@ sealed interface TweaksAction {
     ) : TweaksAction
 
     data object OnResetAnalyticsId : TweaksAction
+
+    data class OnTranslationProviderSelected(
+        val provider: TranslationProvider,
+    ) : TweaksAction
+
+    data class OnYoudaoAppKeyChanged(
+        val appKey: String,
+    ) : TweaksAction
+
+    data class OnYoudaoAppSecretChanged(
+        val appSecret: String,
+    ) : TweaksAction
+
+    data object OnYoudaoAppSecretVisibilityToggle : TweaksAction
+
+    data object OnYoudaoCredentialsSave : TweaksAction
 }

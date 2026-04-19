@@ -11,7 +11,7 @@ val appsModule =
                 appLauncher = get(),
                 appsRepository = get(),
                 logger = get(),
-                httpClient = get(),
+                clientProvider = get(),
                 packageMonitor = get(),
                 tweaksRepository = get(),
             )

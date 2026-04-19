@@ -391,6 +391,13 @@
     <string name="proxy_test_error_auth_required">プロキシ認証が必要です。</string>
     <string name="proxy_test_error_status">予期しない応答：HTTP %1$d</string>
     <string name="proxy_test_error_unknown">接続テストに失敗しました</string>
+    <string name="proxy_scope_intro">各カテゴリは独自のプロキシを使用できます。個別に設定してください。</string>
+    <string name="proxy_scope_discovery_title">ディスカバリー (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">ホーム、検索、リポジトリ詳細、更新確認</string>
+    <string name="proxy_scope_download_title">ダウンロード</string>
+    <string name="proxy_scope_download_description">APK ダウンロードと自動更新</string>
+    <string name="proxy_scope_translation_title">翻訳</string>
+    <string name="proxy_scope_translation_description">README 翻訳サービス</string>
 
 
     <!-- Track app feature -->
@@ -584,7 +591,7 @@
     <string name="seen_badge">閲覧済み</string>
     <string name="privacy_section">プライバシー</string>
     <string name="telemetry_title">検索の改善に協力</string>
-    <string name="telemetry_description">推奨を改善するため、匿名の使用データ(検索、インストール)を共有します。個人情報は収集されません。</string>
+    <string name="telemetry_description">リセット可能な分析 ID に関連付けられた使用データ(検索、インストール、操作)を共有します。アカウント情報は共有されません。</string>
     <string name="reset_analytics_id_title">分析IDをリセット</string>
     <string name="reset_analytics_id_description">新しい匿名IDを生成し、過去のテレメトリとのリンクを切断します。</string>
     <string name="analytics_id_reset">分析IDをリセットしました</string>
@@ -657,4 +664,18 @@
     <string name="install">インストール</string>
     <string name="ready_to_install">インストール準備完了</string>
     <string name="install_ready">インストール（準備完了）</string>
+
+    <!-- Translation provider selection -->
+    <string name="section_translation">翻訳</string>
+    <string name="translation_intro">README の翻訳に使用するサービスを選択します。</string>
+    <string name="translation_provider_title">翻訳サービス</string>
+    <string name="translation_provider_description">Google は世界中で設定不要で動作します。Youdao は中国本土からアクセスできますが、Youdao 開発者ポータルから API 認証情報が必要です。</string>
+    <string name="translation_provider_google">Google</string>
+    <string name="translation_provider_youdao">Youdao</string>
+    <string name="translation_provider_saved">翻訳サービスを更新しました</string>
+    <string name="translation_youdao_help">ai.youdao.com に登録して App Key と App Secret を取得してください。無料プランで通常の利用には十分です。</string>
+    <string name="translation_youdao_app_key">App Key</string>
+    <string name="translation_youdao_app_secret">App Secret</string>
+    <string name="translation_youdao_save">認証情報を保存</string>
+    <string name="translation_youdao_saved">Youdao の認証情報を保存しました</string>
 </resources>

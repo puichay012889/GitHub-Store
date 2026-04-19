@@ -9,7 +9,7 @@ val devProfileModule =
         single<DeveloperProfileRepository> {
             DeveloperProfileRepositoryImpl(
                 logger = get(),
-                httpClient = get(),
+                clientProvider = get(),
                 platform = get(),
                 installedAppsDao = get(),
                 favouritesRepository = get(),

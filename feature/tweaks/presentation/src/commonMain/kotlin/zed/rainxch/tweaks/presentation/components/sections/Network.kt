@@ -44,82 +44,66 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import zed.rainxch.core.domain.model.ProxyScope
 import zed.rainxch.githubstore.core.presentation.res.*
 import zed.rainxch.tweaks.presentation.TweaksAction
 import zed.rainxch.tweaks.presentation.TweaksState
 import zed.rainxch.tweaks.presentation.components.SectionHeader
+import zed.rainxch.tweaks.presentation.model.ProxyScopeFormState
 import zed.rainxch.tweaks.presentation.model.ProxyType
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun LazyListScope.networkSection(
     state: TweaksState,
     onAction: (TweaksAction) -> Unit,
 ) {
     item {
-        SectionHeader(
-            text = stringResource(Res.string.section_network),
+        SectionHeader(text = stringResource(Res.string.section_network))
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(Res.string.proxy_scope_intro),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
         )
+        Spacer(Modifier.height(4.dp))
+    }
 
-        Spacer(Modifier.height(8.dp))
-
-        ProxyTypeCard(
-            selectedType = state.proxyType,
-            onTypeSelected = { type ->
-                onAction(TweaksAction.OnProxyTypeSelected(type))
-            },
-        )
-
-        AnimatedVisibility(
-            visible = state.proxyType == ProxyType.NONE || state.proxyType == ProxyType.SYSTEM,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut(),
-        ) {
-            Column {
-                Text(
-                    text =
-                        when (state.proxyType) {
-                            ProxyType.SYSTEM -> stringResource(Res.string.proxy_system_description)
-                            else -> stringResource(Res.string.proxy_none_description)
-                        },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 8.dp, top = 12.dp),
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                ProxyTestButton(
-                    isInProgress = state.isProxyTestInProgress,
-                    enabled = !state.isProxyTestInProgress,
-                    onClick = { onAction(TweaksAction.OnProxyTest) },
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-        }
-
-        AnimatedVisibility(
-            visible = state.proxyType == ProxyType.HTTP || state.proxyType == ProxyType.SOCKS,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut(),
-        ) {
-            Column {
-                Spacer(Modifier.height(16.dp))
-
-                ProxyDetailsCard(
-                    state = state,
-                    onAction = onAction,
-                )
-            }
+    // One card per scope. Ordering mirrors the user's mental model:
+    // browsing → downloading → translation (least-common last).
+    ProxyScope.entries.forEach { scope ->
+        item {
+            ProxyScopeCard(
+                scope = scope,
+                form = state.formFor(scope),
+                onAction = onAction,
+            )
+            Spacer(Modifier.height(12.dp))
         }
     }
 }
 
+private fun scopeTitleRes(scope: ProxyScope): StringResource =
+    when (scope) {
+        ProxyScope.DISCOVERY -> Res.string.proxy_scope_discovery_title
+        ProxyScope.DOWNLOAD -> Res.string.proxy_scope_download_title
+        ProxyScope.TRANSLATION -> Res.string.proxy_scope_translation_title
+    }
+
+private fun scopeDescriptionRes(scope: ProxyScope): StringResource =
+    when (scope) {
+        ProxyScope.DISCOVERY -> Res.string.proxy_scope_discovery_description
+        ProxyScope.DOWNLOAD -> Res.string.proxy_scope_download_description
+        ProxyScope.TRANSLATION -> Res.string.proxy_scope_translation_description
+    }
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ProxyTypeCard(
-    selectedType: ProxyType,
-    onTypeSelected: (ProxyType) -> Unit,
+private fun ProxyScopeCard(
+    scope: ProxyScope,
+    form: ProxyScopeFormState,
+    onAction: (TweaksAction) -> Unit,
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -129,17 +113,21 @@ private fun ProxyTypeCard(
             ),
         shape = RoundedCornerShape(32.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = stringResource(Res.string.proxy_type),
+                text = stringResource(scopeTitleRes(scope)),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
             )
+            Text(
+                text = stringResource(scopeDescriptionRes(scope)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 2.dp),
+            )
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
 
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -147,8 +135,8 @@ private fun ProxyTypeCard(
             ) {
                 items(ProxyType.entries) { type ->
                     FilterChip(
-                        selected = selectedType == type,
-                        onClick = { onTypeSelected(type) },
+                        selected = form.type == type,
+                        onClick = { onAction(TweaksAction.OnProxyTypeSelected(scope, type)) },
                         label = {
                             Text(
                                 text =
@@ -158,7 +146,7 @@ private fun ProxyTypeCard(
                                         ProxyType.HTTP -> stringResource(Res.string.proxy_http)
                                         ProxyType.SOCKS -> stringResource(Res.string.proxy_socks)
                                     },
-                                fontWeight = if (selectedType == type) FontWeight.Bold else FontWeight.Normal,
+                                fontWeight = if (form.type == type) FontWeight.Bold else FontWeight.Normal,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
@@ -168,148 +156,173 @@ private fun ProxyTypeCard(
                     )
                 }
             }
+
+            AnimatedVisibility(
+                visible = form.type == ProxyType.NONE || form.type == ProxyType.SYSTEM,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                Column {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text =
+                            when (form.type) {
+                                ProxyType.SYSTEM -> stringResource(Res.string.proxy_system_description)
+                                else -> stringResource(Res.string.proxy_none_description)
+                            },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    ProxyTestButton(
+                        isInProgress = form.isTestInProgress,
+                        enabled = !form.isTestInProgress,
+                        onClick = { onAction(TweaksAction.OnProxyTest(scope)) },
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = form.type == ProxyType.HTTP || form.type == ProxyType.SOCKS,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                ProxyDetailsFields(
+                    scope = scope,
+                    form = form,
+                    onAction = onAction,
+                )
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun ProxyDetailsCard(
-    state: TweaksState,
+private fun ProxyDetailsFields(
+    scope: ProxyScope,
+    form: ProxyScopeFormState,
     onAction: (TweaksAction) -> Unit,
 ) {
-    val portValue = state.proxyPort
+    val portValue = form.port
     val isPortInvalid =
         portValue.isNotEmpty() &&
             (portValue.toIntOrNull()?.let { it !in 1..65535 } ?: true)
     val isFormValid =
-        state.proxyHost.isNotBlank() &&
+        form.host.isNotBlank() &&
             portValue.isNotEmpty() &&
             portValue.toIntOrNull()?.let { it in 1..65535 } == true
 
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        colors =
-            CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            ),
-        shape = RoundedCornerShape(32.dp),
+    Column(
+        modifier = Modifier.padding(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                OutlinedTextField(
-                    value = state.proxyHost,
-                    onValueChange = { onAction(TweaksAction.OnProxyHostChanged(it)) },
-                    label = { Text(stringResource(Res.string.proxy_host)) },
-                    placeholder = { Text("127.0.0.1") },
-                    singleLine = true,
-                    modifier = Modifier.weight(2f),
-                    shape = RoundedCornerShape(12.dp),
-                )
-
-                OutlinedTextField(
-                    value = state.proxyPort,
-                    onValueChange = { onAction(TweaksAction.OnProxyPortChanged(it)) },
-                    label = { Text(stringResource(Res.string.proxy_port)) },
-                    placeholder = { Text("1080") },
-                    singleLine = true,
-                    isError = isPortInvalid,
-                    supportingText =
-                        if (isPortInvalid) {
-                            { Text(stringResource(Res.string.proxy_port_error)) }
-                        } else {
-                            null
-                        },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                )
-            }
-
-            // Username
             OutlinedTextField(
-                value = state.proxyUsername,
-                onValueChange = { onAction(TweaksAction.OnProxyUsernameChanged(it)) },
-                label = { Text(stringResource(Res.string.proxy_username)) },
+                value = form.host,
+                onValueChange = { onAction(TweaksAction.OnProxyHostChanged(scope, it)) },
+                label = { Text(stringResource(Res.string.proxy_host)) },
+                placeholder = { Text("127.0.0.1") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.weight(2f),
                 shape = RoundedCornerShape(12.dp),
             )
 
-            // Password with visibility toggle
             OutlinedTextField(
-                value = state.proxyPassword,
-                onValueChange = { onAction(TweaksAction.OnProxyPasswordChanged(it)) },
-                label = { Text(stringResource(Res.string.proxy_password)) },
+                value = form.port,
+                onValueChange = { onAction(TweaksAction.OnProxyPortChanged(scope, it)) },
+                label = { Text(stringResource(Res.string.proxy_port)) },
+                placeholder = { Text("1080") },
                 singleLine = true,
-                visualTransformation =
-                    if (state.isProxyPasswordVisible) {
-                        VisualTransformation.None
+                isError = isPortInvalid,
+                supportingText =
+                    if (isPortInvalid) {
+                        { Text(stringResource(Res.string.proxy_port_error)) }
                     } else {
-                        PasswordVisualTransformation()
+                        null
                     },
-                trailingIcon = {
-                    IconButton(
-                        onClick = { onAction(TweaksAction.OnProxyPasswordVisibilityToggle) },
-                    ) {
-                        Icon(
-                            imageVector =
-                                if (state.isProxyPasswordVisible) {
-                                    Icons.Default.VisibilityOff
-                                } else {
-                                    Icons.Default.Visibility
-                                },
-                            contentDescription =
-                                if (state.isProxyPasswordVisible) {
-                                    stringResource(Res.string.proxy_hide_password)
-                                } else {
-                                    stringResource(Res.string.proxy_show_password)
-                                },
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(12.dp),
             )
+        }
 
-            // Test + Save buttons
-            Row(
-                modifier = Modifier.align(Alignment.End),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                ProxyTestButton(
-                    isInProgress = state.isProxyTestInProgress,
-                    enabled = isFormValid && !state.isProxyTestInProgress,
-                    onClick = { onAction(TweaksAction.OnProxyTest) },
-                )
+        OutlinedTextField(
+            value = form.username,
+            onValueChange = { onAction(TweaksAction.OnProxyUsernameChanged(scope, it)) },
+            label = { Text(stringResource(Res.string.proxy_username)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+        )
 
-                FilledTonalButton(
-                    onClick = { onAction(TweaksAction.OnProxySave) },
-                    enabled = isFormValid && !state.isProxyTestInProgress,
+        OutlinedTextField(
+            value = form.password,
+            onValueChange = { onAction(TweaksAction.OnProxyPasswordChanged(scope, it)) },
+            label = { Text(stringResource(Res.string.proxy_password)) },
+            singleLine = true,
+            visualTransformation =
+                if (form.isPasswordVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
+            trailingIcon = {
+                IconButton(
+                    onClick = { onAction(TweaksAction.OnProxyPasswordVisibilityToggle(scope)) },
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Save,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
+                        imageVector =
+                            if (form.isPasswordVisible) {
+                                Icons.Default.VisibilityOff
+                            } else {
+                                Icons.Default.Visibility
+                            },
+                        contentDescription =
+                            if (form.isPasswordVisible) {
+                                stringResource(Res.string.proxy_hide_password)
+                            } else {
+                                stringResource(Res.string.proxy_show_password)
+                            },
+                        modifier = Modifier.size(20.dp),
                     )
-                    Spacer(Modifier.size(8.dp))
-                    Text(stringResource(Res.string.proxy_save))
                 }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+        )
+
+        Row(
+            modifier = Modifier.align(Alignment.End),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ProxyTestButton(
+                isInProgress = form.isTestInProgress,
+                enabled = isFormValid && !form.isTestInProgress,
+                onClick = { onAction(TweaksAction.OnProxyTest(scope)) },
+            )
+
+            FilledTonalButton(
+                onClick = { onAction(TweaksAction.OnProxySave(scope)) },
+                enabled = isFormValid && !form.isTestInProgress,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Save,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(Res.string.proxy_save))
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ProxyTestButton(
     isInProgress: Boolean,

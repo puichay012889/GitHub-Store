@@ -1,26 +1,34 @@
 package zed.rainxch.details.data.repository
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.request.parameter
-import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
-import zed.rainxch.core.data.network.createPlatformHttpClient
+import zed.rainxch.core.data.network.TranslationClientProvider
 import zed.rainxch.core.data.services.LocalizationManager
-import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.model.TranslationProvider
+import zed.rainxch.core.domain.repository.TweaksRepository
+import zed.rainxch.details.data.translation.GoogleTranslator
+import zed.rainxch.details.data.translation.Translator
+import zed.rainxch.details.data.translation.YoudaoTranslator
 import zed.rainxch.details.domain.model.TranslationResult
 import zed.rainxch.details.domain.repository.TranslationRepository
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+/**
+ * Orchestrates translation: picks the user-configured [Translator]
+ * ([TranslationProvider]), drives chunking + caching in this layer
+ * (so each concrete translator only has to round-trip a single
+ * chunk), and stitches results back together.
+ */
 class TranslationRepositoryImpl(
     private val localizationManager: LocalizationManager,
+    private val clientProvider: TranslationClientProvider,
+    private val tweaksRepository: TweaksRepository,
 ) : TranslationRepository {
-    private val httpClient: HttpClient = createPlatformHttpClient(ProxyConfig.None)
+    private val httpClient: HttpClient get() = clientProvider.client
 
     private val json =
         Json {
@@ -28,9 +36,13 @@ class TranslationRepositoryImpl(
             isLenient = true
         }
 
+    // Google's provider has no per-install config — share a single
+    // instance for the lifetime of the repository.
+    private val googleTranslator: GoogleTranslator =
+        GoogleTranslator(httpClient = { httpClient }, json = json)
+
     private val cacheMutex = Mutex()
     private val cache = LinkedHashMap<CacheKey, CachedTranslation>(MAX_CACHE_SIZE, 0.75f, true)
-    private val maxChunkSize = 4500
 
     @OptIn(ExperimentalTime::class)
     override suspend fun translate(
@@ -47,12 +59,13 @@ class TranslationRepositoryImpl(
             }
         }
 
-        val chunks = chunkText(text)
+        val translator = resolveTranslator()
+        val chunks = chunkText(text, translator.maxChunkSize)
         val translatedParts = mutableListOf<Pair<String, String>>()
         var detectedLang: String? = null
 
         for ((chunkText, delimiter) in chunks) {
-            val response = translateSingleChunk(chunkText, targetLanguage, sourceLanguage)
+            val response = translator.translate(chunkText, targetLanguage, sourceLanguage)
             translatedParts.add(response.translatedText to delimiter)
             if (detectedLang == null) {
                 detectedLang = response.detectedSourceLanguage
@@ -81,49 +94,30 @@ class TranslationRepositoryImpl(
 
     override fun getDeviceLanguageCode(): String = localizationManager.getPrimaryLanguageCode()
 
-    private suspend fun translateSingleChunk(
-        text: String,
-        targetLanguage: String,
-        sourceLanguage: String,
-    ): TranslationResult {
-        val responseText =
-            httpClient
-                .get(
-                    "https://translate.googleapis.com/translate_a/single",
-                ) {
-                    parameter("client", "gtx")
-                    parameter("sl", sourceLanguage)
-                    parameter("tl", targetLanguage)
-                    parameter("dt", "t")
-                    parameter("q", text)
-                }.bodyAsText()
-
-        return parseTranslationResponse(responseText)
+    /**
+     * Resolves the currently-selected translator from preferences.
+     * Called per request rather than held as a field so provider /
+     * credential changes take effect on the next translation without
+     * requiring the repository to be rebuilt.
+     */
+    private suspend fun resolveTranslator(): Translator {
+        val provider = tweaksRepository.getTranslationProvider().first()
+        return when (provider) {
+            TranslationProvider.GOOGLE -> googleTranslator
+            TranslationProvider.YOUDAO -> {
+                val appKey = tweaksRepository.getYoudaoAppKey().first()
+                val appSecret = tweaksRepository.getYoudaoAppSecret().first()
+                YoudaoTranslator(
+                    httpClient = { httpClient },
+                    json = json,
+                    appKey = appKey,
+                    appSecret = appSecret,
+                )
+            }
+        }
     }
 
-    private fun parseTranslationResponse(responseText: String): TranslationResult {
-        val root = json.parseToJsonElement(responseText).jsonArray
-
-        val segments = root[0].jsonArray
-        val translatedText =
-            segments.joinToString("") { segment ->
-                segment.jsonArray[0].jsonPrimitive.content
-            }
-
-        val detectedLang =
-            try {
-                root[2].jsonPrimitive.content
-            } catch (_: Exception) {
-                null
-            }
-
-        return TranslationResult(
-            translatedText = translatedText,
-            detectedSourceLanguage = detectedLang,
-        )
-    }
-
-    private fun chunkText(text: String): List<Pair<String, String>> {
+    private fun chunkText(text: String, maxChunkSize: Int): List<Pair<String, String>> {
         val paragraphs = text.split("\n\n")
         val chunks = mutableListOf<Pair<String, String>>()
         val currentChunk = StringBuilder()
@@ -134,7 +128,7 @@ class TranslationRepositoryImpl(
                     chunks.add(Pair(currentChunk.toString(), "\n\n"))
                     currentChunk.clear()
                 }
-                chunkLargeParagraph(paragraph, chunks)
+                chunkLargeParagraph(paragraph, chunks, maxChunkSize)
             } else if (currentChunk.length + paragraph.length + 2 > maxChunkSize) {
                 chunks.add(Pair(currentChunk.toString(), "\n\n"))
                 currentChunk.clear()
@@ -155,6 +149,7 @@ class TranslationRepositoryImpl(
     private fun chunkLargeParagraph(
         paragraph: String,
         chunks: MutableList<Pair<String, String>>,
+        maxChunkSize: Int,
     ) {
         val lines = paragraph.split("\n")
         val currentChunk = StringBuilder()

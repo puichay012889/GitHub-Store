@@ -14,6 +14,7 @@ import zed.rainxch.apps.domain.repository.AppsRepository
 import zed.rainxch.core.data.dto.GithubRepoNetworkModel
 import zed.rainxch.core.data.dto.ReleaseNetwork
 import zed.rainxch.core.data.mappers.toDomain
+import zed.rainxch.core.data.network.GitHubClientProvider
 import zed.rainxch.core.data.network.executeRequest
 import zed.rainxch.core.domain.logging.GitHubStoreLogger
 import zed.rainxch.core.domain.model.DeviceApp
@@ -34,10 +35,11 @@ class AppsRepositoryImpl(
     private val appLauncher: AppLauncher,
     private val appsRepository: InstalledAppsRepository,
     private val logger: GitHubStoreLogger,
-    private val httpClient: HttpClient,
+    private val clientProvider: GitHubClientProvider,
     private val packageMonitor: PackageMonitor,
     private val tweaksRepository: TweaksRepository,
 ) : AppsRepository {
+    private val httpClient: HttpClient get() = clientProvider.client
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun getApps(): Flow<List<InstalledApp>> = appsRepository.getAllInstalledApps()

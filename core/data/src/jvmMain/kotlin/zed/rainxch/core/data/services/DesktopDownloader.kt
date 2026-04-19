@@ -13,6 +13,7 @@ import okhttp3.Request
 import zed.rainxch.core.data.network.ProxyManager
 import zed.rainxch.core.domain.model.DownloadProgress
 import zed.rainxch.core.domain.model.ProxyConfig
+import zed.rainxch.core.domain.model.ProxyScope
 import zed.rainxch.core.domain.network.Downloader
 import java.io.File
 import java.net.Authenticator
@@ -24,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap
 
 class DesktopDownloader(
     private val files: FileLocationsProvider,
-    private val proxyManager: ProxyManager = ProxyManager,
 ) : Downloader {
     private val activeDownloads = ConcurrentHashMap<String, Call>()
     private val nameToId = ConcurrentHashMap<String, String>()
@@ -35,7 +35,7 @@ class DesktopDownloader(
         return OkHttpClient
             .Builder()
             .apply {
-                when (val config = proxyManager.currentProxyConfig.value) {
+                when (val config = ProxyManager.currentConfig(ProxyScope.DOWNLOAD)) {
                     is ProxyConfig.None -> {
                         proxy(Proxy.NO_PROXY)
                     }

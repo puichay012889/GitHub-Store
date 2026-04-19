@@ -391,6 +391,13 @@
     <string name="proxy_test_error_auth_required">Требуется аутентификация прокси.</string>
     <string name="proxy_test_error_status">Неожиданный ответ: HTTP %1$d</string>
     <string name="proxy_test_error_unknown">Не удалось проверить соединение</string>
+    <string name="proxy_scope_intro">Каждая категория может использовать свой собственный прокси. Настройте их независимо.</string>
+    <string name="proxy_scope_discovery_title">Обнаружение (GitHub API)</string>
+    <string name="proxy_scope_discovery_description">Главная, поиск, детали репозитория и проверка обновлений</string>
+    <string name="proxy_scope_download_title">Загрузки</string>
+    <string name="proxy_scope_download_description">Загрузка APK и автоматические обновления</string>
+    <string name="proxy_scope_translation_title">Перевод</string>
+    <string name="proxy_scope_translation_description">Сервис перевода README</string>
 
 
     <!-- Track app feature -->
@@ -585,7 +592,7 @@
     <string name="seen_badge">Просмотрено</string>
     <string name="privacy_section">Конфиденциальность</string>
     <string name="telemetry_title">Помочь улучшить поиск</string>
-    <string name="telemetry_description">Отправлять анонимные данные об использовании (поиски, установки) для улучшения рекомендаций. Личная информация не собирается.</string>
+    <string name="telemetry_description">Отправлять данные об использовании (поиски, установки, взаимодействия), связанные со сбрасываемым идентификатором аналитики. Данные учётной записи не передаются.</string>
     <string name="reset_analytics_id_title">Сбросить ID аналитики</string>
     <string name="reset_analytics_id_description">Сгенерировать новый анонимный ID, разорвав связь с прошлой телеметрией.</string>
     <string name="analytics_id_reset">ID аналитики сброшен</string>
@@ -664,4 +671,18 @@
     <string name="install">Установить</string>
     <string name="ready_to_install">Готово к установке</string>
     <string name="install_ready">Установить (готово)</string>
+
+    <!-- Translation provider selection -->
+    <string name="section_translation">Перевод</string>
+    <string name="translation_intro">Выберите сервис для перевода README.</string>
+    <string name="translation_provider_title">Сервис перевода</string>
+    <string name="translation_provider_description">Google работает глобально без настройки. Youdao работает из материкового Китая, но требует учётных данных API с портала разработчиков Youdao.</string>
+    <string name="translation_provider_google">Google</string>
+    <string name="translation_provider_youdao">Youdao</string>
+    <string name="translation_provider_saved">Сервис перевода обновлён</string>
+    <string name="translation_youdao_help">Зарегистрируйтесь на ai.youdao.com, чтобы получить App Key и App Secret. Бесплатного тарифа достаточно для обычного использования.</string>
+    <string name="translation_youdao_app_key">App Key</string>
+    <string name="translation_youdao_app_secret">App Secret</string>
+    <string name="translation_youdao_save">Сохранить учётные данные</string>
+    <string name="translation_youdao_saved">Учётные данные Youdao сохранены</string>
 </resources>
