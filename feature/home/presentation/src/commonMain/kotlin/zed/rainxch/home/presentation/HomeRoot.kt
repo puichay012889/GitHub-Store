@@ -364,6 +364,7 @@ private fun MainState(
     bottomNavLiquidState: LiquidState,
     homeTopBarLiquidState: LiquidState,
 ) {
+    val bottomNavHeight = LocalBottomNavigationHeight.current
     val visibleRepos by remember(state.repos, state.isHideSeenEnabled, state.seenRepoIds) {
         derivedStateOf {
             if (state.isHideSeenEnabled && state.seenRepoIds.isNotEmpty()) {
@@ -386,7 +387,13 @@ private fun MainState(
             columns = StaggeredGridCells.Adaptive(350.dp),
             verticalItemSpacing = 12.dp,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp),
+            contentPadding =
+                PaddingValues(
+                    start = 8.dp,
+                    end = 8.dp,
+                    top = 12.dp,
+                    bottom = bottomNavHeight + 32.dp,
+                ),
             modifier = Modifier.fillMaxSize(),
         ) {
             items(

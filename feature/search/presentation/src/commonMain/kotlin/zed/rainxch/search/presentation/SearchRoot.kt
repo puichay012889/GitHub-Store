@@ -553,7 +553,16 @@ fun SearchScreen(
                             columns = StaggeredGridCells.Adaptive(350.dp),
                             verticalItemSpacing = 12.dp,
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp),
+                            // Bottom clearance = nav pill + FAB (~56dp standard M3
+                            // FAB, positioned at bottomNavHeight + 16.dp) + breathing
+                            // room so the last card scrolls fully above both.
+                            contentPadding =
+                                PaddingValues(
+                                    start = 8.dp,
+                                    end = 8.dp,
+                                    top = 12.dp,
+                                    bottom = bottomNavHeight + 88.dp,
+                                ),
                             modifier =
                                 Modifier
                                     .fillMaxSize()
