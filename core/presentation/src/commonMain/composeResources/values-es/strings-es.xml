@@ -100,6 +100,8 @@
     <string name="language_picker_title">Idioma de la aplicación</string>
     <string name="language_picker_description">Cambia los menús, botones y mensajes en toda la aplicación. No cambia el contenido que viene de GitHub.</string>
     <string name="language_follow_system">Seguir el sistema</string>
+    <string name="language_restart_required">Reinicia para aplicar el nuevo idioma.</string>
+    <string name="language_restart_action">Reiniciar</string>
     <string name="section_about">ACERCA DE</string>
     <string name="section_network">RED</string>
 

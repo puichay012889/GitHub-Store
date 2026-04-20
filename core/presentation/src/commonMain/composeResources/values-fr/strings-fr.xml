@@ -100,6 +100,8 @@
     <string name="language_picker_title">Langue de l\'application</string>
     <string name="language_picker_description">Modifie les menus, boutons et messages dans toute l\'application. Ne modifie pas le contenu provenant de GitHub.</string>
     <string name="language_follow_system">Suivre le système</string>
+    <string name="language_restart_required">Redémarrez pour appliquer la nouvelle langue.</string>
+    <string name="language_restart_action">Redémarrer</string>
     <string name="section_about">À PROPOS</string>
     <string name="section_network">RÉSEAU</string>
 

@@ -100,6 +100,8 @@
     <string name="language_picker_title">Язык приложения</string>
     <string name="language_picker_description">Изменяет меню, кнопки и сообщения во всём приложении. Не изменяет содержимое с GitHub.</string>
     <string name="language_follow_system">Как в системе</string>
+    <string name="language_restart_required">Перезапустите, чтобы применить новый язык.</string>
+    <string name="language_restart_action">Перезапустить</string>
     <string name="section_about">О ПРИЛОЖЕНИИ</string>
     <string name="section_network">СЕТЬ</string>
 

@@ -100,6 +100,8 @@
     <string name="language_picker_title">アプリの言語</string>
     <string name="language_picker_description">アプリ全体のメニュー、ボタン、メッセージを変更します。GitHubからのコンテンツは変更されません。</string>
     <string name="language_follow_system">システムに従う</string>
+    <string name="language_restart_required">新しい言語を適用するには再起動してください。</string>
+    <string name="language_restart_action">再起動</string>
     <string name="section_about">情報</string>
     <string name="section_network">ネットワーク</string>
 

@@ -102,6 +102,8 @@
     <string name="language_picker_title">应用语言</string>
     <string name="language_picker_description">更改应用中的菜单、按钮和消息。不会更改来自 GitHub 的内容。</string>
     <string name="language_follow_system">跟随系统</string>
+    <string name="language_restart_required">重新启动以应用新语言。</string>
+    <string name="language_restart_action">重新启动</string>
     <string name="section_about">关于</string>
     <string name="section_network">网络</string>
 

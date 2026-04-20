@@ -116,6 +116,8 @@
     <string name="language_picker_title">앱 언어</string>
     <string name="language_picker_description">앱 전체의 메뉴, 버튼, 메시지를 변경합니다. GitHub의 콘텐츠는 변경하지 않습니다.</string>
     <string name="language_follow_system">시스템 따름</string>
+    <string name="language_restart_required">새 언어를 적용하려면 다시 시작하세요.</string>
+    <string name="language_restart_action">다시 시작</string>
     <string name="section_about">정보</string>
     <string name="section_network">네트워크</string>
 

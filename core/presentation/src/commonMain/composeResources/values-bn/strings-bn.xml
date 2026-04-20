@@ -118,6 +118,8 @@
     <string name="language_picker_title">অ্যাপের ভাষা</string>
     <string name="language_picker_description">সম্পূর্ণ অ্যাপের মেনু, বোতাম এবং বার্তা পরিবর্তন করে। GitHub থেকে আসা বিষয়বস্তু পরিবর্তন করে না।</string>
     <string name="language_follow_system">সিস্টেম অনুসরণ করুন</string>
+    <string name="language_restart_required">নতুন ভাষা প্রয়োগ করতে পুনরায় চালু করুন।</string>
+    <string name="language_restart_action">পুনরায় চালু করুন</string>
     <string name="section_about">সম্পর্কে</string>
     <string name="section_network">নেটওয়ার্ক</string>
 
