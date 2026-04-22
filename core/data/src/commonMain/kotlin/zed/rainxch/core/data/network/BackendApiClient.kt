@@ -33,6 +33,9 @@ import zed.rainxch.core.data.dto.BackendExploreResponse
 import zed.rainxch.core.data.dto.BackendRepoResponse
 import zed.rainxch.core.data.dto.BackendSearchResponse
 import zed.rainxch.core.data.dto.EventRequest
+import zed.rainxch.core.data.dto.GithubReadmeResponseDto
+import zed.rainxch.core.data.dto.ReleaseNetwork
+import zed.rainxch.core.data.dto.UserProfileNetwork
 import zed.rainxch.core.domain.model.ProxyConfig
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -91,7 +94,7 @@ class BackendApiClient(
             if (response.status.isSuccess()) {
                 Result.success(response.body())
             } else {
-                Result.failure(BackendException("HTTP ${response.status.value}"))
+                Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
             }
         }
 
@@ -101,7 +104,7 @@ class BackendApiClient(
             if (response.status.isSuccess()) {
                 Result.success(response.body())
             } else {
-                Result.failure(BackendException("HTTP ${response.status.value}"))
+                Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
             }
         }
 
@@ -125,7 +128,7 @@ class BackendApiClient(
             if (response.status.isSuccess()) {
                 Result.success(response.body())
             } else {
-                Result.failure(BackendException("HTTP ${response.status.value}"))
+                Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
             }
         }
 
@@ -151,7 +154,7 @@ class BackendApiClient(
             if (response.status.isSuccess()) {
                 Result.success(response.body())
             } else {
-                Result.failure(BackendException("HTTP ${response.status.value}"))
+                Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
             }
         }
 
@@ -165,11 +168,72 @@ class BackendApiClient(
         }
     suspend fun getRepo(owner: String, name: String): Result<BackendRepoResponse> =
         safeCall {
-            val response = httpClient.get("repo/$owner/$name")
+            val token = currentUserGithubToken()
+            val response = httpClient.get("repo/$owner/$name") {
+                if (token != null) header(X_GITHUB_TOKEN_HEADER, token)
+            }
             if (response.status.isSuccess()) {
                 Result.success(response.body())
             } else {
-                Result.failure(BackendException("HTTP ${response.status.value}"))
+                Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
+            }
+        }
+
+    suspend fun getReleases(
+        owner: String,
+        name: String,
+        page: Int = 1,
+        perPage: Int = 100,
+    ): Result<List<ReleaseNetwork>> =
+        safeCall {
+            val token = currentUserGithubToken()
+            val response = httpClient.get("releases/$owner/$name") {
+                parameter("page", page)
+                parameter("per_page", perPage)
+                if (token != null) header(X_GITHUB_TOKEN_HEADER, token)
+                // Cold path: backend goes to GitHub + paginates. 15s covers p99.
+                timeout {
+                    requestTimeoutMillis = 15_000
+                    socketTimeoutMillis = 15_000
+                }
+            }
+            if (response.status.isSuccess()) {
+                Result.success(response.body())
+            } else {
+                Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
+            }
+        }
+
+    suspend fun getReadme(
+        owner: String,
+        name: String,
+    ): Result<GithubReadmeResponseDto> =
+        safeCall {
+            val token = currentUserGithubToken()
+            val response = httpClient.get("readme/$owner/$name") {
+                if (token != null) header(X_GITHUB_TOKEN_HEADER, token)
+                timeout {
+                    requestTimeoutMillis = 15_000
+                    socketTimeoutMillis = 15_000
+                }
+            }
+            if (response.status.isSuccess()) {
+                Result.success(response.body())
+            } else {
+                Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
+            }
+        }
+
+    suspend fun getUser(username: String): Result<UserProfileNetwork> =
+        safeCall {
+            val token = currentUserGithubToken()
+            val response = httpClient.get("user/$username") {
+                if (token != null) header(X_GITHUB_TOKEN_HEADER, token)
+            }
+            if (response.status.isSuccess()) {
+                Result.success(response.body())
+            } else {
+                Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
             }
         }
 
@@ -185,7 +249,7 @@ class BackendApiClient(
                 response.status == HttpStatusCode.TooManyRequests ->
                     Result.failure(RateLimitedException())
                 else ->
-                    Result.failure(BackendException("HTTP ${response.status.value}"))
+                    Result.failure(BackendException(response.status.value, "HTTP ${response.status.value}"))
             }
         }
 
@@ -204,6 +268,9 @@ class BackendApiClient(
     }
 }
 
-class BackendException(message: String) : Exception(message)
+class BackendException(
+    val statusCode: Int,
+    message: String,
+) : Exception(message)
 
 class RateLimitedException : Exception("Rate limited by backend (429)")
