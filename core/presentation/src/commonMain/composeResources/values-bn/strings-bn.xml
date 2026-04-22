@@ -744,5 +744,7 @@
     <string name="pat_hide">টোকেন লুকান</string>
     <string name="pat_error_empty">অনুগ্রহ করে একটি টোকেন পেস্ট করুন।</string>
     <string name="pat_error_invalid_format">এটি GitHub টোকেন বলে মনে হচ্ছে না। টোকেন ghp_ বা github_pat_ দিয়ে শুরু হয়।</string>
+    <string name="pat_error_bad_credentials">এই টোকেনটি অবৈধ অথবা বাতিল করা হয়েছে।</string>
+    <string name="pat_error_insufficient_scope">এই টোকেনের প্রয়োজনীয় অনুমতি নেই।</string>
     <string name="pat_error_generic">টোকেন সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।</string>
 </resources>

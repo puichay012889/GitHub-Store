@@ -712,5 +712,7 @@
     <string name="pat_hide">Ukryj token</string>
     <string name="pat_error_empty">Wklej token.</string>
     <string name="pat_error_invalid_format">To nie wygląda na token GitHuba. Tokeny zaczynają się od ghp_ lub github_pat_.</string>
+    <string name="pat_error_bad_credentials">Ten token jest nieprawidłowy lub został unieważniony.</string>
+    <string name="pat_error_insufficient_scope">Ten token nie ma wymaganych uprawnień.</string>
     <string name="pat_error_generic">Nie udało się zapisać tokena. Spróbuj ponownie.</string>
 </resources>

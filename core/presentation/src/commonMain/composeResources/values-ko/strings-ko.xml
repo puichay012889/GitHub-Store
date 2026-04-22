@@ -740,5 +740,7 @@
     <string name="pat_hide">토큰 숨기기</string>
     <string name="pat_error_empty">토큰을 붙여넣어 주세요.</string>
     <string name="pat_error_invalid_format">GitHub 토큰이 아닌 것 같습니다. 토큰은 ghp_ 또는 github_pat_로 시작합니다.</string>
+    <string name="pat_error_bad_credentials">이 토큰은 유효하지 않거나 취소되었습니다.</string>
+    <string name="pat_error_insufficient_scope">이 토큰에는 필요한 권한이 없습니다.</string>
     <string name="pat_error_generic">토큰을 저장할 수 없습니다. 다시 시도해 주세요.</string>
 </resources>

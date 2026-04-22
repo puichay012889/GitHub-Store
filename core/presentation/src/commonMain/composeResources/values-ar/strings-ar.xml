@@ -745,5 +745,7 @@
     <string name="pat_hide">إخفاء الرمز</string>
     <string name="pat_error_empty">يرجى لصق رمز.</string>
     <string name="pat_error_invalid_format">هذا لا يبدو كرمز GitHub. تبدأ الرموز بـ ghp_ أو github_pat_.</string>
+    <string name="pat_error_bad_credentials">هذا الرمز غير صالح أو تم إلغاؤه.</string>
+    <string name="pat_error_insufficient_scope">هذا الرمز لا يمتلك الصلاحيات المطلوبة.</string>
     <string name="pat_error_generic">تعذّر حفظ الرمز. يرجى المحاولة مرة أخرى.</string>
 </resources>

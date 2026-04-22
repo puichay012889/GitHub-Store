@@ -712,5 +712,7 @@
     <string name="pat_hide">Скрыть токен</string>
     <string name="pat_error_empty">Вставьте токен.</string>
     <string name="pat_error_invalid_format">Это не похоже на токен GitHub. Токены начинаются с ghp_ или github_pat_.</string>
+    <string name="pat_error_bad_credentials">Этот токен недействителен или отозван.</string>
+    <string name="pat_error_insufficient_scope">У этого токена нет необходимых прав.</string>
     <string name="pat_error_generic">Не удалось сохранить токен. Попробуйте снова.</string>
 </resources>

@@ -744,5 +744,7 @@
     <string name="pat_hide">Nascondi token</string>
     <string name="pat_error_empty">Incolla un token.</string>
     <string name="pat_error_invalid_format">Non sembra un token GitHub. I token iniziano con ghp_ o github_pat_.</string>
+    <string name="pat_error_bad_credentials">Questo token non è valido o è stato revocato.</string>
+    <string name="pat_error_insufficient_scope">Questo token non ha le autorizzazioni richieste.</string>
     <string name="pat_error_generic">Impossibile salvare il token. Riprova.</string>
 </resources>

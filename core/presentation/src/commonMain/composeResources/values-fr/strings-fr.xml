@@ -706,5 +706,7 @@
     <string name="pat_hide">Masquer le token</string>
     <string name="pat_error_empty">Collez un token.</string>
     <string name="pat_error_invalid_format">Cela ne ressemble pas à un token GitHub. Les tokens commencent par ghp_ ou github_pat_.</string>
+    <string name="pat_error_bad_credentials">Ce token est invalide ou a été révoqué.</string>
+    <string name="pat_error_insufficient_scope">Ce token ne dispose pas des autorisations requises.</string>
     <string name="pat_error_generic">Impossible d\'enregistrer le token. Veuillez réessayer.</string>
 </resources>

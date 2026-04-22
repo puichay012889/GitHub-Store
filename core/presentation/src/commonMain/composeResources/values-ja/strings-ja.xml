@@ -705,5 +705,7 @@
     <string name="pat_hide">トークンを非表示</string>
     <string name="pat_error_empty">トークンを貼り付けてください。</string>
     <string name="pat_error_invalid_format">GitHub のトークンではないようです。トークンは ghp_ または github_pat_ で始まります。</string>
+    <string name="pat_error_bad_credentials">このトークンは無効か、取り消されています。</string>
+    <string name="pat_error_insufficient_scope">このトークンには必要な権限がありません。</string>
     <string name="pat_error_generic">トークンを保存できませんでした。もう一度お試しください。</string>
 </resources>

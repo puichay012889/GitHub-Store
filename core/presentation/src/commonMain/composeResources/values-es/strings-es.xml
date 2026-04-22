@@ -705,5 +705,7 @@
     <string name="pat_hide">Ocultar token</string>
     <string name="pat_error_empty">Pega un token.</string>
     <string name="pat_error_invalid_format">Esto no parece un token de GitHub. Los tokens empiezan con ghp_ o github_pat_.</string>
+    <string name="pat_error_bad_credentials">Ese token no es válido o ha sido revocado.</string>
+    <string name="pat_error_insufficient_scope">Ese token no tiene los permisos necesarios.</string>
     <string name="pat_error_generic">No se pudo guardar el token. Inténtalo de nuevo.</string>
 </resources>

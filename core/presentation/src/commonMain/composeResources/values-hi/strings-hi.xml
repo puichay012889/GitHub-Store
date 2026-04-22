@@ -743,5 +743,7 @@
     <string name="pat_hide">टोकन छुपाएं</string>
     <string name="pat_error_empty">कृपया एक टोकन पेस्ट करें।</string>
     <string name="pat_error_invalid_format">यह GitHub टोकन नहीं लगता। टोकन ghp_ या github_pat_ से शुरू होते हैं।</string>
+    <string name="pat_error_bad_credentials">यह टोकन अमान्य है या निरस्त कर दिया गया है।</string>
+    <string name="pat_error_insufficient_scope">इस टोकन के पास आवश्यक अनुमतियाँ नहीं हैं।</string>
     <string name="pat_error_generic">टोकन सेव नहीं हो सका। कृपया फिर से प्रयास करें।</string>
 </resources>
